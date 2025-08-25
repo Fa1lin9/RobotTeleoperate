@@ -1,0 +1,98 @@
+############################################################
+#   Pipe Arrangement
+#   Written by Fa1lin9 on 2025.8.25
+############################################################
+cmake_minimum_required( VERSION 3.20 )
+project( RobotTeleoperate
+    VERSION 1.0.0
+    LANGUAGES CXX
+)
+
+message( STATUS "Project Version: ${PROJECT_VERSION}" )
+set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_LIST_DIR}/cmake )
+
+#######################################################
+#   Project Setting
+#######################################################
+include ( ProjectSetting )
+
+
+#######################################################
+#   CMake tools included
+#######################################################
+include( CMakeDependentOption )
+include( CMakePrintHelpers )
+
+
+############################################################
+#	User Configuration
+############################################################
+include( UserConfiguration )
+include( MyInstallFuncDef )
+
+
+############################################################
+#	Third Party Configuration
+############################################################
+#   Whether display the Boost target information
+option( Display_Imported_Target_Boost "Whether display the properties of imported target boost." OFF )
+
+#   Whether display the Qt target information
+option( Display_Imported_Target_Qt5 "Whether display the properties of imported target Qt5." OFF )
+
+#   Whether display the Qt target information
+option( Display_Imported_Target "Whether display the properties of all imported targets." ON )
+
+
+include( ThirdPartyConfiguration )
+
+
+
+#######################################################
+#      Define a file path for input/output            #
+#######################################################
+set( SOURCE_FILE_PATH  "${CMAKE_SOURCE_DIR}/" CACHE PATH "Project Source Path" FORCE )
+configure_file( include/source_path.h.in include/source_path.h @ONLY)
+
+
+
+
+
+#######################################################
+#                     My Program                      #
+#######################################################
+
+# option( BuildPackages_Common "Whether generate Common package?" ON )
+# if( BuildPackages_Common )
+#     add_subdirectory( Common )
+# endif()
+
+# option( BuildPackages_TCP "Whether generate TCP package?" ON )
+# if( BuildPackages_TCP )
+#     add_subdirectory( TCP )
+# endif()
+
+# option( BuildPackages_RobotDriver "Whether generate RobotDriver package?" ON )
+# if( BuildPackages_RobotDriver )
+#     add_subdirectory( RobotDriver )
+# endif()
+
+# option( BuildPackages_ControlAlgorithms "Whether generate ControlAlgorithms package?" ON )
+# if( BuildPackages_ControlAlgorithms )
+#     add_subdirectory( ControlAlgorithms )
+# endif()
+
+# option( BuildPackages_GUI "Whether generate GUI package?" ON )
+# if( BuildPackages_GUI )
+#     add_subdirectory( GUI )
+# endif()
+
+option( BuildPackages_Demo "Whether generate Demo package?" ON )
+if( BuildPackages_Demo )
+    add_subdirectory( Demo )
+endif()
+
+option( BuildPackages_DataCollector "Whether generate DataCollector package?" ON )
+if( BuildPackages_DataCollector )
+    add_subdirectory( DataCollector )
+endif()
