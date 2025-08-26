@@ -54,38 +54,13 @@ include( ThirdPartyConfiguration )
 set( SOURCE_FILE_PATH  "${CMAKE_SOURCE_DIR}/" CACHE PATH "Project Source Path" FORCE )
 configure_file( include/source_path.h.in include/source_path.h @ONLY)
 
-
-
-
-
 #######################################################
 #                     My Program                      #
 #######################################################
-
-# option( BuildPackages_Common "Whether generate Common package?" ON )
-# if( BuildPackages_Common )
-#     add_subdirectory( Common )
-# endif()
-
-# option( BuildPackages_TCP "Whether generate TCP package?" ON )
-# if( BuildPackages_TCP )
-#     add_subdirectory( TCP )
-# endif()
-
-# option( BuildPackages_RobotDriver "Whether generate RobotDriver package?" ON )
-# if( BuildPackages_RobotDriver )
-#     add_subdirectory( RobotDriver )
-# endif()
-
-# option( BuildPackages_ControlAlgorithms "Whether generate ControlAlgorithms package?" ON )
-# if( BuildPackages_ControlAlgorithms )
-#     add_subdirectory( ControlAlgorithms )
-# endif()
-
-# option( BuildPackages_GUI "Whether generate GUI package?" ON )
-# if( BuildPackages_GUI )
-#     add_subdirectory( GUI )
-# endif()
+option( BuildPackages_GUI "Whether generate GUI package?" ON )
+if( BuildPackages_GUI )
+    add_subdirectory( GUI )
+endif()
 
 option( BuildPackages_Demo "Whether generate Demo package?" ON )
 if( BuildPackages_Demo )
@@ -95,4 +70,9 @@ endif()
 option( BuildPackages_DataCollector "Whether generate DataCollector package?" ON )
 if( BuildPackages_DataCollector )
     add_subdirectory( DataCollector )
+endif()
+
+option( BuildPackages_Core "Whether generate Core package?" ON )
+if( BuildPackages_Core )
+    add_subdirectory( Core )
 endif()
