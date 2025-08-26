@@ -11,6 +11,7 @@ set( msg_head "[Package Demo CMakeLists.txt] :" )
 set( GROUP_NAME "Core" )
 list( APPEND ${GROUP_NAME}_Components
     CoordinateTransform
+    IKSolver
 )
 
 ##########################################################################
