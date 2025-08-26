@@ -40,12 +40,13 @@ void VisionProCollector::run(){
             continue;
         }
 
-        // memcpy 到 Eigen 矩阵
+        // Get Data
         std::memcpy(headPose.data(), msg.data(), sizeof(Eigen::Matrix4d));
         std::memcpy(leftArmPose.data(), (char*)msg.data() + sizeof(Eigen::Matrix4d), sizeof(Eigen::Matrix4d));
         std::memcpy(rightArmPose.data(), (char*)msg.data() + sizeof(Eigen::Matrix4d) * 2, sizeof(Eigen::Matrix4d));
 
-        // 打印矩阵
+        // Matrix Output
+        std::cout << "--------------------------" << std::endl;
         std::cout << "Head Pose:\n" << headPose << std::endl;
         std::cout << "Left Arm Pose:\n" << leftArmPose << std::endl;
         std::cout << "Right Arm Pose:\n" << rightArmPose << std::endl;
