@@ -12,6 +12,8 @@ set( GROUP_NAME "Demo" )
 list( APPEND ${GROUP_NAME}_Components
     PybindDemo
     SocketDemo
+    NLoptDemo
+    PinocchioDemo
 )
 
 ##########################################################################
