@@ -3,14 +3,15 @@
 #############################################################
 cmake_minimum_required(VERSION 3.20)
 
-set( msg_head "[Package Common CMakeLists.txt] :" )
+set( msg_head "[Package Demo CMakeLists.txt] :" )
 
 ##########################################################################
 #	MainRoutine group components definition
 ##########################################################################
-set( GROUP_NAME "DataCollector" )
+set( GROUP_NAME "Robot" )
 list( APPEND ${GROUP_NAME}_Components
-    VisionProCollector
+    PhysicalRobot
+    SimRobot
 )
 
 ##########################################################################

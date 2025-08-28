@@ -48,6 +48,11 @@ target_link_libraries( ${TARGET_NAME}
     
     PRIVATE
         $<BUILD_INTERFACE:pybind11::embed>
+        $<BUILD_INTERFACE:Python3::Python>
+#        $<BUILD_INTERFACE:Boost::thread>
+#        $<BUILD_INTERFACE:Boost::system>
+        $<BUILD_INTERFACE:Threads::Threads>
+
 
 )
 

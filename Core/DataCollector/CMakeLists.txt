@@ -7,7 +7,7 @@ cmake_minimum_required( VERSION 3.20 )
 #############################################################
 #	Set project name, files, dependancies
 #############################################################
-set( TARGET_NAME "SocketDemo" )
+set( TARGET_NAME "DataCollector" )
 message( STATUS "\n-------------  ${GROUP_NAME} - ${TARGET_NAME}  -------------" )
 
 
@@ -27,7 +27,8 @@ file( GLOB INTERFACE_HEADERS
 #	Create target and Set the target prorperties
 #############################################################
 #	Create target
-add_executable( ${TARGET_NAME} ${SOURCES} ${HEADERS} ${INTERFACE_HEADERS} )
+add_library( ${TARGET_NAME} STATIC ${SOURCES} ${HEADERS} ${INTERFACE_HEADERS} )
+add_library( ${GROUP_NAME}::${TARGET_NAME} ALIAS ${TARGET_NAME})
 
 #  Set project include directories
 target_compile_definitions( ${TARGET_NAME} PUBLIC -DSIM_REMOTEAPICLIENT_OBJECTS )
@@ -45,10 +46,12 @@ target_include_directories( ${TARGET_NAME}
 #   Add dependancies
 target_link_libraries( ${TARGET_NAME}
     PUBLIC 
-    
+        $<BUILD_INTERFACE:Eigen3::Eigen>
+
+
     PRIVATE
-    $<BUILD_INTERFACE:cppzmq>
-    $<BUILD_INTERFACE:Core::DataCollector>
+
+        $<BUILD_INTERFACE:cppzmq>
 
 )
 

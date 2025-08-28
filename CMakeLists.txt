@@ -67,12 +67,12 @@ if( BuildPackages_Demo )
     add_subdirectory( Demo )
 endif()
 
-option( BuildPackages_DataCollector "Whether generate DataCollector package?" ON )
-if( BuildPackages_DataCollector )
-    add_subdirectory( DataCollector )
-endif()
-
 option( BuildPackages_Core "Whether generate Core package?" ON )
 if( BuildPackages_Core )
     add_subdirectory( Core )
+endif()
+
+option( BuildPackages_Robot "Whether generate Core package?" ON )
+if( BuildPackages_Robot )
+    add_subdirectory( Robot )
 endif()

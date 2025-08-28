@@ -1,4 +1,4 @@
-#include <VisionProCollector/VisionProCollector.hpp>
+#include <Core/DataCollector/VisionProCollector.hpp>
 
 VisionProCollector::VisionProCollector(std::string address_)
      :address(address_),

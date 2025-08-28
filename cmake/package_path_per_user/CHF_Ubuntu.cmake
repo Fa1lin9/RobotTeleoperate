@@ -37,6 +37,38 @@ if (Eigen3_FOUND)
                 )
 endif()
 
+# # #######################################################
+# # #              Find pybind and python                 #
+# # #######################################################
+set(MY_CONDA_ENV "/home/fa1lin9/anaconda3/envs/tv")
+set(PYTHON_EXECUTABLE "${MY_CONDA_ENV}/bin/python")
+
+set(Python3_EXECUTABLE ${PYTHON_EXECUTABLE})
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
+execute_process( COMMAND ${Python3_EXECUTABLE} -m pybind11 --cmakedir 
+            OUTPUT_VARIABLE pybind11_DIR 
+            OUTPUT_STRIP_TRAILING_WHITESPACE ) 
+
+find_package(pybind11 CONFIG REQUIRED PATHS ${pybind11_DIR})
+
+# find_package(pybind11 CONFIG REQUIRED
+# )
+
+message(STATUS "---------- pybind11 ----------")
+if (pybind11_FOUND)
+    message(STATUS "Found pybind11!")
+    message(STATUS "pybind11 version: ${pybind11_VERSION}")
+    message(STATUS "pybind11 include dirs: ${pybind11_INCLUDE_DIRS}")
+    
+    message(STATUS ">>> Using Conda env: ${MY_CONDA_ENV}") 
+    message(STATUS ">>> Python exec: ${Python3_EXECUTABLE}") 
+    message(STATUS ">>> Python include: ${Python3_INCLUDE_DIRS}") 
+    message(STATUS ">>> Python lib: ${Python3_LIBRARIES}")
+else()
+    message(FATAL_ERROR "pybind11 not found!")
+endif()
+message(STATUS "---------- pybind11 ----------")
 
 # #######################################################
 # #                     Find Boost                      #
@@ -217,23 +249,6 @@ set(HuamniodRobot_LIBS
     ${MYLIBTI5_LIB}
     ${CONTROLCAN_LIB}
 )
-
-# # #######################################################
-# # #                     Find pybind                    #
-# # #######################################################
-# 强制在该路径下查找pybind11
-find_package(pybind11 CONFIG REQUIRED
-)
-
-message(STATUS "---------- pybind11 ----------")
-if (pybind11_FOUND)
-    message(STATUS "Found pybind11!")
-    message(STATUS "pybind11 version: ${pybind11_VERSION}")
-    message(STATUS "pybind11 include dirs: ${pybind11_INCLUDE_DIRS}")
-else()
-    message(FATAL_ERROR "pybind11 not found!")
-endif()
-message(STATUS "---------- pybind11 ----------")
 
 
 # 打印查找结果

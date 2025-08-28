@@ -37,6 +37,7 @@ void CrpRobotIKSolver::Info(){
 
         std::cout << " lower limit: " << robotModel.lowerPositionLimit[i-1]
                   << ", upper limit: " << robotModel.upperPositionLimit[i-1]<<std::endl;
+        std::cout<<std::endl;
 
     }
 
