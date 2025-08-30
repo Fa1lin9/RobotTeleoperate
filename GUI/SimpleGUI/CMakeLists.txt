@@ -54,6 +54,7 @@ add_executable( ${TARGET_NAME} ${SRC_FILES} ${HEADER_FILES} ${WRAP_FILES} ${RCC_
 target_include_directories( ${TARGET_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${GROUP_NAME}>
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/common>
     PRIVATE
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
         $<INSTALL_INTERFACE:include>

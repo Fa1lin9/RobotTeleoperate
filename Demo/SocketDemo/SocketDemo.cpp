@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cstring>
 #include <FunctionLogger.hpp>
-#include <Core/DataCollector/VisionProCollector.hpp>
+#include <DataCollector/VisionProCollector.hpp>
 
 struct Matrix4x4 {
     float data[4][4];

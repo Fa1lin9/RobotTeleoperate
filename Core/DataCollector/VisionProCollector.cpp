@@ -1,4 +1,4 @@
-#include <Core/DataCollector/VisionProCollector.hpp>
+#include <DataCollector/VisionProCollector.hpp>
 
 VisionProCollector::VisionProCollector(std::string address_)
      :address(address_),
@@ -12,10 +12,10 @@ VisionProCollector::VisionProCollector(std::string address_)
     // Mat Init
     headPose.setZero();
     headPose(3,3) = 1;
-    leftArmPose.setZero();
-    leftArmPose(3,3) = 1;
-    rightArmPose.setZero();
-    rightArmPose(3,3) = 1;
+    leftWristPose.setZero();
+    leftWristPose(3,3) = 1;
+    rightWristPose.setZero();
+    rightWristPose(3,3) = 1;
 
     leftHandPosi.setZero();
     rightHandPosi.setZero();
@@ -42,14 +42,14 @@ void VisionProCollector::run(){
 
         // Get Data
         std::memcpy(headPose.data(), msg.data(), sizeof(Eigen::Matrix4d));
-        std::memcpy(leftArmPose.data(), (char*)msg.data() + sizeof(Eigen::Matrix4d), sizeof(Eigen::Matrix4d));
-        std::memcpy(rightArmPose.data(), (char*)msg.data() + sizeof(Eigen::Matrix4d) * 2, sizeof(Eigen::Matrix4d));
+        std::memcpy(leftWristPose.data(), (char*)msg.data() + sizeof(Eigen::Matrix4d), sizeof(Eigen::Matrix4d));
+        std::memcpy(rightWristPose.data(), (char*)msg.data() + sizeof(Eigen::Matrix4d) * 2, sizeof(Eigen::Matrix4d));
 
         // Matrix Output
         std::cout << "--------------------------" << std::endl;
         std::cout << "Head Pose:\n" << headPose << std::endl;
-        std::cout << "Left Arm Pose:\n" << leftArmPose << std::endl;
-        std::cout << "Right Arm Pose:\n" << rightArmPose << std::endl;
+        std::cout << "Left Wrist Pose:\n" << leftWristPose << std::endl;
+        std::cout << "Right Wrist Pose:\n" << rightWristPose << std::endl;
         std::cout << "--------------------------" << std::endl;
     }
 

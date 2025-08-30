@@ -3,7 +3,7 @@
 #############################################################
 cmake_minimum_required(VERSION 3.20)
 
-set( msg_head "[Package Demo CMakeLists.txt] :" )
+set( msg_head "[Package Robot CMakeLists.txt] :" )
 
 ##########################################################################
 #	MainRoutine group components definition

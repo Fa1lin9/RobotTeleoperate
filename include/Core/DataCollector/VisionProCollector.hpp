@@ -25,8 +25,8 @@ private:
     // some variable for data
     // 头、双臂的位姿矩阵
     Eigen::Matrix4d headPose;
-    Eigen::Matrix4d leftArmPose;
-    Eigen::Matrix4d rightArmPose;
+    Eigen::Matrix4d leftWristPose;
+    Eigen::Matrix4d rightWristPose;
 
     // 两只手的点位
     Eigen::Matrix<double,25,3> leftHandPosi;

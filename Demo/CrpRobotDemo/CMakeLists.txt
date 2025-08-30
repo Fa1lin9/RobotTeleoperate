@@ -7,7 +7,7 @@ cmake_minimum_required( VERSION 3.20 )
 #############################################################
 #	Set project name, files, dependancies
 #############################################################
-set( TARGET_NAME "SocketDemo" )
+set( TARGET_NAME "CrpRobotDemo" )
 message( STATUS "\n-------------  ${GROUP_NAME} - ${TARGET_NAME}  -------------" )
 
 
@@ -45,10 +45,11 @@ target_include_directories( ${TARGET_NAME}
 #   Add dependancies
 target_link_libraries( ${TARGET_NAME}
     PUBLIC 
-    
+
     PRIVATE
-    $<BUILD_INTERFACE:cppzmq>
-    $<BUILD_INTERFACE:Core::DataCollector>
+        $<BUILD_INTERFACE:NLopt::nlopt>
+
+        $<BUILD_INTERFACE:Robot::PhysicalRobot>
 
 )
 
