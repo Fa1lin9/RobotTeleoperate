@@ -14,8 +14,6 @@ class PhysicalRobot
 public:
     struct config
     {
-        config() {}
-
         std::string IP;
         PhysicalRobotType type;
     };
@@ -40,7 +38,15 @@ public:
 
     virtual std::vector<double> GetJointsAngle() = 0;
 
+    // give some basic information of current robot
+    virtual void Info() = 0;
+
+    virtual void GetJointsStatus() = 0;
+
     /* ---------------- Get Information ---------------- */
+
+    virtual bool MoveJ(const std::vector<double> &jointsAngle_) = 0;
+    virtual bool MoveL() = 0;
 
     static boost::shared_ptr<PhysicalRobot> GetPtr(const PhysicalRobot::config &config_);
 

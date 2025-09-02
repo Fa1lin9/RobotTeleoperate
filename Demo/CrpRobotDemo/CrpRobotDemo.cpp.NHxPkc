@@ -26,17 +26,10 @@ int main(){
 //    physicalRobotPtr->isConnect();
     sleep(5);
     std::cout<<" start to move !!! "<<std::endl;
-    // closely
-    // joint1: 0.03 -- 45
-    // joint2: 0.03 -- 45
-    // joint3: 0.06 -- 90
-    // joint4: 0.03 -- 45
-    // joint5:
-    // joint6: 0.02 -- 45
-    // joint7: 0.03 -- 45
-    std::vector<double> jointsAngle_ = { 0 , -0.03 , 0.03 , 0 , 0 , 0, 0};
+    std::vector<double> jointsAngle_ = { 0 , 0 , 1.0 , 0 , 0 , 0 , 0};
     physicalRobotPtr->MoveJ(jointsAngle_);
-    sleep(5);
+
+    sleep(3);
 
     physicalRobotPtr->GetJointsAngle();
 

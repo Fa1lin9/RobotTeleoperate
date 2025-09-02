@@ -46,7 +46,30 @@ public:
     CrpPhysicalRobot(const PhysicalRobot::config &config_);
 
     ~CrpPhysicalRobot();
+    /* ---------------- Basic Information ---------------- */
 
+    // Left(device0): 23, 24, 25, 26, 27, 28, 29
+    // Right(device1): 16, 17, 18, 19, 14, 21, 22
+    // Head(device0): 30, 31, 32
+    // name: {can_device, can_id, index}
+
+    // {"left_joint_3", {0, 25, 18}},
+    // {"left_joint_4", {0, 26, 19}},
+    // {"left_joint_5", {0, 27, 20}},
+    // {"left_joint_6", {0, 28, 21}},
+    // {"left_joint_7", {0, 29, 22}},
+    // {"right_joint_1", {0, 16, 23}},
+    // {"right_joint_2", {0, 17, 24}},
+    // {"right_joint_3", {0, 18, 25}},
+    // {"right_joint_4", {0, 19, 26}},
+    // {"right_joint_5", {0, 20, 27}},
+    // {"right_joint_6", {0, 21, 28}},
+    // {"right_joint_7", {0, 22, 29}},
+    // {"head_joint_1", {0, 30, 30}},
+    // {"head_joint_2", {0, 31, 31}},
+    // {"head_joint_3", {0, 32, 32}},
+
+    /* ---------------- Basic Information ---------------- */
 
     /* ---------------- Connection ---------------- */
 
@@ -62,9 +85,30 @@ public:
 
     bool BackToZero() override;
 
+    /* ---------------- Get Information ---------------- */
+
+    void Info() override;
+
+    void GetJointsStatus() override;
+
+    /* ---------------- Get Information ---------------- */
+
+    bool MoveJ(const std::vector<double> &jointsAngle_) override;
+
+    bool MoveL() override;
+
     std::vector<double> GetJointsAngle() override;
 private:
 
     bool connectFlag = false;
+
+    // degree of freedom
+    const size_t dofHead = 3;
+    const size_t dofArm = 7;
+
+    //
+    std::vector<size_t> headCanIndex = {30, 31, 32};
+    std::vector<size_t> leftArmCanIndex = {23, 24, 25, 26, 27, 28, 29};
+    std::vector<size_t> rightArmCanIndex = {16, 17, 18, 19, 20, 21, 22};
 
 };

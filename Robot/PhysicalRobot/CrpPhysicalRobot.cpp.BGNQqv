@@ -5,7 +5,6 @@ CrpPhysicalRobot::CrpPhysicalRobot(const PhysicalRobot::config &config_){
     r_solver.gap=0.5;
     l_controller.max_vel=0.6;
     r_controller.max_vel=0.6;
-
 }
 
 CrpPhysicalRobot::~CrpPhysicalRobot(){
@@ -54,15 +53,11 @@ bool CrpPhysicalRobot::Connect(){
 //    ti5_socket_server(0,0,SERVER_PORT);
 
     if(startFlag){
-        std::cout << GREEN
-                    << " Successfully initialize the CAN ! "
+          std::cout << GREEN
+                    << " Successfully initialized CAN ! "
                     << RESET << std::endl;
 
           this->connectFlag = true ;
-    }else{
-        std::cout << RED
-                  << " Can't initialize the CAN ! "
-                  << RESET << std::endl;
     }
     return this->connectFlag;
 }
@@ -99,7 +94,7 @@ bool CrpPhysicalRobot::EmergencyStop(){
 bool CrpPhysicalRobot::BackToZero(){
     if(!this->isConnect()){ return false; }
 
-    mechanical_arm_origin(ArmSide::LEFT_ARM,0,0);
+    // TODO
 
     return true;
 }
@@ -117,7 +112,6 @@ std::vector<double> CrpPhysicalRobot::GetJointsAngle(){
         jointsAngle.push_back(currentAngle[i]);
         std::cout << " Left Arm Joint"
                   << i << " : "
-                  << fixed << setprecision(3)
                   << currentAngle[i] << std::endl;
     }
 
@@ -127,7 +121,6 @@ std::vector<double> CrpPhysicalRobot::GetJointsAngle(){
         jointsAngle.push_back(currentAngle[i]);
         std::cout << " Right Arm Joint"
                   << i << " : "
-                  << fixed << setprecision(3)
                   << currentAngle[i] << std::endl;
     }
 
@@ -200,39 +193,15 @@ void CrpPhysicalRobot::Info(){
 
 }
 
-void CrpPhysicalRobot::GetJointsStatus(){
-    if(!this->isConnect()){ return; }
-    int32_t dataList[this->dofArm];
-
-    get_mechanicalarm_status(ArmSide::LEFT_ARM,0,0,dataList);
-
-    for(size_t i = 0;i < this->dofArm;i++){
-        std::cout<<" Left Arm Joint " <<i <<" Status: "<<dataList[i]<<std::endl;
-    }
-
-    get_mechanicalarm_status(ArmSide::RIGHT_ARM,1,0,dataList);
-
-    for(size_t i = 0;i < this->dofArm;i++){
-        std::cout<<" Right Arm Joint " <<i <<" Status: "<<dataList[i]<<std::endl;
-    }
-}
-
 bool CrpPhysicalRobot::MoveJ(const std::vector<double> &jointsAngle_){
     if(!this->isConnect()){ return false; }
     float jointsAngle[7];
-    float currentPosition[7];
 
     for(size_t i=0;i<jointsAngle_.size();i++){
         jointsAngle[i] = static_cast<float>(jointsAngle_[i]);
-        std::cout<<" Joint "<<i<<" Goal Value : "<< fixed << setprecision(3)<<jointsAngle[i]<<std::endl;
     }
 
-//    GetP_joint_to_move(ArmSide::RIGHT_ARM,jointsAngle,currentPosition,0,0);
     joint_to_move(ArmSide::LEFT_ARM,jointsAngle,0,0);
-
-//    for(size_t i=0;i<jointsAngle_.size();i++){
-//        std::cout<<" Joint "<<i<<" Current Position : "<< fixed << setprecision(3)<< currentPosition[i] <<std::endl;
-//    }
 
     return true;
 }

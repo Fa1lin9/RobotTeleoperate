@@ -4,3 +4,7 @@
 if( ${USER_CHF_Ubuntu} )
     include( package_path_per_user/CHF_Ubuntu )
 endif()
+
+if( ${USER_CrpRobot_Ubuntu} )
+    include( package_path_per_user/CrpRobot_Ubuntu )
+endif()
