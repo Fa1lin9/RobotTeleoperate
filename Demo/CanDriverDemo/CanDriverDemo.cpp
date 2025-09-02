@@ -59,9 +59,22 @@ int main(){
                  << ", canID " << canID
                  << std::endl;
 
-//        if(canID == 25){
-//            SendPosition(canDevice, canID, M_PI_2);
-//        }
+        if(canID == 28){
+            double value = 0;
+//            auto result = SendRecvPosition(canDevice, canID, &value);
+//            std::cout<<" SendRecvPosition: "<<std::endl;
+//            std::cout<<" Can ID: "<<std::get<0>(result.value())
+//                     <<" Status: "<<std::get<1>(result.value())
+//                     <<std::endl;
+            auto result =
+                    SendRecvMultiPosition(canDevice, canID, &value, bool(canID % 7 != 0));
+            for(auto const& temp:result){
+                std::cout<<" SendRecvPosition: "<<std::endl;
+                std::cout<<" Can ID: "<<std::get<0>(temp)
+                         <<" Status: "<<std::get<1>(temp)
+                         <<std::endl;
+            }
+        }
 
 //        SendPosition(canDevice, canID, 0);
 
@@ -74,6 +87,7 @@ int main(){
         RecvMaxAcceleration(canDevice, canID, &value);
         std::cout<<" Joint "<<name<<" Max Acceleration: "<< std::fixed << std::setprecision(3)<<value<<std::endl;
 
+        // useless
         RecvPosition(canDevice, canID, &position);
         std::cout<<" Position: "<< std::fixed << std::setprecision(3)<< position <<std::endl;
 

@@ -1,5 +1,6 @@
 #pragma once
 #include <PhysicalRobot/PhysicalRobot.hpp>
+#include <CanDriver/CanDriver.h>
 
 #include <stdio.h>
 #include <cstring>
@@ -25,6 +26,7 @@
 #include <algorithm>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <future>
 
 #define RESET "\033[0m"
 #define RED "\033[31m"     /* Red */
@@ -49,25 +51,31 @@ public:
     /* ---------------- Basic Information ---------------- */
 
     // Left(device0): 23, 24, 25, 26, 27, 28, 29
-    // Right(device1): 16, 17, 18, 19, 14, 21, 22
+    // Right(device0): 16, 17, 18, 19, 14, 21, 22
     // Head(device0): 30, 31, 32
-    // name: {can_device, can_id, index}
+    // Waist(device0) : 13, 14, 15
 
-    // {"left_joint_3", {0, 25, 18}},
-    // {"left_joint_4", {0, 26, 19}},
-    // {"left_joint_5", {0, 27, 20}},
-    // {"left_joint_6", {0, 28, 21}},
-    // {"left_joint_7", {0, 29, 22}},
-    // {"right_joint_1", {0, 16, 23}},
-    // {"right_joint_2", {0, 17, 24}},
-    // {"right_joint_3", {0, 18, 25}},
-    // {"right_joint_4", {0, 19, 26}},
-    // {"right_joint_5", {0, 20, 27}},
-    // {"right_joint_6", {0, 21, 28}},
-    // {"right_joint_7", {0, 22, 29}},
-    // {"head_joint_1", {0, 30, 30}},
-    // {"head_joint_2", {0, 31, 31}},
-    // {"head_joint_3", {0, 32, 32}},
+    // joint name: {can device , can id}
+//    {"L_SHOULDER_P",    {0, 23}},
+//    {"L_SHOULDER_R",    {0, 24}},
+//    {"L_SHOULDER_Y",    {0, 25}},
+//    {"L_ELBOW_P",       {0, 26}},
+//    {"L_FOREARM_Y",     {0, 27}},
+//    {"L_WRIST_P",       {0, 28}},
+//    {"L_HAND_R",        {0, 29}},
+//    {"R_SHOULDER_P",    {0, 16}},
+//    {"R_SHOULDER_R",    {0, 17}},
+//    {"R_SHOULDER_Y",    {0, 18}},
+//    {"R_ELBOW_P",       {0, 19}},
+//    {"R_FOREARM_Y",     {0, 20}},
+//    {"R_WRIST_P",       {0, 21}},
+//    {"R_HAND_R",        {0, 22}},
+//    {"NECK_Y_S",        {0, 30}},  // head y
+//    {"NECK_P_S",        {0, 31}},  // head p
+//    {"NECK_R_S",        {0, 32}},  // head r
+//    {"WAIST_P_S",       {0, 15}},  // waist p
+//    {"WAIST_R_S",       {0, 13}},  // waist r
+//    {"WAIST_Y_S",       {0, 14}},  // waist y
 
     /* ---------------- Basic Information ---------------- */
 
@@ -97,18 +105,35 @@ public:
 
     bool MoveL() override;
 
+    bool MoveJ(const PhysicalRobot::CrpRobotConfig& config_) override;
+
     std::vector<double> GetJointsAngle() override;
 private:
+
+    bool SendRecvJoints(const std::vector<double>& jointsValue,
+                        size_t dof,
+                        size_t canDevice,
+                        const std::vector<size_t>& canID,
+                        const std::string& partName);
 
     bool connectFlag = false;
 
     // degree of freedom
+    const size_t dofWaist = 3;
     const size_t dofHead = 3;
     const size_t dofArm = 7;
 
-    //
-    std::vector<size_t> headCanIndex = {30, 31, 32};
-    std::vector<size_t> leftArmCanIndex = {23, 24, 25, 26, 27, 28, 29};
-    std::vector<size_t> rightArmCanIndex = {16, 17, 18, 19, 20, 21, 22};
+    // Can Device
+    size_t leftArmCanDevice = 0;
+    size_t rightArmCanDevice = 0;
+    size_t headCanDevice = 0;
+    size_t waistCanDevice = 0;
+
+    // Can ID
+    std::vector<size_t> leftArmCanID = {23, 24, 25, 26, 27, 28, 29};
+    std::vector<size_t> rightArmCanID = {16, 17, 18, 19, 20, 21, 22};
+    std::vector<size_t> headCanID = {30, 31, 32};
+    std::vector<size_t> waistCanID = {13, 14, 15};
+
 
 };

@@ -51,6 +51,7 @@ bool CrpPhysicalRobot::Connect(){
     cout << MAGENTA << " IP = " << ip << RESET << endl;
 
     bool startFlag = Start();
+//    bool startFlag = CanDriver::InitCan();
 //    ti5_socket_server(0,0,SERVER_PORT);
 
     if(startFlag){
@@ -75,6 +76,7 @@ bool CrpPhysicalRobot::Disconnect(){
                     << RESET << std:: endl;
           this->connectFlag = false;
     }
+//    CanDriver::CloseCan();
     return this->connectFlag;
 }
 
@@ -117,7 +119,7 @@ std::vector<double> CrpPhysicalRobot::GetJointsAngle(){
         jointsAngle.push_back(currentAngle[i]);
         std::cout << " Left Arm Joint"
                   << i << " : "
-                  << fixed << setprecision(3)
+                  << fixed << setprecision(4)
                   << currentAngle[i] << std::endl;
     }
 
@@ -127,11 +129,9 @@ std::vector<double> CrpPhysicalRobot::GetJointsAngle(){
         jointsAngle.push_back(currentAngle[i]);
         std::cout << " Right Arm Joint"
                   << i << " : "
-                  << fixed << setprecision(3)
+                  << fixed << setprecision(4)
                   << currentAngle[i] << std::endl;
     }
-
-
 
     return {};
 }
@@ -155,7 +155,7 @@ void CrpPhysicalRobot::Info(){
         for(size_t i = 0;i < this->dofHead ;i++){
             std::cout << GREEN
                       << " canDevice: " << size_t(0)
-                      << " canIndex " << this->headCanIndex[i]
+                      << " canIndex " << this->headCanID[i]
                       << RESET << std::endl;
         }
     }
@@ -172,7 +172,7 @@ void CrpPhysicalRobot::Info(){
         for(size_t i = 0;i < this->dofArm ;i++){
             std::cout << YELLOW
                       << " canDevice: " << size_t(0)
-                      << " canIndex " << this->leftArmCanIndex[i]
+                      << " canIndex " << this->leftArmCanID[i]
                       << RESET << std::endl;
         }
     }
@@ -189,7 +189,7 @@ void CrpPhysicalRobot::Info(){
         for(size_t i = 0;i < this->dofArm ;i++){
             std::cout << BLUE
                       << " canDevice: " << size_t(0)
-                      << " canIndex " << this->rightArmCanIndex[i]
+                      << " canIndex " << this->rightArmCanID[i]
                       << RESET << std::endl;
         }
     }
@@ -218,26 +218,102 @@ void CrpPhysicalRobot::GetJointsStatus(){
 }
 
 bool CrpPhysicalRobot::MoveJ(const std::vector<double> &jointsAngle_){
+//    std::cout << RED
+//              << " Sorry,please use MoveJ(const PhysicalRobot::CrpRobotConfig& config_) to control the CrpRobot ! "
+//              << RESET
+//              << std::endl;
     if(!this->isConnect()){ return false; }
-    float jointsAngle[7];
-    float currentPosition[7];
+    float jointsAngle[this->dofArm];
 
-    for(size_t i=0;i<jointsAngle_.size();i++){
-        jointsAngle[i] = static_cast<float>(jointsAngle_[i]);
-        std::cout<<" Joint "<<i<<" Goal Value : "<< fixed << setprecision(3)<<jointsAngle[i]<<std::endl;
+    for(size_t i=0;i<this->dofArm;i++){
+        jointsAngle[i]=jointsAngle_[i];
     }
 
-//    GetP_joint_to_move(ArmSide::RIGHT_ARM,jointsAngle,currentPosition,0,0);
     joint_to_move(ArmSide::LEFT_ARM,jointsAngle,0,0);
-
-//    for(size_t i=0;i<jointsAngle_.size();i++){
-//        std::cout<<" Joint "<<i<<" Current Position : "<< fixed << setprecision(3)<< currentPosition[i] <<std::endl;
-//    }
 
     return true;
 }
 
 bool CrpPhysicalRobot::MoveL(){
 
+    return true;
+}
+
+bool CrpPhysicalRobot::MoveJ(const PhysicalRobot::CrpRobotConfig &config_){
+    if(!this->isConnect()){ return false; }
+
+    // for left arm
+    if(config_.useLeftArm){
+        this->SendRecvJoints(config_.leftArmJointsValue,
+                             this->dofArm,
+                             this->leftArmCanDevice,
+                             this->leftArmCanID,
+                             "Left Arm"
+                             );
+    }
+
+    // for right arm
+    if(config_.useRightArm){
+        this->SendRecvJoints(config_.rightArmJointsValue,
+                             this->dofArm,
+                             this->rightArmCanDevice,
+                             this->rightArmCanID,
+                             "Right Arm"
+                             );
+    }
+
+    // for head
+    if(config_.useHead){
+        this->SendRecvJoints(config_.headJointsValue,
+                             this->dofHead,
+                             this->headCanDevice,
+                             this->headCanID,
+                             "Head"
+                             );
+    }
+
+    // for waist
+    if(config_.useWaist){
+        this->SendRecvJoints(config_.waistJointsValue,
+                             this->dofWaist,
+                             this->waistCanDevice,
+                             this->waistCanID,
+                             "Waist"
+                             );
+    }
+
+    // for hand
+    // TODO
+
+    return true;
+}
+
+bool CrpPhysicalRobot::SendRecvJoints(const std::vector<double>& jointsValue,
+                    size_t dof,
+                    size_t canDevice,
+                    const std::vector<size_t>& canID,
+                    const std::string& partName) {
+    if (jointsValue.empty()) {
+        throw std::invalid_argument("[" + partName + "] The joints vector is empty!");
+        return false;
+    } else if (jointsValue.size() != dof) {
+        throw std::length_error("[" + partName + "] The joints vector size does not match!");
+        return false;
+    }
+
+    for (size_t i = 0; i < dof; i++) {
+        double value = jointsValue[i];
+        auto result = CanDriver::SendRecvPosition(canDevice, canID[i], &value);
+        if (result.has_value()) {
+            std::cout << "[" << partName << "] "
+                      << "Can ID: " << std::fixed << std::setprecision(4) << std::get<0>(result.value())
+                      << " Value: " << std::fixed << std::setprecision(4) << std::get<1>(result.value())
+                      << std::endl;
+        } else {
+            std::cerr << "[" << partName << "] "
+                      << "Failed to send position for Can ID: " << canID[i]
+                      << std::endl;
+        }
+    }
     return true;
 }
