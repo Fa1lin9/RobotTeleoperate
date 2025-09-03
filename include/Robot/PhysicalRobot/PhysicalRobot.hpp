@@ -14,11 +14,25 @@ class PhysicalRobot
 public:
     struct config
     {
-        config() {}
-
         std::string IP;
         PhysicalRobotType type;
     };
+
+    struct CrpRobotConfig
+    {
+        // some flag
+        bool useLeftArm = false;
+        bool useRightArm = false;
+        bool useHead = false;
+        bool useWaist = false;
+
+        //
+        std::vector<double> leftArmJointsValue;
+        std::vector<double> rightArmJointsValue;
+        std::vector<double> headJointsValue;
+        std::vector<double> waistJointsValue;
+    };
+
     PhysicalRobot();
     ~PhysicalRobot();
 
@@ -40,7 +54,17 @@ public:
 
     virtual std::vector<double> GetJointsAngle() = 0;
 
+    // give some basic information of current robot
+    virtual void Info() = 0;
+
+    virtual void GetJointsStatus() = 0;
+
     /* ---------------- Get Information ---------------- */
+
+    virtual bool MoveJ(const std::vector<double> &jointsAngle_) = 0; 
+    virtual bool MoveL() = 0;
+
+    virtual bool MoveJ(const PhysicalRobot::CrpRobotConfig& config_) = 0;
 
     static boost::shared_ptr<PhysicalRobot> GetPtr(const PhysicalRobot::config &config_);
 

@@ -45,11 +45,8 @@ target_include_directories( ${TARGET_NAME}
 #   Add dependancies
 target_link_libraries( ${TARGET_NAME}
     PUBLIC 
-
-    PRIVATE
-        $<BUILD_INTERFACE:NLopt::nlopt>
-
         $<BUILD_INTERFACE:Robot::PhysicalRobot>
+    PRIVATE
 
 )
 

@@ -7,7 +7,7 @@ cmake_minimum_required( VERSION 3.20 )
 #############################################################
 #	Set project name, files, dependancies
 #############################################################
-set( TARGET_NAME "IKSolver" )
+set( TARGET_NAME "CanDriver" )
 message( STATUS "\n-------------  ${GROUP_NAME} - ${TARGET_NAME}  -------------" )
 
 
@@ -37,6 +37,7 @@ target_include_directories( ${TARGET_NAME}
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${GROUP_NAME}>
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/common>
     PRIVATE
+        $<BUILD_INTERFACE:${HumaniodRobot_include}>
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
@@ -46,15 +47,9 @@ target_include_directories( ${TARGET_NAME}
 #   Add dependancies
 target_link_libraries( ${TARGET_NAME}
     PUBLIC     
-        $<BUILD_INTERFACE:Eigen3::Eigen>
-        $<BUILD_INTERFACE:Boost::headers>
-        $<BUILD_INTERFACE:Boost::filesystem>
-        $<BUILD_INTERFACE:Boost::program_options>
         
     PRIVATE
-        $<BUILD_INTERFACE:pinocchio::pinocchio>
-        $<BUILD_INTERFACE:pinocchio::pinocchio_headers>
-
+    $<BUILD_INTERFACE:${CONTROLCAN_LIB}>
 
 )
 

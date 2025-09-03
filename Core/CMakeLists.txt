@@ -13,6 +13,7 @@ list( APPEND ${GROUP_NAME}_Components
     CoordinateTransform
     IKSolver
     DataCollector
+    CanDriver
 )
 
 ##########################################################################

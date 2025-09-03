@@ -5,7 +5,6 @@ CrpPhysicalRobot::CrpPhysicalRobot(const PhysicalRobot::config &config_){
     r_solver.gap=0.5;
     l_controller.max_vel=0.6;
     r_controller.max_vel=0.6;
-
 }
 
 CrpPhysicalRobot::~CrpPhysicalRobot(){
@@ -51,19 +50,14 @@ bool CrpPhysicalRobot::Connect(){
     cout << MAGENTA << " IP = " << ip << RESET << endl;
 
     bool startFlag = Start();
-//    bool startFlag = CanDriver::InitCan();
 //    ti5_socket_server(0,0,SERVER_PORT);
 
     if(startFlag){
-        std::cout << GREEN
-                    << " Successfully initialize the CAN ! "
+          std::cout << GREEN
+                    << " Successfully initialized CAN ! "
                     << RESET << std::endl;
 
           this->connectFlag = true ;
-    }else{
-        std::cout << RED
-                  << " Can't initialize the CAN ! "
-                  << RESET << std::endl;
     }
     return this->connectFlag;
 }
@@ -76,7 +70,6 @@ bool CrpPhysicalRobot::Disconnect(){
                     << RESET << std:: endl;
           this->connectFlag = false;
     }
-//    CanDriver::CloseCan();
     return this->connectFlag;
 }
 
@@ -101,7 +94,7 @@ bool CrpPhysicalRobot::EmergencyStop(){
 bool CrpPhysicalRobot::BackToZero(){
     if(!this->isConnect()){ return false; }
 
-    mechanical_arm_origin(ArmSide::LEFT_ARM,0,0);
+    // TODO
 
     return true;
 }
@@ -119,7 +112,6 @@ std::vector<double> CrpPhysicalRobot::GetJointsAngle(){
         jointsAngle.push_back(currentAngle[i]);
         std::cout << " Left Arm Joint"
                   << i << " : "
-                  << fixed << setprecision(4)
                   << currentAngle[i] << std::endl;
     }
 
@@ -129,9 +121,10 @@ std::vector<double> CrpPhysicalRobot::GetJointsAngle(){
         jointsAngle.push_back(currentAngle[i]);
         std::cout << " Right Arm Joint"
                   << i << " : "
-                  << fixed << setprecision(4)
                   << currentAngle[i] << std::endl;
     }
+
+
 
     return {};
 }
@@ -155,7 +148,7 @@ void CrpPhysicalRobot::Info(){
         for(size_t i = 0;i < this->dofHead ;i++){
             std::cout << GREEN
                       << " canDevice: " << size_t(0)
-                      << " canIndex " << this->headCanID[i]
+                      << " canIndex " << this->headCanIndex[i]
                       << RESET << std::endl;
         }
     }
@@ -172,7 +165,7 @@ void CrpPhysicalRobot::Info(){
         for(size_t i = 0;i < this->dofArm ;i++){
             std::cout << YELLOW
                       << " canDevice: " << size_t(0)
-                      << " canIndex " << this->leftArmCanID[i]
+                      << " canIndex " << this->leftArmCanIndex[i]
                       << RESET << std::endl;
         }
     }
@@ -189,7 +182,7 @@ void CrpPhysicalRobot::Info(){
         for(size_t i = 0;i < this->dofArm ;i++){
             std::cout << BLUE
                       << " canDevice: " << size_t(0)
-                      << " canIndex " << this->rightArmCanID[i]
+                      << " canIndex " << this->rightArmCanIndex[i]
                       << RESET << std::endl;
         }
     }
@@ -200,33 +193,12 @@ void CrpPhysicalRobot::Info(){
 
 }
 
-void CrpPhysicalRobot::GetJointsStatus(){
-    if(!this->isConnect()){ return; }
-    int32_t dataList[this->dofArm];
-
-    get_mechanicalarm_status(ArmSide::LEFT_ARM,0,0,dataList);
-
-    for(size_t i = 0;i < this->dofArm;i++){
-        std::cout<<" Left Arm Joint " <<i <<" Status: "<<dataList[i]<<std::endl;
-    }
-
-    get_mechanicalarm_status(ArmSide::RIGHT_ARM,1,0,dataList);
-
-    for(size_t i = 0;i < this->dofArm;i++){
-        std::cout<<" Right Arm Joint " <<i <<" Status: "<<dataList[i]<<std::endl;
-    }
-}
-
 bool CrpPhysicalRobot::MoveJ(const std::vector<double> &jointsAngle_){
-//    std::cout << RED
-//              << " Sorry,please use MoveJ(const PhysicalRobot::CrpRobotConfig& config_) to control the CrpRobot ! "
-//              << RESET
-//              << std::endl;
     if(!this->isConnect()){ return false; }
-    float jointsAngle[this->dofArm];
+    float jointsAngle[7];
 
-    for(size_t i=0;i<this->dofArm;i++){
-        jointsAngle[i]=jointsAngle_[i];
+    for(size_t i=0;i<jointsAngle_.size();i++){
+        jointsAngle[i] = static_cast<float>(jointsAngle_[i]);
     }
 
     joint_to_move(ArmSide::LEFT_ARM,jointsAngle,0,0);
@@ -236,84 +208,5 @@ bool CrpPhysicalRobot::MoveJ(const std::vector<double> &jointsAngle_){
 
 bool CrpPhysicalRobot::MoveL(){
 
-    return true;
-}
-
-bool CrpPhysicalRobot::MoveJ(const PhysicalRobot::CrpRobotConfig &config_){
-    if(!this->isConnect()){ return false; }
-
-    // for left arm
-    if(config_.useLeftArm){
-        this->SendRecvJoints(config_.leftArmJointsValue,
-                             this->dofArm,
-                             this->leftArmCanDevice,
-                             this->leftArmCanID,
-                             "Left Arm"
-                             );
-    }
-
-    // for right arm
-    if(config_.useRightArm){
-        this->SendRecvJoints(config_.rightArmJointsValue,
-                             this->dofArm,
-                             this->rightArmCanDevice,
-                             this->rightArmCanID,
-                             "Right Arm"
-                             );
-    }
-
-    // for head
-    if(config_.useHead){
-        this->SendRecvJoints(config_.headJointsValue,
-                             this->dofHead,
-                             this->headCanDevice,
-                             this->headCanID,
-                             "Head"
-                             );
-    }
-
-    // for waist
-    if(config_.useWaist){
-        this->SendRecvJoints(config_.waistJointsValue,
-                             this->dofWaist,
-                             this->waistCanDevice,
-                             this->waistCanID,
-                             "Waist"
-                             );
-    }
-
-    // for hand
-    // TODO
-
-    return true;
-}
-
-bool CrpPhysicalRobot::SendRecvJoints(const std::vector<double>& jointsValue,
-                    size_t dof,
-                    size_t canDevice,
-                    const std::vector<size_t>& canID,
-                    const std::string& partName) {
-    if (jointsValue.empty()) {
-        throw std::invalid_argument("[" + partName + "] The joints vector is empty!");
-        return false;
-    } else if (jointsValue.size() != dof) {
-        throw std::length_error("[" + partName + "] The joints vector size does not match!");
-        return false;
-    }
-
-    for (size_t i = 0; i < dof; i++) {
-        double value = jointsValue[i];
-        auto result = CanDriver::SendRecvPosition(canDevice, canID[i], &value);
-        if (result.has_value()) {
-            std::cout << "[" << partName << "] "
-                      << "Can ID: " << std::fixed << std::setprecision(4) << std::get<0>(result.value())
-                      << " Value: " << std::fixed << std::setprecision(4) << std::get<1>(result.value())
-                      << std::endl;
-        } else {
-            std::cerr << "[" << partName << "] "
-                      << "Failed to send position for Can ID: " << canID[i]
-                      << std::endl;
-        }
-    }
     return true;
 }

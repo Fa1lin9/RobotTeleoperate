@@ -28,6 +28,7 @@ file( GLOB INTERFACE_HEADERS
 #############################################################
 #	Create target
 add_library( ${TARGET_NAME} ${SOURCES} ${HEADERS} ${INTERFACE_HEADERS} )
+add_library( ${GROUP_NAME}::${TARGET_NAME} ALIAS ${TARGET_NAME})
 
 #  Set project include directories
 target_compile_definitions( ${TARGET_NAME} PUBLIC -DSIM_REMOTEAPICLIENT_OBJECTS )
