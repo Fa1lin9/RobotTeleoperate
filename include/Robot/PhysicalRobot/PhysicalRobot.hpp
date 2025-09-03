@@ -50,6 +50,8 @@ public:
 
     virtual bool BackToZero() = 0;
 
+    virtual bool BackToZero(const PhysicalRobot::CrpRobotConfig& config_) = 0;
+
     /* ---------------- Get Information ---------------- */
 
     virtual std::vector<double> GetJointsAngle() = 0;

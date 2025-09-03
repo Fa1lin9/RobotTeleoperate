@@ -93,6 +93,8 @@ public:
 
     bool BackToZero() override;
 
+    bool BackToZero(const PhysicalRobot::CrpRobotConfig& config_) override;
+
     /* ---------------- Get Information ---------------- */
 
     void Info() override;

@@ -101,7 +101,63 @@ bool CrpPhysicalRobot::EmergencyStop(){
 bool CrpPhysicalRobot::BackToZero(){
     if(!this->isConnect()){ return false; }
 
-    mechanical_arm_origin(ArmSide::LEFT_ARM,0,0);
+    PhysicalRobot::CrpRobotConfig crpRobotConfig = {
+//        .useLeftArm = true,
+        .useRightArm = true,
+        .leftArmJointsValue = std::vector<double>{ 0 , 0 , 0 , 0 , 0 , 0 , 0 },
+        .rightArmJointsValue = std::vector<double>{ 0 , 0 , 0 , 0 , 0 , 0 , 0 },
+    };
+
+    this->MoveJ(crpRobotConfig);
+
+    return true;
+}
+
+bool CrpPhysicalRobot::BackToZero(const PhysicalRobot::CrpRobotConfig &config_){
+    if(!this->isConnect()){ return false; }
+
+    // for left arm
+    if(config_.useLeftArm){
+        this->SendRecvJoints(std::vector<double>{ 0 , 0 , 0 , 0 , 0 , 0 , 0 },
+                             this->dofArm,
+                             this->leftArmCanDevice,
+                             this->leftArmCanID,
+                             "Left Arm"
+                             );
+    }
+
+    // for right arm
+    if(config_.useRightArm){
+        this->SendRecvJoints(std::vector<double>{ 0 , 0 , 0 , 0 , 0 , 0 , 0 },
+                             this->dofArm,
+                             this->rightArmCanDevice,
+                             this->rightArmCanID,
+                             "Right Arm"
+                             );
+    }
+
+    // for head
+    if(config_.useHead){
+        this->SendRecvJoints(std::vector<double>{ 0 , 0 , 0 , 0 , 0 , 0 , 0 },
+                             this->dofHead,
+                             this->headCanDevice,
+                             this->headCanID,
+                             "Head"
+                             );
+    }
+
+    // for waist
+    if(config_.useWaist){
+        this->SendRecvJoints(std::vector<double>{ 0 , 0 , 0 , 0 , 0 , 0 , 0 },
+                             this->dofWaist,
+                             this->waistCanDevice,
+                             this->waistCanID,
+                             "Waist"
+                             );
+    }
+
+    // for hand
+    // TODO
 
     return true;
 }
