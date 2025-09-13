@@ -24,6 +24,9 @@ CrpRobotIKSolver::CrpRobotIKSolver(const IKSolver::config &config_)
         this->leftArmEndIndex = this->robotModel.getFrameId(config_.targetFrameName[0]);
         this->rightArmEndIndex = this->robotModel.getFrameId(config_.targetFrameName[1]);
     }
+
+    // Init
+    this->Initialize();
 }
 
 CrpRobotIKSolver::~CrpRobotIKSolver()
@@ -32,10 +35,63 @@ CrpRobotIKSolver::~CrpRobotIKSolver()
 }
 
 boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
-        std::vector<Eigen::Matrix4d> targetPose,
-        Eigen::VectorXd qInit)
+        const std::vector<Eigen::Matrix4d>& targetPose,
+        const Eigen::VectorXd& qInit)
 {
-    return boost::none;
+    nlopt::opt opt;
+    opt = nlopt::opt(nlopt::GN_DIRECT_L , qInit.size());
+
+    double (*ObjectWrapper)(const std::vector<double>& x,std::vector<double>& grad,void *data);
+    ObjectWrapper = [](const std::vector<double>& x,std::vector<double>& grad,void *data)->double{
+        Eigen::Map<const Eigen::VectorXd> q(x.data(),x.size());
+        CrpRobotData *robotData = static_cast<CrpRobotData*>(data);
+        IKSolver::CostFuncConfig config = {
+            .q = q,
+            .qInit= robotData->qInit,
+            .targetPose = robotData->targetPose,
+        };
+
+        return robotData->solver->CostFunc(config);
+    };
+
+    // set bounds
+    opt.set_lower_bounds(this->totalBoundsLower);
+    opt.set_upper_bounds(this->totalBoundsUpper);
+
+    opt.set_maxeval(200);
+    opt.set_xtol_rel(1e-2);
+//    std::cout<<"-------------------------------"<<std::endl;
+    CrpRobotData robotData = {
+        .solver = this,
+        .qInit = qInit,
+        .targetPose = targetPose,
+    };
+
+    opt.set_min_objective(ObjectWrapper, &robotData);
+
+    double funcValue;
+    std::vector<double> q(this->dofTotal);
+    q = this->qNeutral;
+
+    auto start = std::chrono::high_resolution_clock::now();
+//    std::cout<<"-------------------------------"<<std::endl;
+    nlopt::result result = opt.optimize(q, funcValue);
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "耗时: " << duration.count() << " ms" << std::endl;
+
+    if(result<0){
+        std::string error = " Optimize failed! ";
+        throw std::logic_error(error);
+    }
+
+    Eigen::Map<Eigen::VectorXd> qEigen(q.data(),q.size());
+
+    std::cout << " Joint Value =\n" << qEigen << std::endl;
+
+    std::cout << " Function Value = " << funcValue << std::endl;
+
+    return boost::optional<Eigen::VectorXd>(qEigen);
 }
 
 void CrpRobotIKSolver::Info(){
@@ -65,6 +121,7 @@ void CrpRobotIKSolver::Info(){
     std::cout << "Number of joints: " << robotModel.njoints << std::endl;
     std::cout << "Number of DOFs: " << robotModel.nv << std::endl;
     std::cout << "Number of frames: " << robotModel.nframes << std::endl;
+    std::cout << "Number of q: " << robotModel.nq << std::endl;
 
     // Demo
     Eigen::VectorXd q;
@@ -97,21 +154,22 @@ void CrpRobotIKSolver::Info(){
 
     pinocchio::SE3 rightArmPose = rightShoulderPitchPose.inverse() * rightWaistRollPose;
 
-    // 打印平移向量
-    std::cout << "leftArmPose position: " << leftArmPose.translation().transpose() << std::endl;
-    std::cout << "rightArmPose position: "  << rightArmPose.translation().transpose() << std::endl;
+//    // 打印平移向量
+//    std::cout << "leftArmPose position: " << leftArmPose.translation().transpose() << std::endl;
+//    std::cout << "rightArmPose position: "  << rightArmPose.translation().transpose() << std::endl;
 
-    // 打印旋转矩阵
-    std::cout << "leftArmPose rotation:\n" << leftArmPose.rotation() << std::endl;
-    std::cout << "rightArmPose rotation:\n"  << rightArmPose.rotation() << std::endl;
+//    // 打印旋转矩阵
+//    std::cout << "leftArmPose rotation:\n" << leftArmPose.rotation() << std::endl;
+//    std::cout << "rightArmPose rotation:\n"  << rightArmPose.rotation() << std::endl;
 
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "耗时: " << duration.count() << " ms" << std::endl;
+//    std::cout << "耗时: " << duration.count() << " ms" << std::endl;
 
 }
 
 std::vector<pinocchio::SE3> CrpRobotIKSolver::Forward(const Eigen::VectorXd& q){
+//    LOG_FUNCTION;
     if(q.size() != this->robotModel.nq){
         std::string error = " The size of the q should be this->robotModel.nq! ";
         throw std::length_error(error);
@@ -123,24 +181,26 @@ std::vector<pinocchio::SE3> CrpRobotIKSolver::Forward(const Eigen::VectorXd& q){
     pinocchio::updateFramePlacements(robotModel,data);
 
     // base pose
-    pinocchio::SE3 basePose = data.oMi[this->baseIndex];
+    pinocchio::SE3 basePose = data.oMf[this->baseIndex];
 
     // left arm
-    pinocchio::SE3 leftArmEndPose = data.oMi[this->leftArmEndIndex];
+    pinocchio::SE3 leftArmEndPose = data.oMf[this->leftArmEndIndex];
     pinocchio::SE3 leftArmPose = basePose.inverse() * leftArmEndPose;
 
 
     // right arm
-    pinocchio::SE3 rightArmEndPose = data.oMi[this->rightArmEndIndex];
+    pinocchio::SE3 rightArmEndPose = data.oMf[this->rightArmEndIndex];
     pinocchio::SE3 rightArmPose = basePose.inverse() * rightArmEndPose;
 
     return std::vector<pinocchio::SE3>{leftArmPose, rightArmPose};
 }
 
 double CrpRobotIKSolver::CostFunc(const IKSolver::CostFuncConfig& config_){
+//    LOG_FUNCTION;
     std::vector<pinocchio::SE3> currentPose = this->Forward(config_.q);
 
     // translation error
+//    std::cout<<" Translation Error "<<std::endl;
     Eigen::Vector3d currentLeftTrans  = currentPose[0].translation();
     Eigen::Vector3d currentRightTrans = currentPose[1].translation();
     Eigen::Vector3d targetLeftTrans   = config_.targetPose[0].block<3,1>(0,3);
@@ -154,6 +214,7 @@ double CrpRobotIKSolver::CostFunc(const IKSolver::CostFuncConfig& config_){
     double transError = transErrorVec.norm();
 
     // rotation error
+//    std::cout<<" rotation Error "<<std::endl;
     Eigen::Matrix3d leftArmError
             = config_.targetPose[0].block<3,3>(0,0) * currentPose[0].rotation().inverse();
     Eigen::Matrix3d rightArmError
@@ -164,13 +225,26 @@ double CrpRobotIKSolver::CostFunc(const IKSolver::CostFuncConfig& config_){
     double rotaError = rotaErrorVec.norm();
 
     // smoothing error
+//    std::cout<<" Smoothing Error "<<std::endl;
     Eigen::VectorXd smoothErrorVec = config_.q - config_.qInit;
     this->NormalizeAngle(smoothErrorVec);
     double smoothError = smoothErrorVec.norm();
 
+    // regularization
+//    std::cout<<" Regularization "<<std::endl;
+    Eigen::VectorXd reguVec;
+    reguVec =
+            config_.q - Eigen::VectorXd::Map(this->qNeutral.data(), this->qNeutral.size());
+    double reguError = reguVec.norm();
 
+    // weight
+    double wTrans = 50.0;
+    double wRota = 0.5;
+    double wSmooth = 0.1;
+    double wRegu = 0.02;
 
-
+    double error = wTrans * transError + wRota * rotaError + wSmooth * smoothError + wRegu * reguError;
+    return error;
 }
 
 void CrpRobotIKSolver::NormalizeAngle(Eigen::VectorXd& angle){
@@ -181,4 +255,58 @@ void CrpRobotIKSolver::NormalizeAngle(Eigen::VectorXd& angle){
         }
         angle(i) -= M_PI; // 回到 [-π, π]
     }
+}
+
+void CrpRobotIKSolver::Initialize(){
+    LOG_FUNCTION;
+    double min,max;
+    for(size_t i = 0;i<this->dofArm;i++){
+        // left arm
+        min = this->robotModel.lowerPositionLimit(this->leftArmID[0] + i - 1);
+        max = this->robotModel.upperPositionLimit(this->leftArmID[0] + i - 1);
+        this->leftArmBoundsLower.push_back(min);
+        this->leftArmBoundsUpper.push_back(max);
+        this->qLeftArmNeutral.push_back((min + max) / 2);
+
+        // right arm
+        min = this->robotModel.lowerPositionLimit(this->rightArmID[0] + i - 1);
+        max = this->robotModel.upperPositionLimit(this->rightArmID[0] + i - 1);
+        this->rightArmBoundsLower.push_back(min);
+        this->rightArmBoundsUpper.push_back(max);
+        this->qRightArmNeutral.push_back((min + max) / 2);
+    }
+
+    // order: base(1) - waist(3) - left arm(dofArm) - neck(3) - right arm(dofArm)
+    qNeutral.clear();
+    qNeutral.reserve(this->dofTotal);
+
+    // base
+    qNeutral.push_back(0);
+    totalBoundsLower.push_back(0);
+    totalBoundsUpper.push_back(0);
+
+    // waist
+    qNeutral.insert(qNeutral.end(), 3, 0);
+    totalBoundsLower.insert(totalBoundsLower.end(), 3, 0);
+    totalBoundsUpper.insert(totalBoundsUpper.end(), 3, 0);
+
+    // left arm
+    qNeutral.insert(qNeutral.end(), qLeftArmNeutral.begin(), qLeftArmNeutral.end());
+    totalBoundsLower.insert(totalBoundsLower.end(), leftArmBoundsLower.begin(), leftArmBoundsLower.end());
+    totalBoundsUpper.insert(totalBoundsUpper.end(), leftArmBoundsUpper.begin(), leftArmBoundsUpper.end());
+
+    // neck
+    qNeutral.insert(qNeutral.end(), 3, 0);
+    totalBoundsLower.insert(totalBoundsLower.end(), 3, 0);
+    totalBoundsUpper.insert(totalBoundsUpper.end(), 3, 0);
+
+    // right arm
+    qNeutral.insert(qNeutral.end(), qRightArmNeutral.begin(), qRightArmNeutral.end());
+    totalBoundsLower.insert(totalBoundsLower.end(), rightArmBoundsLower.begin(), rightArmBoundsLower.end());
+    totalBoundsUpper.insert(totalBoundsUpper.end(), rightArmBoundsUpper.begin(), rightArmBoundsUpper.end());
+
+//    std::cout<<" The size of the totalBoundsLower is "<<totalBoundsLower.size()<<std::endl;
+//    std::cout<<" The size of the totalBoundsUpper is "<<totalBoundsUpper.size()<<std::endl;
+//    std::cout<<" The size of the qNeutral is "<<qNeutral.size()<<std::endl;
+
 }

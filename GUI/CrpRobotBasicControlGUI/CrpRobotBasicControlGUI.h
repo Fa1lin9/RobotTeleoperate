@@ -54,6 +54,10 @@ private slots:
 
     void on_backToZeroPushButton_clicked();
 
+    void on_resetLeftArmPushButton_clicked();
+
+    void on_resetRightArmPushButton_clicked();
+
 private:
     Ui::CrpRobotBasicControlGUI *ui;
 

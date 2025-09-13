@@ -283,3 +283,43 @@ void CrpRobotBasicControlGUI::NormalizeAngle(){
 }
 
 
+
+void CrpRobotBasicControlGUI::on_resetLeftArmPushButton_clicked()
+{
+    std::array<QLineEdit*, 7> leftArmLineEdits = {
+        ui->leftArmJ1LineEdit,
+        ui->leftArmJ2LineEdit,
+        ui->leftArmJ3LineEdit,
+        ui->leftArmJ4LineEdit,
+        ui->leftArmJ5LineEdit,
+        ui->leftArmJ6LineEdit,
+        ui->leftArmJ7LineEdit,
+    };
+
+    double value = 0.0;
+
+    for(size_t i = 0;i<leftArmLineEdits.size();i++){
+        leftArmLineEdits[i]->setText(QString::number(value,'f',1));
+    }
+}
+
+
+void CrpRobotBasicControlGUI::on_resetRightArmPushButton_clicked()
+{
+    std::array<QLineEdit*, 7> rightArmLineEdits = {
+        ui->rightArmJ1LineEdit,
+        ui->rightArmJ2LineEdit,
+        ui->rightArmJ3LineEdit,
+        ui->rightArmJ4LineEdit,
+        ui->rightArmJ5LineEdit,
+        ui->rightArmJ6LineEdit,
+        ui->rightArmJ7LineEdit,
+    };
+
+    double value = 0.0;
+
+    for(size_t i = 0;i<rightArmLineEdits.size();i++){
+        rightArmLineEdits[i]->setText(QString::number(value,'f',1));
+    }
+}
+

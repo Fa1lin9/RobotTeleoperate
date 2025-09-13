@@ -12,6 +12,8 @@
 #include <pinocchio/algorithm/jacobian.hpp>
 #include <pinocchio/parsers/urdf.hpp>
 
+#include <nlopt.hpp>
+
 enum SolverType{
     CrpRobot
 };
@@ -33,7 +35,10 @@ public:
 
         Eigen::VectorXd q;
         Eigen::VectorXd qInit;
+        // 2 pose: left arm and right arm
         std::vector<Eigen::Matrix4d> targetPose;
+//        Eigen::Matrix4d leftArmTargetPose;
+//        Eigen::Matrix4d rightArmTargetPose;
 
     };
 
@@ -43,8 +48,8 @@ public:
     // Solver the IK
     //考虑到目标位姿包含双臂末端，同时考虑到泛化性，所以用std::vector
     virtual boost::optional<Eigen::VectorXd> Solve(
-                    std::vector<Eigen::Matrix4d> targetPose,
-                    Eigen::VectorXd qInit) = 0;
+                    const std::vector<Eigen::Matrix4d>& targetPose,
+                    const Eigen::VectorXd& qInit) = 0;
 
     virtual std::vector<pinocchio::SE3> Forward(const Eigen::VectorXd& q) = 0;
 

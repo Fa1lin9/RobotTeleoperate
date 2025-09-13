@@ -13,8 +13,8 @@ public:
     ~CrpRobotIKSolver();
 
     boost::optional<Eigen::VectorXd> Solve(
-                    std::vector<Eigen::Matrix4d> targetPose,
-                    Eigen::VectorXd qInit) override;
+                    const std::vector<Eigen::Matrix4d>& targetPose,
+                    const Eigen::VectorXd& qInit) override;
 
     std::vector<pinocchio::SE3> Forward(const Eigen::VectorXd& q) override;
 
@@ -23,8 +23,19 @@ public:
     void Info() override;
 
 private:
+    struct CrpRobotData{
+        CrpRobotIKSolver *solver;
+        Eigen::VectorXd qInit;
+        std::vector<Eigen::Matrix4d> targetPose;
+//        Eigen::Matrix4d leftArmTargetPose;
+//        Eigen::Matrix4d rightArmTargetPose;
+    };
+
+private:
 
     void NormalizeAngle(Eigen::VectorXd& angle);
+
+    void Initialize();
 
     /* ------------------ Basic Info ------------------ */
     // the degree of freedom of CRP's Robot
@@ -33,7 +44,7 @@ private:
     // 腰部3个自由度
     // AGV处有个UP_DOWN关节，是沿着Z轴的平移关节
     // 总共 7 * 2 + 3 + 3 + 1 = 21
-    const size_t dof = 21;
+    const size_t dofTotal = 21;
 
     // the urdf file path of the CRP's Robot
     const std::string modelPath =
@@ -120,6 +131,19 @@ private:
     size_t baseIndex;
     size_t leftArmEndIndex;
     size_t rightArmEndIndex;
+
+    std::vector<double> qLeftArmNeutral;
+    std::vector<double> qRightArmNeutral;
+    std::vector<double> qNeutral;
+
+    std::vector<double> leftArmBoundsLower;
+    std::vector<double> rightArmBoundsLower;
+
+    std::vector<double> leftArmBoundsUpper;
+    std::vector<double> rightArmBoundsUpper;
+
+    std::vector<double> totalBoundsLower;
+    std::vector<double> totalBoundsUpper;
 
     /* ------------------ Robot Parameter ------------------ */
 
