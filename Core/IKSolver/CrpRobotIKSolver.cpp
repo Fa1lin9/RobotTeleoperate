@@ -6,6 +6,24 @@ CrpRobotIKSolver::CrpRobotIKSolver(const IKSolver::config &config_)
     pinocchio::urdf::buildModel(
                 this->modelPath,
                 this->robotModel);
+
+    // As For CrpRobot
+    // The size of the baseFrameName should be 1
+    // The size of the targetFrameName should be 2, and as the order: left arm , right arm
+    if(config_.baseFrameName.size() != 1){
+        std::string error = " As for CrpRobotIKSolver,the size of the baseFrameName should be 1! ";
+        throw std::length_error(error);
+    }else{
+        this->baseIndex = this->robotModel.getFrameId(config_.baseFrameName[0]);
+    }
+
+    if(config_.targetFrameName.size() != 2){
+        std::string error = " As for CrpRobotIKSolver,the size of the baseFrameName should be 2! And the order is: left arm, right arm! ";
+        throw std::length_error(error);
+    }else{
+        this->leftArmEndIndex = this->robotModel.getFrameId(config_.targetFrameName[0]);
+        this->rightArmEndIndex = this->robotModel.getFrameId(config_.targetFrameName[1]);
+    }
 }
 
 CrpRobotIKSolver::~CrpRobotIKSolver()
@@ -91,4 +109,76 @@ void CrpRobotIKSolver::Info(){
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "耗时: " << duration.count() << " ms" << std::endl;
 
+}
+
+std::vector<pinocchio::SE3> CrpRobotIKSolver::Forward(const Eigen::VectorXd& q){
+    if(q.size() != this->robotModel.nq){
+        std::string error = " The size of the q should be this->robotModel.nq! ";
+        throw std::length_error(error);
+    }
+
+    // updata data to better get position
+    pinocchio::Data data=pinocchio::Data(robotModel);
+    pinocchio::forwardKinematics(robotModel,data,q);
+    pinocchio::updateFramePlacements(robotModel,data);
+
+    // base pose
+    pinocchio::SE3 basePose = data.oMi[this->baseIndex];
+
+    // left arm
+    pinocchio::SE3 leftArmEndPose = data.oMi[this->leftArmEndIndex];
+    pinocchio::SE3 leftArmPose = basePose.inverse() * leftArmEndPose;
+
+
+    // right arm
+    pinocchio::SE3 rightArmEndPose = data.oMi[this->rightArmEndIndex];
+    pinocchio::SE3 rightArmPose = basePose.inverse() * rightArmEndPose;
+
+    return std::vector<pinocchio::SE3>{leftArmPose, rightArmPose};
+}
+
+double CrpRobotIKSolver::CostFunc(const IKSolver::CostFuncConfig& config_){
+    std::vector<pinocchio::SE3> currentPose = this->Forward(config_.q);
+
+    // translation error
+    Eigen::Vector3d currentLeftTrans  = currentPose[0].translation();
+    Eigen::Vector3d currentRightTrans = currentPose[1].translation();
+    Eigen::Vector3d targetLeftTrans   = config_.targetPose[0].block<3,1>(0,3);
+    Eigen::Vector3d targetRightTrans  = config_.targetPose[1].block<3,1>(0,3);
+
+    Eigen::VectorXd currentTrans(6), targetTrans(6);
+    currentTrans << currentLeftTrans, currentRightTrans;
+    targetTrans  << targetLeftTrans, targetRightTrans;
+
+    Eigen::VectorXd transErrorVec = currentTrans - targetTrans;
+    double transError = transErrorVec.norm();
+
+    // rotation error
+    Eigen::Matrix3d leftArmError
+            = config_.targetPose[0].block<3,3>(0,0) * currentPose[0].rotation().inverse();
+    Eigen::Matrix3d rightArmError
+            = config_.targetPose[1].block<3,3>(0,0) * currentPose[1].rotation().inverse();
+
+    Eigen::VectorXd rotaErrorVec(6);
+    rotaErrorVec << pinocchio::log3(leftArmError), pinocchio::log3(rightArmError);
+    double rotaError = rotaErrorVec.norm();
+
+    // smoothing error
+    Eigen::VectorXd smoothErrorVec = config_.q - config_.qInit;
+    this->NormalizeAngle(smoothErrorVec);
+    double smoothError = smoothErrorVec.norm();
+
+
+
+
+}
+
+void CrpRobotIKSolver::NormalizeAngle(Eigen::VectorXd& angle){
+    for(int i=0;i<angle.size();i++){
+        angle(i) = fmod(angle(i) + M_PI, 2 * M_PI); // 先 +π 再取模
+        if (angle(i) < 0) {
+            angle(i) += 2 * M_PI; // 确保在 [0, 2π]
+        }
+        angle(i) -= M_PI; // 回到 [-π, π]
+    }
 }

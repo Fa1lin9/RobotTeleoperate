@@ -295,6 +295,7 @@ bool CrpPhysicalRobot::MoveL(){
     return true;
 }
 
+// Angle Unit: rad
 bool CrpPhysicalRobot::MoveJ(const PhysicalRobot::CrpRobotConfig &config_){
     if(!this->isConnect()){ return false; }
 

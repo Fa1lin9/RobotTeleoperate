@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <PhysicalRobot/PhysicalRobot.hpp>
+#include <math.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class CrpRobotBasicControlGUI; }
@@ -59,6 +60,14 @@ private:
     boost::shared_ptr<PhysicalRobot> physicalRobotPtr;
 
     PhysicalRobot::CrpRobotConfig crpRobotConfig;
+
+    std::vector<double> ConvertDegrees2Radians(const std::vector<double>& degrees);
+
+    std::vector<double> ConvertRadians2Degrees(const std::vector<double>& radians);
+
+    void NormalizeAngle();
+
+    const double pi = M_PI;
 
 
 };

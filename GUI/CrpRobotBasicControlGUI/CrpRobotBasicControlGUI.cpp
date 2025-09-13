@@ -107,11 +107,13 @@ void CrpRobotBasicControlGUI::on_disconnectPushButton_clicked()
 }
 
 
+
 void CrpRobotBasicControlGUI::on_emergencyStopPushButton_clicked()
 {
     CheckConnection();
 
-    // TODO
+    this->physicalRobotPtr->EmergencyStop();
+    this->printMessage(" [Stop] Emergency Stop ! ");
 }
 
 
@@ -159,7 +161,6 @@ void CrpRobotBasicControlGUI::on_moveJPushButton_clicked()
 {
     CheckConnection();
 
-    // TODO
     std::vector<double> leftArmTarget(7);
     std::vector<double> rightArmTarget(7);
 
@@ -169,7 +170,8 @@ void CrpRobotBasicControlGUI::on_moveJPushButton_clicked()
         ui->leftArmJ3LineEdit,
         ui->leftArmJ4LineEdit,
         ui->leftArmJ5LineEdit,
-        ui->leftArmJ6LineEdit
+        ui->leftArmJ6LineEdit,
+        ui->leftArmJ7LineEdit,
     };
 
     std::array<QLineEdit*, 7> rightArmLineEdits = {
@@ -178,11 +180,13 @@ void CrpRobotBasicControlGUI::on_moveJPushButton_clicked()
         ui->rightArmJ3LineEdit,
         ui->rightArmJ4LineEdit,
         ui->rightArmJ5LineEdit,
-        ui->rightArmJ6LineEdit
+        ui->rightArmJ6LineEdit,
+        ui->rightArmJ7LineEdit,
     };
 
     bool ok = true;
     for (size_t i = 0; i < leftArmLineEdits.size(); ++i) {
+        // parse value
         double val = leftArmLineEdits[i]->text().toDouble(&ok);
         if (!ok) {
             std::string message =
@@ -201,9 +205,14 @@ void CrpRobotBasicControlGUI::on_moveJPushButton_clicked()
             this->printMessage(message);
             val = 0.0;
         }
-        leftArmTarget[i] = val;
+        rightArmTarget[i] = val;
 
     }
+
+    this->crpRobotConfig.leftArmJointsValue = leftArmTarget;
+    this->crpRobotConfig.rightArmJointsValue = rightArmTarget;
+    this->NormalizeAngle();
+    this->physicalRobotPtr->MoveJ(this->crpRobotConfig);
 
 }
 
@@ -226,6 +235,51 @@ void CrpRobotBasicControlGUI::on_backToZeroPushButton_clicked()
 {
     CheckConnection();
 
-    // TODO
+    std::vector<double> zeroVec = {0 , 0 , 0 , 0 , 0 , 0 , 0};
+
+    if(this->crpRobotConfig.useLeftArm){
+        this->crpRobotConfig.leftArmJointsValue=zeroVec;
+    }else if(this->crpRobotConfig.useRightArm){
+        this->crpRobotConfig.rightArmJointsValue=zeroVec;
+    }
+
+    this->physicalRobotPtr->MoveJ(this->crpRobotConfig);
 }
+
+std::vector<double> CrpRobotBasicControlGUI::ConvertDegrees2Radians(const std::vector<double>& degrees){
+    std::vector<double> radians;
+
+    for(const auto& degree:degrees){
+        radians.push_back(degree * (this->pi / 180.0));
+    }
+
+    return radians;
+}
+
+std::vector<double> CrpRobotBasicControlGUI::ConvertRadians2Degrees(const std::vector<double>& radians){
+    std::vector<double> degrees;
+
+    for(const auto& radian:radians){
+        degrees.push_back(radian * 180.0 / this->pi);
+    }
+
+    return degrees;
+}
+
+void CrpRobotBasicControlGUI::NormalizeAngle(){
+    // turn to degree
+    if(ui->radianRadioButton->isChecked()){
+//        this->crpRobotConfig.leftArmJointsValue
+//                = ConvertRadians2Degrees(this->crpRobotConfig.leftArmJointsValue);
+//        this->crpRobotConfig.rightArmJointsValue
+//                = ConvertRadians2Degrees(this->crpRobotConfig.rightArmJointsValue);
+    // turn to radian
+    }else{
+        this->crpRobotConfig.leftArmJointsValue
+                = ConvertDegrees2Radians(this->crpRobotConfig.leftArmJointsValue);
+        this->crpRobotConfig.rightArmJointsValue
+                = ConvertDegrees2Radians(this->crpRobotConfig.rightArmJointsValue);
+    }
+}
+
 

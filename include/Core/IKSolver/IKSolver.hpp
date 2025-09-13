@@ -7,6 +7,11 @@
 #include <iostream>
 #include <FunctionLogger.hpp>
 
+#include <pinocchio/algorithm/model.hpp>
+#include <pinocchio/algorithm/frames.hpp>
+#include <pinocchio/algorithm/jacobian.hpp>
+#include <pinocchio/parsers/urdf.hpp>
+
 enum SolverType{
     CrpRobot
 };
@@ -19,7 +24,19 @@ public:
         std::string modelPath;
 
         SolverType type;
+
+        std::vector<std::string> baseFrameName;
+        std::vector<std::string> targetFrameName;
     };
+
+    struct CostFuncConfig{
+
+        Eigen::VectorXd q;
+        Eigen::VectorXd qInit;
+        std::vector<Eigen::Matrix4d> targetPose;
+
+    };
+
     IKSolver();
     ~IKSolver();
 
@@ -29,10 +46,14 @@ public:
                     std::vector<Eigen::Matrix4d> targetPose,
                     Eigen::VectorXd qInit) = 0;
 
+    virtual std::vector<pinocchio::SE3> Forward(const Eigen::VectorXd& q) = 0;
+
+    virtual double CostFunc(const IKSolver::CostFuncConfig& config_) = 0;
+
     // Output some information of the current solver
     virtual void Info() = 0;
 
-    static boost::shared_ptr<IKSolver> GetPtr(const IKSolver::config &config_);
+    static boost::shared_ptr<IKSolver> GetPtr(const IKSolver::config& config_);
 
 
 private:

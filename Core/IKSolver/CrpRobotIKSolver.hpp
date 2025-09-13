@@ -1,10 +1,7 @@
 #pragma once
 #include <IKSolver/IKSolver.hpp>
 #include <source_path.h>
-#include <pinocchio/algorithm/model.hpp>
-#include <pinocchio/algorithm/frames.hpp>
-#include <pinocchio/algorithm/jacobian.hpp>
-#include <pinocchio/parsers/urdf.hpp>
+
 
 #include <chrono>
 
@@ -19,9 +16,16 @@ public:
                     std::vector<Eigen::Matrix4d> targetPose,
                     Eigen::VectorXd qInit) override;
 
+    std::vector<pinocchio::SE3> Forward(const Eigen::VectorXd& q) override;
+
+    double CostFunc(const IKSolver::CostFuncConfig& config_) override;
+
     void Info() override;
 
 private:
+
+    void NormalizeAngle(Eigen::VectorXd& angle);
+
     /* ------------------ Basic Info ------------------ */
     // the degree of freedom of CRP's Robot
     // 一只手7个自由度
@@ -29,7 +33,7 @@ private:
     // 腰部3个自由度
     // AGV处有个UP_DOWN关节，是沿着Z轴的平移关节
     // 总共 7 * 2 + 3 + 3 + 1 = 21
-    const int dof = 21;
+    const size_t dof = 21;
 
     // the urdf file path of the CRP's Robot
     const std::string modelPath =
@@ -37,6 +41,7 @@ private:
     /* ------------------ Basic Info ------------------ */
 
     /* ------------------ Details of the Joints ------------------
+
     *Joint 1: UP-DOWN, type: JointModelPZ, parent: 0
      lower limit: 0, upper limit: 0.225
 
@@ -99,11 +104,22 @@ private:
 
     *Joint 21: R_WRIST_R, type: JointModelRX, parent: 20
      lower limit: 0, upper limit: 1.5533
+
      ------------------ Details of the Joints ------------------ */
 
     /* ------------------ Robot Parameter ------------------ */
+
     pinocchio::Model robotModel;
 
+    const size_t dofArm = 7;
+
+    std::vector<size_t> leftArmID = {5,6,7,8,9,10,11};
+
+    std::vector<size_t> rightArmID = {15,16,17,18,19,20,21};
+
+    size_t baseIndex;
+    size_t leftArmEndIndex;
+    size_t rightArmEndIndex;
 
     /* ------------------ Robot Parameter ------------------ */
 

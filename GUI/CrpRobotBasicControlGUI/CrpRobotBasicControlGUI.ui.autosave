@@ -685,6 +685,11 @@
         <string>Head and Waist Control</string>
        </attribute>
       </widget>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Teleoperate</string>
+       </attribute>
+      </widget>
      </widget>
     </item>
    </layout>
