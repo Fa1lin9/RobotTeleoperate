@@ -55,6 +55,7 @@ target_link_libraries( ${TARGET_NAME}
         $<BUILD_INTERFACE:pinocchio::pinocchio>
         $<BUILD_INTERFACE:pinocchio::pinocchio_headers>
         $<BUILD_INTERFACE:NLopt::nlopt>
+        $<BUILD_INTERFACE:casadi::casadi>
 
 )
 

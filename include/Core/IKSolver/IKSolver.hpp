@@ -11,6 +11,9 @@
 #include <pinocchio/algorithm/frames.hpp>
 #include <pinocchio/algorithm/jacobian.hpp>
 #include <pinocchio/parsers/urdf.hpp>
+#include <pinocchio/autodiff/casadi.hpp>
+
+#include <casadi/casadi.hpp>
 
 #include <nlopt.hpp>
 
@@ -31,7 +34,7 @@ public:
         std::vector<std::string> targetFrameName;
     };
 
-    struct CostFuncConfig{
+    struct CrpRobotConfig{
 
         Eigen::VectorXd q;
         Eigen::VectorXd qInit;
@@ -52,8 +55,6 @@ public:
                     const Eigen::VectorXd& qInit) = 0;
 
     virtual std::vector<pinocchio::SE3> Forward(const Eigen::VectorXd& q) = 0;
-
-    virtual double CostFunc(const IKSolver::CostFuncConfig& config_) = 0;
 
     // Output some information of the current solver
     virtual void Info() = 0;

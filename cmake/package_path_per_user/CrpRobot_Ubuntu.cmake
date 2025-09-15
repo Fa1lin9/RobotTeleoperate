@@ -169,6 +169,18 @@ find_package( ZeroMQ REQUIRED )
 
  find_package( NLopt REQUIRED )
 
+ # # #######################################################
+ # # #                     Find casadi                      #
+ # # #######################################################
+
+ find_package( casadi REQUIRED )
+
+ if (Qt5_FOUND)
+    message(STATUS "casadi found!")
+else()
+    message(FATAL_ERROR "casadi not found!")
+endif()
+
 # # #######################################################
 # # #            Find HumanoidDualArmSolver               #
 # # #######################################################

@@ -18,7 +18,7 @@ int main(){
 
     boost::shared_ptr<IKSolver> ikSolverPtr = IKSolver::GetPtr(config);
 
-    ikSolverPtr->Info();
+//    ikSolverPtr->Info();
 
     Eigen::VectorXd qInit = Eigen::VectorXd::Ones(21);
     qInit.head(21) *= 0.1;
@@ -27,11 +27,11 @@ int main(){
     Eigen::Matrix4d leftArmTargetPose,rightArmTargetPose;
     leftArmTargetPose <<     1 , 0 , 0 , 0.3,
                              0 , 1 , 0 , 0.4,
-                             0 , 0 , 1 , 1.0,
+                             0 , 0 , 1 , 0.7,
                              0 , 0 , 0 , 1;
     rightArmTargetPose <<    1 , 0 , 0 , 0.3,
                              0 , 1 , 0 , -0.4,
-                             0 , 0 , 1 , 1.0,
+                             0 , 0 , 1 , 0.7,
                              0 , 0 , 0 , 1;
     std::vector<Eigen::Matrix4d> targetPose = {leftArmTargetPose, rightArmTargetPose};
 

@@ -7,6 +7,8 @@ CrpRobotIKSolver::CrpRobotIKSolver(const IKSolver::config &config_)
                 this->modelPath,
                 this->robotModel);
 
+    robotModelAD = robotModel.cast<casadi::SX>();
+
     // As For CrpRobot
     // The size of the baseFrameName should be 1
     // The size of the targetFrameName should be 2, and as the order: left arm , right arm
@@ -42,25 +44,50 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
     opt = nlopt::opt(nlopt::GN_DIRECT_L , qInit.size());
 
     double (*ObjectWrapper)(const std::vector<double>& x,std::vector<double>& grad,void *data);
-    ObjectWrapper = [](const std::vector<double>& x,std::vector<double>& grad,void *data)->double{
-        Eigen::Map<const Eigen::VectorXd> q(x.data(),x.size());
-        CrpRobotData *robotData = static_cast<CrpRobotData*>(data);
-        IKSolver::CostFuncConfig config = {
-            .q = q,
-            .qInit= robotData->qInit,
-            .targetPose = robotData->targetPose,
-        };
 
-        return robotData->solver->CostFunc(config);
-    };
+    bool useGrad = 0;
+    if(useGrad){
+        ObjectWrapper = [](const std::vector<double>& x,std::vector<double>& grad,void *data)->double{
+            Eigen::Map<const Eigen::VectorXd> q(x.data(),x.size());
+            CrpRobotData *robotData = static_cast<CrpRobotData*>(data);
+            IKSolver::CrpRobotConfig config = {
+                .q = q,
+                .qInit= robotData->qInit,
+                .targetPose = robotData->targetPose,
+            };
+
+            // calculate the gradient
+            grad.resize(robotData->solver->dofTotal);
+            Eigen::VectorXd gradEigen = robotData->solver->GetGradient(config);
+            std::copy(gradEigen.begin(),gradEigen.end(),grad.begin());
+
+            return robotData->solver->CostFunc(config);
+        };
+    }else{
+        ObjectWrapper = [](const std::vector<double>& x,std::vector<double>& grad,void *data)->double{
+            Eigen::Map<const Eigen::VectorXd> q(x.data(),x.size());
+            CrpRobotData *robotData = static_cast<CrpRobotData*>(data);
+            IKSolver::CrpRobotConfig config = {
+                .q = q,
+                .qInit= robotData->qInit,
+                .targetPose = robotData->targetPose,
+            };
+
+            return robotData->solver->CostFunc(config);
+        };
+    }
+
+    // set limitation to joint6
+//    this->totalBoundsLower[9] = 0;
+//    this->totalBoundsUpper[9] = 0;
 
     // set bounds
     opt.set_lower_bounds(this->totalBoundsLower);
     opt.set_upper_bounds(this->totalBoundsUpper);
 
-    opt.set_maxeval(200);
+    opt.set_maxeval(500);
     opt.set_xtol_rel(1e-2);
-//    std::cout<<"-------------------------------"<<std::endl;
+
     CrpRobotData robotData = {
         .solver = this,
         .qInit = qInit,
@@ -71,14 +98,13 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
 
     double funcValue;
     std::vector<double> q(this->dofTotal);
-    q = this->qNeutral;
 
     auto start = std::chrono::high_resolution_clock::now();
-//    std::cout<<"-------------------------------"<<std::endl;
+
     nlopt::result result = opt.optimize(q, funcValue);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "耗时: " << duration.count() << " ms" << std::endl;
+    std::cout << " optimazation 耗时: " << duration.count() << " ms" << std::endl;
 
     if(result<0){
         std::string error = " Optimize failed! ";
@@ -90,6 +116,12 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
     std::cout << " Joint Value =\n" << qEigen << std::endl;
 
     std::cout << " Function Value = " << funcValue << std::endl;
+
+    // check result
+    std::cout<<" Left Arm Translation: \n"<<Forward(qEigen)[0].translation()<<std::endl;
+    std::cout<<" Left Arm Rotation: \n"<<Forward(qEigen)[0].rotation()<<std::endl;
+    std::cout<<" Left Arm Translation: \n"<<Forward(qEigen)[1].translation()<<std::endl;
+    std::cout<<" Left Arm Rotation: \n"<<Forward(qEigen)[1].rotation()<<std::endl;
 
     return boost::optional<Eigen::VectorXd>(qEigen);
 }
@@ -103,17 +135,18 @@ void CrpRobotIKSolver::Info(){
     // 而整个机器人的自由度是指其可动的关节
     // 所以打印的时候我们可以看到总关节是22，但是DOF确实21
     // 因此，在我们打印相关关节的上下界的时候要注意索引的匹配
-    for(pinocchio::JointIndex i=1; i<robotModel.njoints; ++i){
-        std::cout << "Joint " << i << ": " << robotModel.names[i]
-                  << ", type: " << robotModel.joints[i].shortname()
-                  << ", parent: " << robotModel.parents[i] << std::endl;
+
+//    for(pinocchio::JointIndex i=1; i<robotModel.njoints; ++i){
+//        std::cout << "Joint " << i << ": " << robotModel.names[i]
+//                  << ", type: " << robotModel.joints[i].shortname()
+//                  << ", parent: " << robotModel.parents[i] << std::endl;
 
 
-        std::cout << " lower limit: " << robotModel.lowerPositionLimit[i-1]
-                  << ", upper limit: " << robotModel.upperPositionLimit[i-1]<<std::endl;
-        std::cout<<std::endl;
+//        std::cout << " lower limit: " << robotModel.lowerPositionLimit[i-1]
+//                  << ", upper limit: " << robotModel.upperPositionLimit[i-1]<<std::endl;
+//        std::cout<<std::endl;
 
-    }
+//    }
 
     std::cout << " ----------------------------------------------------- "<< std::endl;
 
@@ -121,6 +154,13 @@ void CrpRobotIKSolver::Info(){
     std::cout << "Number of joints: " << robotModel.njoints << std::endl;
     std::cout << "Number of DOFs: " << robotModel.nv << std::endl;
     std::cout << "Number of frames: " << robotModel.nframes << std::endl;
+//    for(size_t i =0;i<robotModel.nframes;i++){
+//        std::cout<<" Frame "<<i<<" : "<<robotModel.frames[i]<<std::endl;
+//    }
+    // universe 1
+    // BASE_S 1
+    // JOINT and its JOINT_S 21 * 2 = 42
+    // Total 44
     std::cout << "Number of q: " << robotModel.nq << std::endl;
 
     // Demo
@@ -165,7 +205,13 @@ void CrpRobotIKSolver::Info(){
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 //    std::cout << "耗时: " << duration.count() << " ms" << std::endl;
+//    Eigen::VectorXd testQ = Eigen::VectorXd::Zero(dofTotal);
 
+//    testQ.segment(4, dofArm) << -2.09, -0.5236, 0.698, -1, 2.09, 0, -0.733;
+//    testQ.segment(4, dofArm) << -0.2, -1.22, -2.09, -1.37, 2.79, 1.24, -0.0;
+
+//    std::cout << " translations of left arm: \n"<<Forward(testQ)[0].translation()<<std::endl;
+//    std::cout << " rotation of left arm: \n"<<Forward(testQ)[0].rotation()<<std::endl;
 }
 
 std::vector<pinocchio::SE3> CrpRobotIKSolver::Forward(const Eigen::VectorXd& q){
@@ -195,7 +241,7 @@ std::vector<pinocchio::SE3> CrpRobotIKSolver::Forward(const Eigen::VectorXd& q){
     return std::vector<pinocchio::SE3>{leftArmPose, rightArmPose};
 }
 
-double CrpRobotIKSolver::CostFunc(const IKSolver::CostFuncConfig& config_){
+double CrpRobotIKSolver::CostFunc(const IKSolver::CrpRobotConfig& config_){
 //    LOG_FUNCTION;
     std::vector<pinocchio::SE3> currentPose = this->Forward(config_.q);
 
@@ -245,6 +291,33 @@ double CrpRobotIKSolver::CostFunc(const IKSolver::CostFuncConfig& config_){
 
     double error = wTrans * transError + wRota * rotaError + wSmooth * smoothError + wRegu * reguError;
     return error;
+}
+
+Eigen::VectorXd CrpRobotIKSolver::GetGradient(const IKSolver::CrpRobotConfig& config_){
+    return GradFunc(config_);
+}
+
+Eigen::VectorXd CrpRobotIKSolver::GradFunc(const IKSolver::CrpRobotConfig& config_){
+    double e = 1e-6;
+    Eigen::VectorXd grad(config_.q.size());
+    IKSolver::CrpRobotConfig temp = config_;
+
+    for(size_t i = 0;i<config_.q.size();i++){
+        double originalValue = config_.q[i];
+        // plus
+        temp.q[i] = originalValue + e;
+        double fPlus = this->CostFunc(temp);
+
+        // minus
+        temp.q[i] = originalValue - e;
+        double fMinus = this->CostFunc(temp);
+
+        grad[i] = (fPlus - fMinus) / (2*e);
+
+        temp.q[i] = originalValue;
+    }
+
+    return grad;
 }
 
 void CrpRobotIKSolver::NormalizeAngle(Eigen::VectorXd& angle){
@@ -308,5 +381,88 @@ void CrpRobotIKSolver::Initialize(){
 //    std::cout<<" The size of the totalBoundsLower is "<<totalBoundsLower.size()<<std::endl;
 //    std::cout<<" The size of the totalBoundsUpper is "<<totalBoundsUpper.size()<<std::endl;
 //    std::cout<<" The size of the qNeutral is "<<qNeutral.size()<<std::endl;
+
+}
+
+void CrpRobotIKSolver::InitializeAD(){
+    pinocchio::DataTpl<casadi::SX>::ConfigVectorType q =
+            pinocchio::DataTpl<casadi::SX>::ConfigVectorType::Zero(this->dofTotal);
+    std::vector<Eigen::Matrix<casadi::SX,4,4>> targetPose;
+    Eigen::Matrix<casadi::SX,Eigen::Dynamic,1> qInit;
+
+    casadi::SX costFunc = this->CostFuncAD(q,qInit,targetPose);
+//    casadi::SX grad = casadi::gradient(costFunc,q);
+
+}
+
+casadi::SX CrpRobotIKSolver::CostFuncAD(
+            const pinocchio::ModelTpl<casadi::SX>::ConfigVectorType& q,
+            const Eigen::Matrix<casadi::SX,Eigen::Dynamic,1>& qInit,
+            const std::vector<Eigen::Matrix<casadi::SX,4,4>>& targetPose){
+    if(q.size() != this->robotModel.nq){
+        std::string error = " The size of the q should be this->robotModel.nq! ";
+        throw std::length_error(error);
+    }
+
+    // updata data to better get position
+    pinocchio::DataTpl<casadi::SX> dataAD(robotModelAD);
+    pinocchio::forwardKinematics(robotModelAD, dataAD, q);
+    pinocchio::updateFramePlacements(robotModelAD, dataAD);
+
+    // extract matrix
+    Eigen::Matrix<casadi::SX,4,4> basePose = dataAD.oMf[this->baseIndex].toHomogeneousMatrix();
+    Eigen::Matrix<casadi::SX,4,4> leftArmEndPose = dataAD.oMf[this->leftArmEndIndex].toHomogeneousMatrix();
+    Eigen::Matrix<casadi::SX,4,4> rightArmEndPose = dataAD.oMf[this->rightArmEndIndex].toHomogeneousMatrix();
+
+    Eigen::Matrix<casadi::SX,4,4> leftArmPose = basePose.inverse() * leftArmEndPose;
+    Eigen::Matrix<casadi::SX,4,4> rightArmPose = basePose.inverse() * rightArmEndPose;
+
+    // translation error
+//    std::cout<<" Translation Error "<<std::endl;
+    Eigen::Matrix<casadi::SX,3,1> currentLeftTrans  = leftArmPose.block<3,1>(0,3);
+    Eigen::Matrix<casadi::SX,3,1> currentRightTrans = rightArmPose.block<3,1>(0,3);
+    Eigen::Matrix<casadi::SX,3,1> targetLeftTrans   = targetPose[0].block<3,1>(0,3);
+    Eigen::Matrix<casadi::SX,3,1> targetRightTrans  = targetPose[1].block<3,1>(0,3);
+
+    Eigen::Matrix<casadi::SX,6,1> currentTrans, targetTrans;
+    currentTrans << currentLeftTrans, currentRightTrans;
+    targetTrans  << targetLeftTrans, targetRightTrans;
+
+    Eigen::Matrix<casadi::SX,6,1> transErrorVec = currentTrans - targetTrans;
+    casadi::SX transError = transErrorVec.norm();
+
+    // rotation error
+//    std::cout<<" rotation Error "<<std::endl;
+    Eigen::Matrix<casadi::SX,3,3> leftArmError
+            = targetPose[0].block<3,3>(0,0) * leftArmPose.block<3,3>(0,0);
+    Eigen::Matrix<casadi::SX,3,3> rightArmError
+            = targetPose[1].block<3,3>(0,0) * rightArmPose.block<3,3>(0,0);
+
+    Eigen::Matrix<casadi::SX,6,1> rotaErrorVec(6);
+    rotaErrorVec << pinocchio::log3(leftArmError).cast<casadi::SX>(),
+                    pinocchio::log3(rightArmError).cast<casadi::SX>();
+    casadi::SX rotaError = rotaErrorVec.norm();
+
+    // smoothing error
+//    std::cout<<" Smoothing Error "<<std::endl;
+    pinocchio::DataTpl<casadi::SX>::ConfigVectorType smoothErrorVec =
+            q - qInit.cast<casadi::SX>();
+    casadi::SX smoothError = smoothErrorVec.norm();
+
+    // regularization
+//    std::cout<<" Regularization "<<std::endl;
+    pinocchio::DataTpl<casadi::SX>::ConfigVectorType reguVec;
+    reguVec =
+            q - Eigen::VectorXd::Map(this->qNeutral.data(), this->qNeutral.size()).cast<casadi::SX>();
+    casadi::SX reguError = reguVec.norm();
+
+    // weight
+    double wTrans = 50.0;
+    double wRota = 0.5;
+    double wSmooth = 0.1;
+    double wRegu = 0.02;
+
+    casadi::SX error = wTrans * transError + wRota * rotaError + wSmooth * smoothError + wRegu * reguError;
+    return error;
 
 }
