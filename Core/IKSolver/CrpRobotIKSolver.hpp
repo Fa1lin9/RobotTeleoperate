@@ -80,7 +80,8 @@ public:
 
     boost::optional<Eigen::VectorXd> Solve(
                     const std::vector<Eigen::Matrix4d>& targetPose,
-                    const Eigen::VectorXd& qInit) override;
+                    const Eigen::VectorXd& qInit,
+                    bool verbose) override;
 
     std::vector<pinocchio::SE3> Forward(const Eigen::VectorXd& q) override;
 
@@ -109,6 +110,9 @@ private:
     };
 
 private:
+    bool isPoseMatrix(const Eigen::Matrix4d& mat,
+                      const double& eps = 1e-2);
+
     double CostFunc(const IKSolver::CrpRobotConfig& config_);
 
     casadi::SX CostFuncAD(const pinocchio::ModelTpl<casadi::SX>::ConfigVectorType& q,
@@ -163,8 +167,12 @@ private:
     // Function
     casadi::Function mainFunc;
 
-
-
     /* ------------------ Casadi Auto-Diff ------------------ */
 
+    Eigen::Matrix4d BaseOffset;
+    Eigen::Matrix<casadi::SX,4,4> BaseOffsetAD;
+
+    /* ------------------ NLopt ------------------ */
+    double relativeTol = 1e-3;
+    size_t maxIteration = 400;
 };

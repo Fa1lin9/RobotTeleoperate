@@ -39,8 +39,8 @@ int main(){
 //    physicalRobotPtr->MoveJ(jointsAngle_);
 
     PhysicalRobot::CrpRobotConfig crpRobotConfig = {
-//        .useLeftArm = true,
-        .useRightArm = true,
+        .useLeftArm = true,
+//        .useRightArm = true,
 //        .leftArmJointsValue = std::vector<double>{ 0 , -0.3 , 0.4 , 0.3 , 0 , 0.3 , 0.4 },
         .leftArmJointsValue = std::vector<double>{ 0 , 0 , 0 , 0 , 0 , 0 , 0 },
         .rightArmJointsValue = std::vector<double>{ 0 , 0 , 0 , 0 , 0 , 0 , 0 },

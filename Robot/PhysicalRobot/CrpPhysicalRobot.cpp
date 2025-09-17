@@ -1,10 +1,10 @@
 #include "CrpPhysicalRobot.hpp"
 
 CrpPhysicalRobot::CrpPhysicalRobot(const PhysicalRobot::config &config_){
-    l_solver.gap=0.5;
-    r_solver.gap=0.5;
-    l_controller.max_vel=0.6;
-    r_controller.max_vel=0.6;
+//    l_solver.gap=0.5;
+//    r_solver.gap=0.5;
+//    l_controller.max_vel=0.6;
+//    r_controller.max_vel=0.6;
 
 }
 
@@ -101,16 +101,34 @@ bool CrpPhysicalRobot::EmergencyStop(){
 bool CrpPhysicalRobot::BackToZero(){
     if(!this->isConnect()){ return false; }
 
-    PhysicalRobot::CrpRobotConfig crpRobotConfig = {
-//        .useLeftArm = true,
-        .useRightArm = true,
-        .leftArmJointsValue = std::vector<double>{ 0 , 0 , 0 , 0 , 0 , 0 , 0 },
-        .rightArmJointsValue = std::vector<double>{ 0 , 0 , 0 , 0 , 0 , 0 , 0 },
-    };
+    return true;
+}
 
-    this->MoveJ(crpRobotConfig);
+bool CrpPhysicalRobot::BackToInitPose(const PhysicalRobot::CrpRobotConfig& config_){
+    if(!this->isConnect()){ return false; }
+
+    // for left arm
+    if(config_.useLeftArm){
+        this->SendRecvJoints(std::vector<double>{-0.72, -1.0, 0.57, -1.0, 0.83, 0, 0},
+                             this->dofArm,
+                             this->leftArmCanDevice,
+                             this->leftArmCanID,
+                             "Left Arm"
+                             );
+    }
+
+    // for right arm
+    if(config_.useRightArm){
+        this->SendRecvJoints(std::vector<double>{0.72, 1.0, -0.57, 1.0, -0.83, 0, 0},
+                             this->dofArm,
+                             this->rightArmCanDevice,
+                             this->rightArmCanID,
+                             "Right Arm"
+                             );
+    }
 
     return true;
+
 }
 
 bool CrpPhysicalRobot::BackToZero(const PhysicalRobot::CrpRobotConfig &config_){
@@ -136,25 +154,25 @@ bool CrpPhysicalRobot::BackToZero(const PhysicalRobot::CrpRobotConfig &config_){
                              );
     }
 
-    // for head
-    if(config_.useHead){
-        this->SendRecvJoints(std::vector<double>{ 0 , 0 , 0 , 0 , 0 , 0 , 0 },
-                             this->dofHead,
-                             this->headCanDevice,
-                             this->headCanID,
-                             "Head"
-                             );
-    }
+//    // for head
+//    if(config_.useHead){
+//        this->SendRecvJoints(std::vector<double>{ 0 , 0 , 0 , 0 , 0 , 0 , 0 },
+//                             this->dofHead,
+//                             this->headCanDevice,
+//                             this->headCanID,
+//                             "Head"
+//                             );
+//    }
 
-    // for waist
-    if(config_.useWaist){
-        this->SendRecvJoints(std::vector<double>{ 0 , 0 , 0 , 0 , 0 , 0 , 0 },
-                             this->dofWaist,
-                             this->waistCanDevice,
-                             this->waistCanID,
-                             "Waist"
-                             );
-    }
+//    // for waist
+//    if(config_.useWaist){
+//        this->SendRecvJoints(std::vector<double>{ 0 , 0 , 0 , 0 , 0 , 0 , 0 },
+//                             this->dofWaist,
+//                             this->waistCanDevice,
+//                             this->waistCanID,
+//                             "Waist"
+//                             );
+//    }
 
     // for hand
     // TODO
@@ -163,33 +181,45 @@ bool CrpPhysicalRobot::BackToZero(const PhysicalRobot::CrpRobotConfig &config_){
 }
 
 std::vector<double> CrpPhysicalRobot::GetJointsAngle(){
-    LOG_FUNCTION;
+//    LOG_FUNCTION;
     if(!this->isConnect()){ return {}; }
 
     std::vector<double> jointsAngle;
-    float currentAngle[this->dofArm];
+    double position;
 
-    // For Left Arm
-    get_current_angle(ArmSide::LEFT_ARM, currentAngle, 0, 0);
-    for(size_t i = 0; i < this->dofArm; i++){
-        jointsAngle.push_back(currentAngle[i]);
-        std::cout << " Left Arm Joint"
-                  << i << " : "
-                  << fixed << setprecision(4)
-                  << currentAngle[i] << std::endl;
+    // base
+    jointsAngle.push_back(0);
+
+    // waist
+    jointsAngle.insert(jointsAngle.end(),3,0);
+
+    // left arm
+    for(size_t i=0;i<this->dofArm;i++){
+        CanDriver::RecvPosition(this->leftArmCanDevice,this->leftArmCanID[i],&position);
+        jointsAngle.push_back(position);
     }
 
-    // For Right Arm
-    get_current_angle(ArmSide::RIGHT_ARM, currentAngle, 0, 0);
-    for(size_t i = 0; i < this->dofArm; i++){
-        jointsAngle.push_back(currentAngle[i]);
-        std::cout << " Right Arm Joint"
-                  << i << " : "
-                  << fixed << setprecision(4)
-                  << currentAngle[i] << std::endl;
+    // neck
+    jointsAngle.insert(jointsAngle.end(),3,0);
+
+    // right arm
+    for(size_t i=0;i<this->dofArm;i++){
+        CanDriver::RecvPosition(this->rightArmCanDevice,this->rightArmCanID[i],&position);
+        jointsAngle.push_back(position);
     }
 
-    return {};
+    return jointsAngle;
+}
+
+Eigen::VectorXd CrpPhysicalRobot::GetJointsAngleEigen(){
+//    LOG_FUNCTION;
+    if(!this->isConnect()){ return {}; }
+
+    std::vector<double> jointsAngle = this->GetJointsAngle();
+    Eigen::VectorXd jointsAngleEigen =
+            Eigen::VectorXd::Map(jointsAngle.data(),jointsAngle.size());
+
+    return jointsAngleEigen;
 }
 
 void CrpPhysicalRobot::Info(){
@@ -342,6 +372,61 @@ bool CrpPhysicalRobot::MoveJ(const PhysicalRobot::CrpRobotConfig &config_){
     // for hand
     // TODO
 
+    return true;
+}
+
+bool CrpPhysicalRobot::Init(){
+    LOG_FUNCTION;
+    if(this->isConnect()){
+        this->Initialize(true);
+        return true;
+    }else{
+        std::cout<<"Init failed! "<<std::endl;
+        return false;
+    }
+}
+
+bool CrpPhysicalRobot::Initialize(bool verbose){
+    double maxVelocity = 800;
+    double maxAcceleration = 5;
+    double currentVelocity;
+    double currentAcceleration;
+
+    std::cout<< " ----- Config and get max velocity and acceleration ----- " <<std::endl;
+    for(size_t i=0;i<this->dofArm;i++){
+        // left arm
+        CanDriver::ConfigMaxVelocity(this->leftArmCanDevice, this->leftArmCanID[i], maxVelocity);
+        CanDriver::RecvMaxVelocity(this->leftArmCanDevice, this->leftArmCanID[i], &currentVelocity);
+
+        CanDriver::ConfigMaxAcceleration(this->leftArmCanDevice, this->leftArmCanID[i], maxAcceleration);
+        CanDriver::RecvMaxAcceleration(this->leftArmCanDevice, this->leftArmCanID[i], &currentAcceleration);
+
+        if(verbose){
+            std::cout<<"Left Arm Joint "<<i<<
+                       " Max Velocity: "<<
+                       std::fixed << std::setprecision(3)<<currentVelocity <<std::endl;
+            std::cout<<"Left Arm Joint "<<i<<
+                       " Max Acceleration: "<<
+                       std::fixed << std::setprecision(3)<<currentAcceleration<<std::endl;
+        }
+
+        // right arm
+        CanDriver::ConfigMaxVelocity(this->rightArmCanDevice, this->rightArmCanID[i], maxVelocity);
+        CanDriver::RecvMaxVelocity(this->rightArmCanDevice, this->rightArmCanID[i], &currentVelocity);
+
+        CanDriver::ConfigMaxAcceleration(this->rightArmCanDevice, this->rightArmCanID[i], maxAcceleration);
+        CanDriver::RecvMaxAcceleration(this->rightArmCanDevice, this->rightArmCanID[i], &currentAcceleration);
+
+        if(verbose){
+            std::cout<<"Right Arm Joint "<<i<<
+                       " Max Velocity: "<<
+                       std::fixed << std::setprecision(3)<<currentVelocity <<std::endl;
+            std::cout<<"Right Arm Joint "<<i<<
+                       " Max Acceleration: "<<
+                       std::fixed << std::setprecision(3)<<currentAcceleration<<std::endl;
+            std::cout<< " --------------------------------------------- " <<std::endl;
+        }
+    }
     return true;
 }
 

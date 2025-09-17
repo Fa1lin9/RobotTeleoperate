@@ -45,9 +45,10 @@ target_include_directories( ${TARGET_NAME}
 #   Add dependancies
 target_link_libraries( ${TARGET_NAME}
     PUBLIC 
-        $<BUILD_INTERFACE:Core::CanDriver>
-    PRIVATE
 
+    PRIVATE
+        $<BUILD_INTERFACE:Core::CanDriver>
+        $<BUILD_INTERFACE:Robot::PhysicalRobot>
 )
 
 # #   Add Macro compile defination

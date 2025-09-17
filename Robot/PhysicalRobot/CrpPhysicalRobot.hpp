@@ -79,29 +79,28 @@ public:
 
     /* ---------------- Basic Information ---------------- */
 
-    /* ---------------- Connection ---------------- */
-
     bool Connect() override;
 
     bool Disconnect() override;
 
     bool isConnect() override;
 
-    /* ---------------- Connection ---------------- */
-
     bool EmergencyStop() override;
 
     bool BackToZero() override;
 
+    bool BackToInitPose(const PhysicalRobot::CrpRobotConfig& config_) override;
+
     bool BackToZero(const PhysicalRobot::CrpRobotConfig& config_) override;
 
-    /* ---------------- Get Information ---------------- */
 
     void Info() override;
 
     void GetJointsStatus() override;
 
-    /* ---------------- Get Information ---------------- */
+    std::vector<double> GetJointsAngle() override;
+
+    Eigen::VectorXd GetJointsAngleEigen() override;
 
     bool MoveJ(const std::vector<double> &jointsAngle_) override;
 
@@ -109,8 +108,11 @@ public:
 
     bool MoveJ(const PhysicalRobot::CrpRobotConfig& config_) override;
 
-    std::vector<double> GetJointsAngle() override;
+    bool Init() override;
+
+
 private:
+    bool Initialize(bool verbose);
 
     bool SendRecvJoints(const std::vector<double>& jointsValue,
                         size_t dof,

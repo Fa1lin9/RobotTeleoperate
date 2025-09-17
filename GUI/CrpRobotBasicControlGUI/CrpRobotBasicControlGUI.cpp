@@ -85,6 +85,7 @@ void CrpRobotBasicControlGUI::on_directConnectPushButton_clicked()
         printMessage(" [Connect] Can't connect to the robot ! ");
     }else{
         printMessage(" [Connect] Sucessfully connect to the robot ! ");
+        this->physicalRobotPtr->Init();
     }
 }
 
@@ -235,15 +236,15 @@ void CrpRobotBasicControlGUI::on_backToZeroPushButton_clicked()
 {
     CheckConnection();
 
-    std::vector<double> zeroVec = {0 , 0 , 0 , 0 , 0 , 0 , 0};
+//    std::vector<double> zeroVec = {0 , 0 , 0 , 0 , 0 , 0 , 0};
 
-    if(this->crpRobotConfig.useLeftArm){
-        this->crpRobotConfig.leftArmJointsValue=zeroVec;
-    }else if(this->crpRobotConfig.useRightArm){
-        this->crpRobotConfig.rightArmJointsValue=zeroVec;
-    }
+//    if(this->crpRobotConfig.useLeftArm){
+//        this->crpRobotConfig.leftArmJointsValue=zeroVec;
+//    }else if(this->crpRobotConfig.useRightArm){
+//        this->crpRobotConfig.rightArmJointsValue=zeroVec;
+//    }
 
-    this->physicalRobotPtr->MoveJ(this->crpRobotConfig);
+    this->physicalRobotPtr->BackToZero(this->crpRobotConfig);
 }
 
 std::vector<double> CrpRobotBasicControlGUI::ConvertDegrees2Radians(const std::vector<double>& degrees){
@@ -321,5 +322,14 @@ void CrpRobotBasicControlGUI::on_resetRightArmPushButton_clicked()
     for(size_t i = 0;i<rightArmLineEdits.size();i++){
         rightArmLineEdits[i]->setText(QString::number(value,'f',1));
     }
+}
+
+
+void CrpRobotBasicControlGUI::on_backToInitPosePushButton_clicked()
+{
+    CheckConnection();
+
+    this->physicalRobotPtr->BackToInitPose(this->crpRobotConfig);
+
 }
 

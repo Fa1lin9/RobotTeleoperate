@@ -3,6 +3,7 @@
 #include <CanDriver/CanDriver.h>
 #include <boost/shared_ptr.hpp>
 #include <unordered_map>
+#include <PhysicalRobot/PhysicalRobot.hpp>
 #include <map>
 #include <iomanip>
 #include <math.h>
@@ -48,7 +49,7 @@ int main(){
     std::cout<< " --------------------------------------------- " <<std::endl;
 
     double value;
-    double position;
+    double position = 1.0;
     for(const auto& joint:jointsList){
         // Get Value
         const std::string name = joint.first;
@@ -59,22 +60,22 @@ int main(){
                  << ", canID " << canID
                  << std::endl;
 
-        if(canID == 28){
-            double value = 0;
+//        if(canID == 28){
+//            double value = 0;
 //            auto result = SendRecvPosition(canDevice, canID, &value);
 //            std::cout<<" SendRecvPosition: "<<std::endl;
 //            std::cout<<" Can ID: "<<std::get<0>(result.value())
 //                     <<" Status: "<<std::get<1>(result.value())
 //                     <<std::endl;
-            auto result =
-                    SendRecvMultiPosition(canDevice, canID, &value, bool(canID % 7 != 0));
-            for(auto const& temp:result){
-                std::cout<<" SendRecvPosition: "<<std::endl;
-                std::cout<<" Can ID: "<<std::get<0>(temp)
-                         <<" Status: "<<std::get<1>(temp)
-                         <<std::endl;
-            }
-        }
+//            auto result =
+//                    SendRecvMultiPosition(canDevice, canID, &value, bool(canID % 7 != 0));
+//            for(auto const& temp:result){
+//                std::cout<<" SendRecvPosition: "<<std::endl;
+//                std::cout<<" Can ID: "<<std::get<0>(temp)
+//                         <<" Status: "<<std::get<1>(temp)
+//                         <<std::endl;
+//            }
+//        }
 
 //        SendPosition(canDevice, canID, 0);
 
@@ -94,4 +95,19 @@ int main(){
         std::cout<< " --------------------------------------------- " <<std::endl;
     }
 
+
+//    PhysicalRobot::config config = {
+//        .type = PhysicalRobotType::CrpRobot,
+//    };
+
+//    boost::shared_ptr<PhysicalRobot> robotPtr
+//            = PhysicalRobot::GetPtr(config);
+
+//    robotPtr->Connect();
+//    std::vector<double> jointsAngle = robotPtr->GetJointsAngle();
+
+////    Eigen::VectorXd jointsAngleEigen = Eigen::VectorXd::Map(jointsAngle.data(),jointsAngle.size());
+//    Eigen::VectorXd jointsAngleEigen = robotPtr->GetJointsAngleEigen();
+
+//    std::cout<<"JointsAngle:\n"<<jointsAngleEigen<<std::endl;
 }

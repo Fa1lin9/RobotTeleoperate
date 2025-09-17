@@ -1,6 +1,8 @@
 #include "CrpRobotIKSolver.hpp"
 
 CrpRobotIKSolver::CrpRobotIKSolver(const IKSolver::BasicConfig &config_)
+    :maxIteration(config_.maxIteration),
+     relativeTol(config_.relativeTol)
 {
     LOG_FUNCTION;
     // Init Model
@@ -32,8 +34,12 @@ CrpRobotIKSolver::CrpRobotIKSolver(const IKSolver::BasicConfig &config_)
     // Initialize qNeutral
     this->Initialize();
 
-    // Initialize casadi variable and function
-//    this->InitializeAD();
+    this->BaseOffset << 0, 0, 1, +0.01359,
+                        1, 0, 0, 0,
+                        0, 1, 0, +1.1845,
+                        0, 0 ,0, 1;
+    this->BaseOffsetAD = this->BaseOffset.cast<casadi::SX>();
+
     std::cout<<" Init Sucessfully! "<<std::endl;
 }
 
@@ -44,11 +50,20 @@ CrpRobotIKSolver::~CrpRobotIKSolver()
 
 boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
         const std::vector<Eigen::Matrix4d>& targetPose,
-        const Eigen::VectorXd& qInit)
+        const Eigen::VectorXd& qInit,
+        bool verbose)
 {
+    // check the target pose
+    for(size_t i=0;i<targetPose.size();i++){
+        if(!this->isPoseMatrix(targetPose[i])){
+            std::cout<<"targetPose is not a pose matrix"<<std::endl;
+            return boost::none;
+        }
+    }
+
     this->InitializeAD(targetPose,qInit);
     nlopt::opt opt;
-    opt = nlopt::opt(nlopt::GN_DIRECT_L , qInit.size());
+    opt = nlopt::opt(nlopt::LD_SLSQP , qInit.size());
 
     double (*ObjectWrapper)(const std::vector<double>& x,std::vector<double>& grad,void *data);
 
@@ -104,8 +119,8 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
     opt.set_lower_bounds(this->totalBoundsLower);
     opt.set_upper_bounds(this->totalBoundsUpper);
 
-    opt.set_maxeval(200);
-    opt.set_xtol_rel(1e-2);
+    opt.set_maxeval(this->maxIteration);
+    opt.set_xtol_rel(this->relativeTol);
 
     CrpRobotData robotData = {
         .solver = this,
@@ -128,21 +143,24 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
     if(result<0){
         std::string error = " Optimize failed! ";
         throw std::logic_error(error);
+
     }
 
     Eigen::Map<Eigen::VectorXd> qEigen(q.data(),q.size());
 
-    std::cout << " Joint Value =\n" << qEigen << std::endl;
+    if(verbose){
+        std::cout << " Joint Value =\n" << qEigen << std::endl;
 
-    std::cout << " Function Value = " << funcValue << std::endl;
+        std::cout << " Function Value = " << funcValue << std::endl;
 
-    // check result
-    std::cout<<"------------ Solver Result ------------"<<std::endl;
-    std::cout<<" Left Arm Translation: \n"<<Forward(qEigen)[0].translation()<<std::endl;
-    std::cout<<" Left Arm Rotation: \n"<<Forward(qEigen)[0].rotation()<<std::endl;
-    std::cout<<" Left Arm Translation: \n"<<Forward(qEigen)[1].translation()<<std::endl;
-    std::cout<<" Left Arm Rotation: \n"<<Forward(qEigen)[1].rotation()<<std::endl;
-    std::cout<<"------------ Solver Result ------------"<<std::endl;
+        // check result
+        std::cout<<"------------ Solver Result ------------"<<std::endl;
+        std::cout<<" Left Arm Translation: \n"<<Forward(qEigen)[0].translation()<<std::endl;
+        std::cout<<" Left Arm Rotation: \n"<<Forward(qEigen)[0].rotation()<<std::endl;
+        std::cout<<" Right Arm Translation: \n"<<Forward(qEigen)[1].translation()<<std::endl;
+        std::cout<<" Rigit Arm Rotation: \n"<<Forward(qEigen)[1].rotation()<<std::endl;
+        std::cout<<"------------ Solver Result ------------"<<std::endl;
+    }
 
     return boost::optional<Eigen::VectorXd>(qEigen);
 }
@@ -248,7 +266,11 @@ std::vector<pinocchio::SE3> CrpRobotIKSolver::Forward(const Eigen::VectorXd& q){
     pinocchio::updateFramePlacements(robotModel,data);
 
     // base pose
+    pinocchio::SE3 BasePoseOffset = pinocchio::SE3(
+                this->BaseOffset.block<3,3>(0,0),
+                this->BaseOffset.block<3,1>(0,3));
     pinocchio::SE3 basePose = data.oMf[this->baseIndex];
+    basePose = BasePoseOffset * basePose;
 
     // left arm
     pinocchio::SE3 leftArmEndPose = data.oMf[this->leftArmEndIndex];
@@ -260,6 +282,27 @@ std::vector<pinocchio::SE3> CrpRobotIKSolver::Forward(const Eigen::VectorXd& q){
     pinocchio::SE3 rightArmPose = basePose.inverse() * rightArmEndPose;
 
     return std::vector<pinocchio::SE3>{leftArmPose, rightArmPose};
+}
+
+bool CrpRobotIKSolver::isPoseMatrix(const Eigen::Matrix4d &mat,
+                                    const double& eps){
+
+    Eigen::Matrix3d rotation = mat.block<3,3>(0,0);
+    if(!(rotation.transpose() * rotation).isApprox(Eigen::Matrix3d::Identity() , eps)){
+        std::cout<<"rotation.transpose() * rotation: \n"<<rotation.transpose() * rotation<<std::endl;
+        return false;
+    }
+
+    if(std::abs(mat.determinant()-1) > eps){
+        std::cout<<"mat.determinant()-1: "<<mat.determinant()-1<<std::endl;
+        return false;
+    }
+
+    if(mat(3,0) != 0.0 || mat(3,1) != 0.0 || mat(3,2) != 0.0 || mat(3,3) != 1.0){
+        return false;
+    }
+
+    return true;
 }
 
 double CrpRobotIKSolver::CostFunc(const IKSolver::CrpRobotConfig& config_){
@@ -448,7 +491,8 @@ casadi::SX CrpRobotIKSolver::CostFuncAD(
     pinocchio::updateFramePlacements(robotModelAD, dataAD);
 
     // extract matrix
-    Eigen::Matrix<casadi::SX,4,4> basePose = dataAD.oMf[this->baseIndex].toHomogeneousMatrix();
+    Eigen::Matrix<casadi::SX,4,4> basePose =
+            this->BaseOffsetAD * dataAD.oMf[this->baseIndex].toHomogeneousMatrix();
     Eigen::Matrix<casadi::SX,4,4> leftArmEndPose = dataAD.oMf[this->leftArmEndIndex].toHomogeneousMatrix();
     Eigen::Matrix<casadi::SX,4,4> rightArmEndPose = dataAD.oMf[this->rightArmEndIndex].toHomogeneousMatrix();
 
@@ -499,8 +543,13 @@ casadi::SX CrpRobotIKSolver::CostFuncAD(
     double wRota = 0.5;
     double wSmooth = 0.1;
     double wRegu = 0.02;
+//    double wSmooth = 0;
+//    double wRegu = 0;
 
-    casadi::SX error = wTrans * transError + wRota * rotaError + wSmooth * smoothError + wRegu * reguError;
+    casadi::SX error =  casadi::SX(wTrans)  * transError +
+                        casadi::SX(wRota)   * rotaError +
+                        casadi::SX(wSmooth) * smoothError +
+                        casadi::SX(wRegu)   * reguError;
     return error;
 
 }

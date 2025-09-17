@@ -2,6 +2,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <Eigen/Dense>
 #include <FunctionLogger.hpp>
 #include <iostream>
 
@@ -44,29 +45,37 @@ public:
 
     virtual bool isConnect() = 0;
 
-    /* ---------------- Connection ---------------- */
+    /* ---------------- Basic Action ---------------- */
+
+    virtual bool Init() = 0;
 
     virtual bool EmergencyStop() = 0;
 
     virtual bool BackToZero() = 0;
 
+    virtual bool BackToInitPose(const PhysicalRobot::CrpRobotConfig& config_) = 0;
+
     virtual bool BackToZero(const PhysicalRobot::CrpRobotConfig& config_) = 0;
+
+    virtual bool MoveJ(const std::vector<double> &jointsAngle_) = 0;
+
+    virtual bool MoveL() = 0;
+
+    virtual bool MoveJ(const PhysicalRobot::CrpRobotConfig& config_) = 0;
 
     /* ---------------- Get Information ---------------- */
 
     virtual std::vector<double> GetJointsAngle() = 0;
+
+    virtual Eigen::VectorXd GetJointsAngleEigen() = 0;
 
     // give some basic information of current robot
     virtual void Info() = 0;
 
     virtual void GetJointsStatus() = 0;
 
-    /* ---------------- Get Information ---------------- */
 
-    virtual bool MoveJ(const std::vector<double> &jointsAngle_) = 0; 
-    virtual bool MoveL() = 0;
-
-    virtual bool MoveJ(const PhysicalRobot::CrpRobotConfig& config_) = 0;
+    /* ---------------- Static Method ---------------- */
 
     static boost::shared_ptr<PhysicalRobot> GetPtr(const PhysicalRobot::config &config_);
 

@@ -137,8 +137,12 @@ namespace CanDriver {
           uint8_t hex_array[4] = {latest_rec.Data[1], latest_rec.Data[2], latest_rec.Data[3], latest_rec.Data[4]};
           // std::cout << send[0].ID << " recv id:" << latest_rec.I\nD;
           int32_t decimal = FromHexArray(hex_array);
+          // 2025.9.17 --by Fa1lin9
+          {
+            *result = decimal;
+          }
           return std::make_tuple<int32_t, double>(static_cast<int32_t>(latest_rec.ID), decimal);
-          // *result = decimal;
+
         }
       }
       return std::nullopt;
@@ -322,6 +326,8 @@ namespace CanDriver {
       int32_t id = std::get<0>(result.value());
       double status = std::get<1>(result.value());
       double real_status = static_cast<double>(status) * kCommandToPosition;
+      // 2025.9.17 by Fa1lin9
+      *position = real_status;
       usleep(100);
       return std::make_tuple<int32_t, double>(static_cast<int32_t>(id), static_cast<double>(real_status));
     }

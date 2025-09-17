@@ -162,6 +162,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="backToInitPosePushButton">
+           <property name="text">
+            <string>Back To Initial Pose</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="getJointsValuePushButton">
            <property name="text">
             <string>Get Joints Value</string>

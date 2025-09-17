@@ -69,7 +69,7 @@ void VisionProCollector::run(){
 }
 
 std::vector<Eigen::Matrix4d> VisionProCollector::GetValue(){
-    LOG_FUNCTION;
+//    LOG_FUNCTION;
     zmq::message_t msg;
     subscriber.recv(msg, zmq::recv_flags::none);
 
