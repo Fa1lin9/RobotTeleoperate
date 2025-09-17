@@ -1,7 +1,8 @@
 #include "CrpRobotIKSolver.hpp"
 
-CrpRobotIKSolver::CrpRobotIKSolver(const IKSolver::config &config_)
+CrpRobotIKSolver::CrpRobotIKSolver(const IKSolver::BasicConfig &config_)
 {
+    LOG_FUNCTION;
     // Init Model
     pinocchio::urdf::buildModel(
                 this->modelPath,
@@ -28,7 +29,12 @@ CrpRobotIKSolver::CrpRobotIKSolver(const IKSolver::config &config_)
     }
 
     // Init
+    // Initialize qNeutral
     this->Initialize();
+
+    // Initialize casadi variable and function
+//    this->InitializeAD();
+    std::cout<<" Init Sucessfully! "<<std::endl;
 }
 
 CrpRobotIKSolver::~CrpRobotIKSolver()
@@ -40,12 +46,19 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
         const std::vector<Eigen::Matrix4d>& targetPose,
         const Eigen::VectorXd& qInit)
 {
+    this->InitializeAD(targetPose,qInit);
     nlopt::opt opt;
     opt = nlopt::opt(nlopt::GN_DIRECT_L , qInit.size());
 
     double (*ObjectWrapper)(const std::vector<double>& x,std::vector<double>& grad,void *data);
 
-    bool useGrad = 0;
+    // update casadi variable
+//    this->qInit = qInit.cast<casadi::SX>();
+//    for(size_t i=0;i<this->targetPose.size();i++){
+//        this->targetPose[i] = targetPose[i].cast<casadi::SX>();
+//    }
+
+    bool useGrad = 1;
     if(useGrad){
         ObjectWrapper = [](const std::vector<double>& x,std::vector<double>& grad,void *data)->double{
             Eigen::Map<const Eigen::VectorXd> q(x.data(),x.size());
@@ -56,12 +69,18 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
                 .targetPose = robotData->targetPose,
             };
 
-            // calculate the gradient
+            casadi::DM qVar = casadi::DM(x);
             grad.resize(robotData->solver->dofTotal);
-            Eigen::VectorXd gradEigen = robotData->solver->GetGradient(config);
-            std::copy(gradEigen.begin(),gradEigen.end(),grad.begin());
+            std::vector<casadi::DM> output = robotData->solver->mainFunc({qVar});
 
-            return robotData->solver->CostFunc(config);
+            double costFunc = double(output[0]);
+            casadi::DM gradFunc = output[1];
+            std::transform(
+                        gradFunc->begin(), gradFunc->end(), grad.begin(),
+                        [](const auto& v){ return double(v); }
+            );
+
+            return costFunc;
         };
     }else{
         ObjectWrapper = [](const std::vector<double>& x,std::vector<double>& grad,void *data)->double{
@@ -85,7 +104,7 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
     opt.set_lower_bounds(this->totalBoundsLower);
     opt.set_upper_bounds(this->totalBoundsUpper);
 
-    opt.set_maxeval(500);
+    opt.set_maxeval(200);
     opt.set_xtol_rel(1e-2);
 
     CrpRobotData robotData = {
@@ -118,10 +137,12 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
     std::cout << " Function Value = " << funcValue << std::endl;
 
     // check result
+    std::cout<<"------------ Solver Result ------------"<<std::endl;
     std::cout<<" Left Arm Translation: \n"<<Forward(qEigen)[0].translation()<<std::endl;
     std::cout<<" Left Arm Rotation: \n"<<Forward(qEigen)[0].rotation()<<std::endl;
     std::cout<<" Left Arm Translation: \n"<<Forward(qEigen)[1].translation()<<std::endl;
     std::cout<<" Left Arm Rotation: \n"<<Forward(qEigen)[1].rotation()<<std::endl;
+    std::cout<<"------------ Solver Result ------------"<<std::endl;
 
     return boost::optional<Eigen::VectorXd>(qEigen);
 }
@@ -331,7 +352,7 @@ void CrpRobotIKSolver::NormalizeAngle(Eigen::VectorXd& angle){
 }
 
 void CrpRobotIKSolver::Initialize(){
-    LOG_FUNCTION;
+//    LOG_FUNCTION;
     double min,max;
     for(size_t i = 0;i<this->dofArm;i++){
         // left arm
@@ -384,15 +405,28 @@ void CrpRobotIKSolver::Initialize(){
 
 }
 
-void CrpRobotIKSolver::InitializeAD(){
+void CrpRobotIKSolver::InitializeAD(const std::vector<Eigen::Matrix4d>& targetPose_,
+                                    const Eigen::VectorXd& qInit_){
+    // Variable
+    casadi::SX qVar = casadi::SX::sym("qVar",this->dofTotal,1);
+
     pinocchio::DataTpl<casadi::SX>::ConfigVectorType q =
             pinocchio::DataTpl<casadi::SX>::ConfigVectorType::Zero(this->dofTotal);
-    std::vector<Eigen::Matrix<casadi::SX,4,4>> targetPose;
-    Eigen::Matrix<casadi::SX,Eigen::Dynamic,1> qInit;
+
+    std::vector<Eigen::Matrix<casadi::SX,4,4>> targetPose(targetPose_.size());
+    for(size_t i=0;i<targetPose_.size();i++){
+        targetPose[i] = targetPose_[i].cast<casadi::SX>();
+    }
+
+    Eigen::Matrix<casadi::SX,Eigen::Dynamic,1> qInit = qInit_.cast<casadi::SX>();
+
+    for(int i =0;i<q.size();i++){
+        q(i) = qVar(i);
+    }
 
     casadi::SX costFunc = this->CostFuncAD(q,qInit,targetPose);
-//    casadi::SX grad = casadi::gradient(costFunc,q);
-
+    casadi::SX gradFunc = gradient(costFunc,qVar);
+    this->mainFunc = casadi::Function("mainFunc", {qVar}, {costFunc, gradFunc});
 }
 
 casadi::SX CrpRobotIKSolver::CostFuncAD(
@@ -401,6 +435,10 @@ casadi::SX CrpRobotIKSolver::CostFuncAD(
             const std::vector<Eigen::Matrix<casadi::SX,4,4>>& targetPose){
     if(q.size() != this->robotModel.nq){
         std::string error = " The size of the q should be this->robotModel.nq! ";
+        throw std::length_error(error);
+    }
+    if(targetPose.size() != 2){
+        std::string error = " The size of the targetPose should be 2! ";
         throw std::length_error(error);
     }
 

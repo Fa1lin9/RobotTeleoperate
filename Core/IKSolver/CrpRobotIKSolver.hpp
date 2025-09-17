@@ -75,7 +75,7 @@ class CrpRobotIKSolver
         :public IKSolver
 {
 public:
-    CrpRobotIKSolver(const IKSolver::config &config_);
+    CrpRobotIKSolver(const IKSolver::BasicConfig &config_);
     ~CrpRobotIKSolver();
 
     boost::optional<Eigen::VectorXd> Solve(
@@ -122,7 +122,8 @@ private:
 
     void Initialize();
 
-    void InitializeAD();
+    void InitializeAD(const std::vector<Eigen::Matrix4d>& targetPose,
+                      const Eigen::VectorXd& qInit);
 
     // the urdf file path of the CRP's Robot
     const std::string modelPath =
@@ -131,10 +132,6 @@ private:
     /* ------------------ Robot Parameter ------------------ */
 
     pinocchio::Model robotModel;
-    // auto diff
-    pinocchio::ModelTpl<casadi::SX> robotModelAD;
-    casadi::Function costFunc;
-
 
     std::vector<size_t> leftArmID = {5,6,7,8,9,10,11};
 
@@ -158,5 +155,16 @@ private:
     std::vector<double> totalBoundsUpper;
 
     /* ------------------ Robot Parameter ------------------ */
+
+    /* ------------------ Casadi Auto-Diff ------------------ */
+
+    pinocchio::ModelTpl<casadi::SX> robotModelAD;
+
+    // Function
+    casadi::Function mainFunc;
+
+
+
+    /* ------------------ Casadi Auto-Diff ------------------ */
 
 };

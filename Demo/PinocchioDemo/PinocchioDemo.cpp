@@ -10,7 +10,7 @@ const std::string modelPath =
         std::string(SOURCE_FILE_PATH)+"/assets/urdf/update_kanuopu-robot.urdf";
 
 int main(){
-    IKSolver::config config = {
+    IKSolver::BasicConfig config = {
         .type = SolverType::CrpRobot,
         .baseFrameName = {"BASE_S"},
         .targetFrameName = {"L_WRIST_R", "R_WRIST_R"},
@@ -34,7 +34,7 @@ int main(){
                              0 , 0 , 1 , 0.7,
                              0 , 0 , 0 , 1;
     std::vector<Eigen::Matrix4d> targetPose = {leftArmTargetPose, rightArmTargetPose};
-
+    std::cout<<" start to solve "<<std::endl;
     ikSolverPtr->Solve(targetPose,qInit);
 
 }

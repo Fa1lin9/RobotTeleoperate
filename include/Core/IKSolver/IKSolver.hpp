@@ -24,7 +24,7 @@ enum SolverType{
 class IKSolver
 {
 public:
-    struct config
+    struct BasicConfig
     {
         std::string modelPath;
 
@@ -59,7 +59,7 @@ public:
     // Output some information of the current solver
     virtual void Info() = 0;
 
-    static boost::shared_ptr<IKSolver> GetPtr(const IKSolver::config& config_);
+    static boost::shared_ptr<IKSolver> GetPtr(const IKSolver::BasicConfig& config_);
 
 
 private:

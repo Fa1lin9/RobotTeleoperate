@@ -9,7 +9,7 @@ IKSolver::~IKSolver(){
 
 }
 
-boost::shared_ptr<IKSolver> IKSolver::GetPtr(const IKSolver::config &config_){
+boost::shared_ptr<IKSolver> IKSolver::GetPtr(const IKSolver::BasicConfig &config_){
     switch (config_.type) {
         case SolverType::CrpRobot :{
            return boost::make_shared<CrpRobotIKSolver>(config_);
