@@ -47,9 +47,9 @@ target_link_libraries( ${TARGET_NAME}
     PUBLIC 
         
     PRIVATE
-        $<BUILD_INTERFACE:Core::CoordinateTransform>
+        $<BUILD_INTERFACE:CoordinateTransform::CoordinateTransform>
         $<BUILD_INTERFACE:Core::DataCollector>
-        $<BUILD_INTERFACE:Core::IKSolver>
+        $<BUILD_INTERFACE:IKSolver::IKSolver>
 
 )
 

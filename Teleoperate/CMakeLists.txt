@@ -3,15 +3,15 @@
 #############################################################
 cmake_minimum_required(VERSION 3.20)
 
-set( msg_head "[Package Core CMakeLists.txt] :" )
+set( msg_head "[Package Teleoperate CMakeLists.txt] :" )
 
 ##########################################################################
 #	MainRoutine group components definition
 ##########################################################################
-set( GROUP_NAME "Core" )
+set( GROUP_NAME "Teleoperate" )
 list( APPEND ${GROUP_NAME}_Components
-    DataCollector
-    CanDriver
+    RobotTeleoperate
+    CrpRobotTeleoperate
 )
 
 ##########################################################################

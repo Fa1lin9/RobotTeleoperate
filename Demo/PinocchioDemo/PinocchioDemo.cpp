@@ -11,7 +11,7 @@ const std::string modelPath =
 
 int main(){
     IKSolver::BasicConfig config = {
-        .type = SolverType::CrpRobot,
+        .type = IKSolver::Type::CrpRobot,
         .baseFrameName = {"BASE_S"},
         .targetFrameName = {"L_WRIST_R", "R_WRIST_R"},
         .maxIteration = 400,

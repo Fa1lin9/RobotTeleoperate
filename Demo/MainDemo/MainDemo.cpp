@@ -10,7 +10,7 @@ int main(){
 
     // IKSolver
     IKSolver::BasicConfig config = {
-        .type = SolverType::CrpRobot,
+        .type = IKSolver::Type::CrpRobot,
         .baseFrameName = {"BASE_S"},
         .targetFrameName = {"L_WRIST_R", "R_WRIST_R"},
         .maxIteration = 400,
@@ -29,7 +29,7 @@ int main(){
          0,0,-1,0,
          0,0,0,1;
     CoordinateTransform::BasicConfig basicConfig;
-    basicConfig.type = TransformType::VisionPro2CrpRobot;
+    basicConfig.type = CoordinateTransform::Type::VisionPro2CrpRobot;
     basicConfig.T_Head2Waist = Eigen::Matrix4d::Identity();
     basicConfig.T_XR2Robot <<  -1, 0, 0, 0,
                                 0, 1, 0, 0,
@@ -92,6 +92,7 @@ int main(){
         }
 
         std::cout<<"---------------- Solver over ----------------"<<std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
     }
 
     return 0;
