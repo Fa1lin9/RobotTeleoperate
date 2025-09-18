@@ -7,7 +7,7 @@
 int main(){
 
     // Set configeration
-    PhysicalRobot::config config = {
+    PhysicalRobot::BasicConfig config = {
         .type = PhysicalRobot::Type::CrpRobot,
     };
 

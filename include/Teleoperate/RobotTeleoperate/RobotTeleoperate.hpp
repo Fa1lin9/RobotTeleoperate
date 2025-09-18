@@ -2,7 +2,6 @@
 
 #include <IKSolver/IKSolver.hpp>
 #include <PhysicalRobot/PhysicalRobot.hpp>
-#include <DataCollector/VisionProCollector.hpp>
 #include <CoordinateTransform/CoordinateTransform.hpp>
 
 #include <boost/shared_ptr.hpp>
@@ -17,6 +16,11 @@ public:
 
     struct BasicConfig{
         RobotTeleoperate::Type type;
+        std::string address;
+
+        IKSolver::BasicConfig solverConfig;
+        PhysicalRobot::BasicConfig robotConfig;
+        CoordinateTransform::BasicConfig transformConfig;
     };
 
     RobotTeleoperate();

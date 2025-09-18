@@ -24,7 +24,7 @@ bool PhysicalRobot::MoveJ(const PhysicalRobot::CrpRobotConfig& config_){
     return true;
 }
 
-boost::shared_ptr<PhysicalRobot> PhysicalRobot::GetPtr(const PhysicalRobot::config &config_){
+boost::shared_ptr<PhysicalRobot> PhysicalRobot::GetPtr(const PhysicalRobot::BasicConfig &config_){
     switch (config_.type) {
         case PhysicalRobot::Type::CrpRobot :{
            return boost::make_shared<CrpPhysicalRobot>(config_);

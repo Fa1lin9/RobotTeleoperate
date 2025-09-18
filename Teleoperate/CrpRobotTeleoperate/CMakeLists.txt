@@ -46,10 +46,10 @@ target_include_directories( ${TARGET_NAME}
 #   Add dependancies
 target_link_libraries( ${TARGET_NAME}
     PUBLIC 
-
-    
-    PRIVATE
         $<BUILD_INTERFACE:Teleoperate::RobotTeleoperate>
+
+    PRIVATE
+        
 
 )
 

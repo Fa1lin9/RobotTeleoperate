@@ -45,7 +45,7 @@ class CrpPhysicalRobot
         :public PhysicalRobot
 {
 public:
-    CrpPhysicalRobot(const PhysicalRobot::config &config_);
+    CrpPhysicalRobot(const PhysicalRobot::BasicConfig &config_);
 
     ~CrpPhysicalRobot();
     /* ---------------- Basic Information ---------------- */

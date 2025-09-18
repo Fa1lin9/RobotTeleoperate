@@ -1,5 +1,5 @@
 #include <CrpPhysicalRobot/CrpPhysicalRobot.hpp>
-CrpPhysicalRobot::CrpPhysicalRobot(const PhysicalRobot::config &config_){
+CrpPhysicalRobot::CrpPhysicalRobot(const PhysicalRobot::BasicConfig &config_){
 //    l_solver.gap=0.5;
 //    r_solver.gap=0.5;
 //    l_controller.max_vel=0.6;

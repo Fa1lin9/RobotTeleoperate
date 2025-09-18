@@ -13,7 +13,7 @@ public:
         CrpRobot
     };
 
-    struct config
+    struct BasicConfig
     {
         std::string IP;
         PhysicalRobot::Type type;
@@ -79,7 +79,7 @@ public:
 
     /* ---------------- Static Method ---------------- */
 
-    static boost::shared_ptr<PhysicalRobot> GetPtr(const PhysicalRobot::config &config_);
+    static boost::shared_ptr<PhysicalRobot> GetPtr(const PhysicalRobot::BasicConfig &config_);
 
 private:
 

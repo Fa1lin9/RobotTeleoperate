@@ -52,7 +52,7 @@ target_link_libraries( ${TARGET_NAME}
         $<BUILD_INTERFACE:PhysicalRobot::PhysicalRobot>
     
     PRIVATE
-
+        $<BUILD_INTERFACE:Teleoperate::CrpRobotTeleoperate>
 
 )
 
