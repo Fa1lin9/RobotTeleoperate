@@ -12,6 +12,8 @@ public:
 
     bool Init() override;
     bool StartTeleoperate() override;
+    bool StopTeleoperate() override;
+    bool EndTeleoperate() override;
 
 private:
     std::string address;
@@ -19,5 +21,10 @@ private:
     VisionProCollector dataCollector;
 
     Eigen::VectorXd qInit;
+
+    // some flags
+    bool start = false;
+
+    bool stop = false;
 
 };

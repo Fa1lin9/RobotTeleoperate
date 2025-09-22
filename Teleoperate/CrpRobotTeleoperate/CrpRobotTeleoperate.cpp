@@ -33,20 +33,20 @@ CrpRobotTeleoperate::CrpRobotTeleoperate(const RobotTeleoperate::BasicConfig &co
     CoordinateTransform::BasicConfig transformConfig;
     transformConfig.type = CoordinateTransform::Type::VisionPro2CrpRobot;
     transformConfig.T_Head2Waist = Eigen::Matrix4d::Identity();
-    transformConfig.T_XR2Robot <<  -1, 0, 0, 0,
-                                0, 1, 0, 0,
-                                0, 0, -1, 0,
-                                0, 0, 0, 1;
+    transformConfig.T_XR2Robot <<   0, -1, 0, 0,
+                                    0, 0, 1, 0,
+                                    -1, 0, 0, 0,
+                                    0, 0, 0, 1;
     transformConfig.T_Robot2LeftWrist <<0.0, 1.0, 0.0, 0.0,
-                                    0.0, 0.0,-1.0, 0.0,
-                                   -1.0, 0.0, 0.0, 0.0,
-                                    0.0, 0.0, 0.0, 1.0;
+                                        -1.0, 0.0,0.0, 0.0,
+                                        0.0, 0.0, 1.0, 0.0,
+                                        0.0, 0.0, 0.0, 1.0;
     transformConfig.T_Robot2LeftWrist = Eigen::Matrix4d::Identity();
     transformConfig.T_Robot2LeftWrist = temp * transformConfig.T_Robot2LeftWrist;
     transformConfig.T_Robot2RightWrist <<   0.0,-1.0, 0.0, 0.0,
-                                        0.0, 0.0, 1.0, 0.0,
-                                       -1.0, 0.0, 0.0, 0.0,
-                                        0.0, 0.0, 0.0, 1.0;
+                                            1.0, 0.0, 0.0, 0.0,
+                                            0.0, 0.0, 1.0, 0.0,
+                                            0.0, 0.0, 0.0, 1.0;
     transformConfig.T_Robot2RightWrist = Eigen::Matrix4d::Identity();
     transformConfig.offset << 0, 0, 0.2;
     this->transformPtr = CoordinateTransform::GetPtr(transformConfig);
@@ -65,7 +65,15 @@ CrpRobotTeleoperate::~CrpRobotTeleoperate(){
 }
 
 bool CrpRobotTeleoperate::StartTeleoperate(){
-    while(1){
+
+    this->start = true;
+
+    while(this->start){
+        if(this->stop){
+            std::cout<<"Teleoperation Stop ! "<<std::endl;
+            continue;
+        }
+
         std::vector<Eigen::Matrix4d> msg = this->dataCollector.GetValue();
 
         if(msg.size()==0 || msg.empty()){
@@ -109,6 +117,21 @@ bool CrpRobotTeleoperate::StartTeleoperate(){
 
         std::cout<<"---------------- Solver over ----------------"<<std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+
+    return true;
+}
+
+bool CrpRobotTeleoperate::StopTeleoperate(){
+    this->stop = true;
+    return true;
+}
+
+bool CrpRobotTeleoperate::EndTeleoperate(){
+    if(!this->start){
+        std::cout<<"Teleoperation has ended! "<<std::endl;
+    }else{
+        this->start = false;
     }
 
     return true;
