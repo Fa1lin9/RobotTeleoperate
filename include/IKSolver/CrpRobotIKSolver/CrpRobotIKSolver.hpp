@@ -85,7 +85,7 @@ public:
 
     std::vector<pinocchio::SE3> Forward(const Eigen::VectorXd& q) override;
 
-    Eigen::VectorXd GetGradient(const IKSolver::CrpRobotConfig& config_);
+//    Eigen::VectorXd GetGradient(const IKSolver::CrpRobotConfig& config_);
 
     void Info() override;
 
@@ -115,12 +115,12 @@ private:
 
     double CostFunc(const IKSolver::CrpRobotConfig& config_);
 
-    casadi::SX CostFuncAD(const pinocchio::ModelTpl<casadi::SX>::ConfigVectorType& q,
+    casadi::SX CostFunc(const pinocchio::ModelTpl<casadi::SX>::ConfigVectorType& q,
                         const Eigen::Matrix<casadi::SX,Eigen::Dynamic,1>& qInit,
                         const std::vector<Eigen::Matrix<casadi::SX,4,4>>& targetPose
                         );
 
-    Eigen::VectorXd GradFunc(const IKSolver::CrpRobotConfig& config_);
+//    Eigen::VectorXd GradFunc(const IKSolver::CrpRobotConfig& config_);
 
     void NormalizeAngle(Eigen::VectorXd& angle);
 
@@ -162,7 +162,7 @@ private:
 
     /* ------------------ Casadi Auto-Diff ------------------ */
 
-    pinocchio::ModelTpl<casadi::SX> robotModelAD;
+    pinocchio::ModelTpl<casadi::SX> robotModelSX;
 
     // Function
     casadi::Function mainFunc;

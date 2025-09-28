@@ -10,8 +10,9 @@ set( msg_head "[Package Demo CMakeLists.txt] :" )
 ##########################################################################
 set( GROUP_NAME "Demo" )
 list( APPEND ${GROUP_NAME}_Components
+    CasadiDemo
     # PybindDemo
-    SocketDemo
+#    SocketDemo
 #    NLoptDemo
     PinocchioDemo
     CrpRobotDemo
