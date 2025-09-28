@@ -4,8 +4,8 @@
 #######################################################
 
 #   Choose User
-option( USER_CHF_Ubuntu "Configure CHF Ubuntu system." OFF )
-option( USER_CrpRobot_Ubuntu "Configure CrpRobot Ubuntu system." ON )
+option( USER_CHF_Ubuntu "Configure CHF Ubuntu system." ON )
+option( USER_CrpRobot_Ubuntu "Configure CrpRobot Ubuntu system." OFF )
 
 #   Make Users as a group
 list( APPEND USER_GROUP

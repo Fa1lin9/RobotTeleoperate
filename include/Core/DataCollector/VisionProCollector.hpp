@@ -2,6 +2,7 @@
 #include <Eigen/Dense>
 #include <zmq.hpp>
 #include <iostream>
+#include <mutex>
 
 // 打印函数信息
 #include <FunctionLogger.hpp>
@@ -15,6 +16,7 @@ public:
     VisionProCollector(std::string address_);
     ~VisionProCollector();
     void run();
+    std::vector<Eigen::Matrix4d> GetValue();
 
 private:
     // some variable for socket
@@ -29,7 +31,10 @@ private:
     Eigen::Matrix4d rightWristPose;
 
     // 两只手的点位
-    Eigen::Matrix<double,25,3> leftHandPosi;
-    Eigen::Matrix<double,25,3> rightHandPosi;
+    Eigen::Matrix<double,25,3> leftHandPosition;
+    Eigen::Matrix<double,25,3> rightHandPosition;
+
+    // lock
+    std::mutex mutex;
 
 };

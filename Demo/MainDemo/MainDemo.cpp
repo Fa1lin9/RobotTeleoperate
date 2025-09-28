@@ -1,0 +1,105 @@
+#include <iostream>
+#include <RobotTeleoperate/RobotTeleoperate.hpp>
+#include <thread>
+
+int main(){
+//    std::string address = "tcp://127.0.0.1:5555";
+//    auto visionProCollector = VisionProCollector(address);
+
+//    // IKSolver
+//    IKSolver::BasicConfig config = {
+//        .type = IKSolver::Type::CrpRobot,
+//        .baseFrameName = {"BASE_S"},
+//        .targetFrameName = {"L_WRIST_R", "R_WRIST_R"},
+//        .maxIteration = 400,
+//        .relativeTol = 1e-3,
+//    };
+
+//    boost::shared_ptr<IKSolver> ikSolverPtr = IKSolver::GetPtr(config);
+//    Eigen::VectorXd qInit = Eigen::VectorXd::Zero(21);
+//    qInit.segment(4,7) << -0.72, -1.0, 0.57, -1.0, 0.83, 0, 0;
+//    qInit.segment(14,7) << 0.72, 1.0, -0.57, 1.0, -0.83, 0, 0;
+
+//    // CoordinateTransform
+//    Eigen::Matrix4d temp;
+//    temp<<1,0,0,0,
+//         0,-1,0,0,
+//         0,0,-1,0,
+//         0,0,0,1;
+//    CoordinateTransform::BasicConfig basicConfig;
+//    basicConfig.type = CoordinateTransform::Type::VisionPro2CrpRobot;
+//    basicConfig.T_Head2Waist = Eigen::Matrix4d::Identity();
+//    basicConfig.T_XR2Robot <<  -1, 0, 0, 0,
+//                                0, 1, 0, 0,
+//                                0, 0, -1, 0,
+//                                0, 0, 0, 1;
+//    basicConfig.T_Robot2LeftWrist <<0.0, 1.0, 0.0, 0.0,
+//                                    0.0, 0.0,-1.0, 0.0,
+//                                   -1.0, 0.0, 0.0, 0.0,
+//                                    0.0, 0.0, 0.0, 1.0;
+//    basicConfig.T_Robot2LeftWrist = Eigen::Matrix4d::Identity();
+//    basicConfig.T_Robot2LeftWrist = temp * basicConfig.T_Robot2LeftWrist;
+//    basicConfig.T_Robot2RightWrist <<   0.0,-1.0, 0.0, 0.0,
+//                                        0.0, 0.0, 1.0, 0.0,
+//                                       -1.0, 0.0, 0.0, 0.0,
+//                                        0.0, 0.0, 0.0, 1.0;
+//    basicConfig.T_Robot2RightWrist = Eigen::Matrix4d::Identity();
+//    basicConfig.offset << 0, 0, 0.2;
+//    auto transformPtr = CoordinateTransform::GetPtr(basicConfig);
+
+//    while(1){
+//        std::vector<Eigen::Matrix4d> msg = visionProCollector.GetValue();
+
+//        if(msg.size()==0 || msg.empty()){
+//            std::string error = " The message received is not qualified !";
+//            throw std::invalid_argument(error);
+//            continue;
+//        }
+
+//        if(0){
+//            std::cout << "--------------------------" << std::endl;
+//            std::cout << "Head Pose:\n" << msg[0] << std::endl;
+//            std::cout << "Left Wrist Pose:\n" << msg[1] << std::endl;
+//            std::cout << "Right Wrist Pose:\n" << msg[2] << std::endl;
+//            std::cout << "--------------------------" << std::endl;
+//        }
+
+//        CoordinateTransform::MsgConfig msgConfig{
+//            .head2xrWorldPose = msg[0],
+//            .leftWrist2xrWorldPose = msg[1],
+//            .rightWrist2xrWorldPose = msg[2],
+//        };
+
+//        std::vector<Eigen::Matrix4d> transformedMsg = transformPtr->Transform(msgConfig);
+
+//        if(1){
+//            std::cout << "--------------------------" << std::endl;
+//            std::cout << "Transformed Left Wrist Pose:\n" << transformedMsg[0] << std::endl;
+//            std::cout << "Transformed Right Wrist Pose:\n" << transformedMsg[1] << std::endl;
+//            std::cout << "--------------------------" << std::endl;
+//        }
+
+//        std::cout<<"-------------- Start to solve --------------"<<std::endl;
+
+//        boost::optional<Eigen::VectorXd> q = ikSolverPtr->Solve(transformedMsg, qInit, false);
+//        if(q.has_value()){
+//            qInit = q.value();
+//            std::cout << "q:\n" << q << std::endl;
+//        }else{
+//            continue;
+//        }
+
+//        std::cout<<"---------------- Solver over ----------------"<<std::endl;
+//        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+//    }
+
+//    return 0;
+    RobotTeleoperate::BasicConfig config = {
+        .type = RobotTeleoperate::Type::CrpRobot,
+        .address = "tcp://127.0.0.1:5555",
+    };
+
+    auto teleoperatePtr = RobotTeleoperate::GetPtr(config);
+
+    teleoperatePtr->StartTeleoperate();
+}

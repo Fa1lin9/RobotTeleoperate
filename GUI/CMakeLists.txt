@@ -11,6 +11,7 @@ set( msg_head "[Package GUI CMakeLists.txt] :" )
 set( GROUP_NAME "GUI" )
 list( APPEND ${GROUP_NAME}_Components
     SimpleGUI # Just for test
+    CrpRobotBasicControlGUI
 
 )
 

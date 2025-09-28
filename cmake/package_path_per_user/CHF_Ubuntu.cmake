@@ -184,13 +184,25 @@ message(STATUS "RemoteAPIClient_INCLUDE_DIR Include Directory: ${RemoteAPIClient
 # # #######################################################
 # # #                     Find cppzmq                     #
 # # #######################################################
- find_package( cppzmq REQUIRED )
+find_package( cppzmq REQUIRED )
 
 # # #######################################################
 # # #                     Find jsoncons                   #
 # # #######################################################
 
- find_package( jsoncons REQUIRED )
+find_package( jsoncons REQUIRED )
+
+# # #######################################################
+# # #                     Find casadi                      #
+# # #######################################################
+
+find_package( casadi REQUIRED )
+
+if (Qt5_FOUND)
+    message(STATUS "casadi found!")
+else()
+    message(FATAL_ERROR "casadi not found!")
+endif()
 
  # # #######################################################
  # # #                     Find nlopt                      #
@@ -229,30 +241,30 @@ find_package( spdlog REQUIRED)
 # # #######################################################
 # # #            Find HumanoidDualArmSolver               #
 # # #######################################################
-#set(HuamniodRobot "/home/djr/djr_workspace/djr_libs/HumanoidDualArmSolver" )
-set(HuamniodRobot "/home/fa1lin9/ProgramEnv/HumanoidDualArmSolver" )
-set(HuamniodRobot_include "${HuamniodRobot}/include")
+#set(HumanoidRobot "/home/djr/djr_workspace/djr_libs/HumanoidDualArmSolver" )
+set(HumanoidRobot "/home/fa1lin9/ProgramEnv/HumanoidDualArmSolver" )
+set(HumanoidRobot_include "${HumanoidRobot}/include")
 
 find_library(MYLIBTI5_LIB
     NAMES mylibti5_2004
-    PATHS "${HuamniodRobot}/usrlib/2004"
+    PATHS "${HumanoidRobot}/usrlib/2004"
     REQUIRED
 )
 
 find_library(CONTROLCAN_LIB
     NAMES controlcan
-    PATHS "${HuamniodRobot}/usrlib/2004"
+    PATHS "${HumanoidRobot}/usrlib/2004"
     REQUIRED
 )
 
-set(HuamniodRobot_LIBS
+set(HumanoidRobot_LIBS
     ${MYLIBTI5_LIB}
     ${CONTROLCAN_LIB}
 )
 
 
 # 打印查找结果
-message(STATUS "HuamniodRobot_include: ${HuamniodRobot_include}")
+message(STATUS "HumanoidRobot_include: ${HumanoidRobot_include}")
 message(STATUS "MYLIBTI5_LIB Library: ${MYLIBTI5_LIB}")
 message(STATUS "CONTROLCAN_LIB Library: ${CONTROLCAN_LIB}")
-message(STATUS "HuamniodRobot_LIBS Library: ${HuamniodRobot_LIBS}")
+message(STATUS "HumanoidRobot_LIBS Library: ${HumanoidRobot_LIBS}")

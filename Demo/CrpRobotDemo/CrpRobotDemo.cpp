@@ -7,8 +7,8 @@
 int main(){
 
     // Set configeration
-    PhysicalRobot::config config = {
-        .type = PhysicalRobotType::CrpRobot,
+    PhysicalRobot::BasicConfig config = {
+        .type = PhysicalRobot::Type::CrpRobot,
     };
 
     boost::shared_ptr<PhysicalRobot> physicalRobotPtr
@@ -19,12 +19,12 @@ int main(){
 //    sleep(1);
     std::cout<<"start to back to zero"<<std::endl;
 
-//    physicalRobotPtr->BackToZero();
+    physicalRobotPtr->BackToZero();
 
 //    physicalRobotPtr->Info();
 
 //    physicalRobotPtr->isConnect();
-    sleep(5);
+    sleep(3);
     std::cout<<" start to move !!! "<<std::endl;
     // closely
     // joint1: 0.03 -- 45
@@ -35,15 +35,15 @@ int main(){
     // joint6: 0.02 -- 45
     // joint7: 0.03 -- 45
 
-    std::vector<double> jointsAngle_ = { 0.01 , 0.02 , 0.02 , 0.01 , 0 , 0.02, 0.02};
+//    std::vector<double> jointsAngle_ = { 0.01 , 0.02 , 0.02 , 0.01 , 0 , 0.02, 0.02};
 //    physicalRobotPtr->MoveJ(jointsAngle_);
 
     PhysicalRobot::CrpRobotConfig crpRobotConfig = {
         .useLeftArm = true,
-        .useRightArm = true,
+//        .useRightArm = true,
 //        .leftArmJointsValue = std::vector<double>{ 0 , -0.3 , 0.4 , 0.3 , 0 , 0.3 , 0.4 },
         .leftArmJointsValue = std::vector<double>{ 0 , 0 , 0 , 0 , 0 , 0 , 0 },
-        .rightArmJointsValue = std::vector<double>{ 0 , 0.3 , -0.4 , -0.3 , 0 , 0.3 , 0.3 },
+        .rightArmJointsValue = std::vector<double>{ 0 , 0 , 0 , 0 , 0 , 0 , 0 },
     };
 
     physicalRobotPtr->MoveJ(crpRobotConfig);
