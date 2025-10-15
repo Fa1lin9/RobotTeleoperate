@@ -3,6 +3,7 @@
 #include <IKSolver/IKSolver.hpp>
 #include <PhysicalRobot/PhysicalRobot.hpp>
 #include <CoordinateTransform/CoordinateTransform.hpp>
+#include <CsvWriter/CsvWriter.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>

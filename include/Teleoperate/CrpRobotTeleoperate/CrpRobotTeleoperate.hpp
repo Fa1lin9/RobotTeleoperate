@@ -17,14 +17,16 @@ public:
 
 private:
     std::string address;
+    CsvWriter csvWriter;
 
     VisionProCollector dataCollector;
 
     Eigen::VectorXd qInit;
 
     // some flags
-    bool start = false;
+    bool startFlag = false;
 
-    bool stop = false;
+    bool stopFlag = false;
 
+    bool saveFlag = true;
 };

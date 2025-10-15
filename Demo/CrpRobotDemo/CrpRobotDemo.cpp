@@ -19,13 +19,13 @@ int main(){
 //    sleep(1);
     std::cout<<"start to back to zero"<<std::endl;
 
-    physicalRobotPtr->BackToZero();
+//    physicalRobotPtr->BackToZero();
 
 //    physicalRobotPtr->Info();
 
 //    physicalRobotPtr->isConnect();
-    sleep(3);
-    std::cout<<" start to move !!! "<<std::endl;
+//    sleep(3);
+//    std::cout<<" start to move !!! "<<std::endl;
     // closely
     // joint1: 0.03 -- 45
     // joint2: 0.03 -- 45
@@ -46,11 +46,11 @@ int main(){
         .rightArmJointsValue = std::vector<double>{ 0 , 0 , 0 , 0 , 0 , 0 , 0 },
     };
 
-    physicalRobotPtr->MoveJ(crpRobotConfig);
+//    physicalRobotPtr->MoveJ(crpRobotConfig);
 
-    sleep(3);
+//    sleep(3);
 
-//    physicalRobotPtr->GetJointsAngle();
+    std::cout<<"q: "<<physicalRobotPtr->GetJointsAngleEigen()<<std::endl;
 
 //    physicalRobotPtr->GetJointsStatus();
 

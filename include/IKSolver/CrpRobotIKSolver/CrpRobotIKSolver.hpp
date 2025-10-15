@@ -169,8 +169,8 @@ private:
 
     /* ------------------ Casadi Auto-Diff ------------------ */
 
-    Eigen::Matrix4d BaseOffset;
-    Eigen::Matrix<casadi::SX,4,4> BaseOffsetAD;
+    Eigen::Matrix4d baseOffset;
+    Eigen::Matrix<casadi::SX,4,4> baseOffsetAD;
 
     /* ------------------ NLopt ------------------ */
     double relativeTol = 1e-3;

@@ -30,15 +30,17 @@ CrpRobotIKSolver::CrpRobotIKSolver(const IKSolver::BasicConfig &config_)
         this->rightArmEndIndex = this->robotModel.getFrameId(config_.targetFrameName[1]);
     }
 
+    if(config_.baseOffset.size() != 1){
+        std::string error = " As for CrpRobotIKSolver,the size of the baseOffset should be 1! ";
+        throw std::length_error(error);
+    }else{
+        this->baseOffset = config_.baseOffset[0];
+        this->baseOffsetAD = this->baseOffset.cast<casadi::SX>();
+    }
+
     // Init
     // Initialize qNeutral
     this->Initialize();
-
-    this->BaseOffset << 0, 0, 1, +0.01359,
-                        1, 0, 0, 0,
-                        0, 1, 0, +1.1845,
-                        0, 0 ,0, 1;
-    this->BaseOffsetAD = this->BaseOffset.cast<casadi::SX>();
 
     std::cout<<" Init Sucessfully! "<<std::endl;
 }
@@ -63,7 +65,6 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
 
     this->InitializeAD(targetPose,qInit);
     nlopt::opt opt;
-    opt = nlopt::opt(nlopt::LD_SLSQP , qInit.size());
 
     double (*ObjectWrapper)(const std::vector<double>& x,std::vector<double>& grad,void *data);
 
@@ -75,6 +76,7 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
 
     bool useGrad = 1;
     if(useGrad){
+        opt = nlopt::opt(nlopt::GD_STOGO , qInit.size());
         ObjectWrapper = [](const std::vector<double>& x,std::vector<double>& grad,void *data)->double{
             Eigen::Map<const Eigen::VectorXd> q(x.data(),x.size());
             CrpRobotData *robotData = static_cast<CrpRobotData*>(data);
@@ -98,6 +100,7 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
             return costFunc;
         };
     }else{
+        opt = nlopt::opt(nlopt::GN_DIRECT_L , qInit.size());
         ObjectWrapper = [](const std::vector<double>& x,std::vector<double>& grad,void *data)->double{
             Eigen::Map<const Eigen::VectorXd> q(x.data(),x.size());
             CrpRobotData *robotData = static_cast<CrpRobotData*>(data);
@@ -111,9 +114,21 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
         };
     }
 
+    // set limitation to joint5
+    this->totalBoundsLower[8] = 0;
+    this->totalBoundsUpper[8] = 0;
+    this->totalBoundsLower[18] = 0;
+    this->totalBoundsUpper[18] = 0;
     // set limitation to joint6
-//    this->totalBoundsLower[9] = 0;
-//    this->totalBoundsUpper[9] = 0;
+    this->totalBoundsLower[9] = 0;
+    this->totalBoundsUpper[9] = 0;
+    this->totalBoundsLower[19] = 0;
+    this->totalBoundsUpper[19] = 0;
+    // set limitation to joint7
+    this->totalBoundsLower[10] = 0;
+    this->totalBoundsUpper[10] = 0;
+    this->totalBoundsLower[20] = 0;
+    this->totalBoundsUpper[20] = 0;
 
     // set bounds
     opt.set_lower_bounds(this->totalBoundsLower);
@@ -131,7 +146,9 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
     opt.set_min_objective(ObjectWrapper, &robotData);
 
     double funcValue;
+
     std::vector<double> q(this->dofTotal);
+//    q = this->qNeutral;
 
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -139,6 +156,7 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << " optimazation 耗时: " << duration.count() << " ms" << std::endl;
+    std::cout << " Function Value = " << funcValue << std::endl;
 
     if(result<0){
         std::string error = " Optimize failed! ";
@@ -149,12 +167,10 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
     Eigen::Map<Eigen::VectorXd> qEigen(q.data(),q.size());
 
     if(verbose){
-        std::cout << " Joint Value =\n" << qEigen << std::endl;
-
-        std::cout << " Function Value = " << funcValue << std::endl;
-
         // check result
         std::cout<<"------------ Solver Result ------------"<<std::endl;
+        std::cout << " Joint Value =\n" << qEigen << std::endl;
+        std::cout << " Function Value = " << funcValue << std::endl;
         std::cout<<" Left Arm Translation: \n"<<Forward(qEigen)[0].translation()<<std::endl;
         std::cout<<" Left Arm Rotation: \n"<<Forward(qEigen)[0].rotation()<<std::endl;
         std::cout<<" Right Arm Translation: \n"<<Forward(qEigen)[1].translation()<<std::endl;
@@ -267,9 +283,13 @@ std::vector<pinocchio::SE3> CrpRobotIKSolver::Forward(const Eigen::VectorXd& q){
 
     // base pose
     pinocchio::SE3 BasePoseOffset = pinocchio::SE3(
-                this->BaseOffset.block<3,3>(0,0),
-                this->BaseOffset.block<3,1>(0,3));
+                this->baseOffset.block<3,3>(0,0),
+                this->baseOffset.block<3,1>(0,3));
     pinocchio::SE3 basePose = data.oMf[this->baseIndex];
+
+//    std::cout<<"BasePose Translation: "<<basePose.translation()<<std::endl;
+//    std::cout<<"BasePose Rotation: "<<basePose.rotation()<<std::endl;
+
     basePose = BasePoseOffset * basePose;
 
     // left arm
@@ -487,17 +507,20 @@ casadi::SX CrpRobotIKSolver::CostFuncAD(
 
     // updata data to better get position
     pinocchio::DataTpl<casadi::SX> dataAD(robotModelAD);
-    pinocchio::forwardKinematics(robotModelAD, dataAD, q);
-    pinocchio::updateFramePlacements(robotModelAD, dataAD);
+    forwardKinematics(robotModelAD, dataAD, q);
+    updateFramePlacements(robotModelAD, dataAD);
 
     // extract matrix
     Eigen::Matrix<casadi::SX,4,4> basePose =
-            this->BaseOffsetAD * dataAD.oMf[this->baseIndex].toHomogeneousMatrix();
+            this->baseOffsetAD * dataAD.oMf[this->baseIndex].toHomogeneousMatrix();
     Eigen::Matrix<casadi::SX,4,4> leftArmEndPose = dataAD.oMf[this->leftArmEndIndex].toHomogeneousMatrix();
     Eigen::Matrix<casadi::SX,4,4> rightArmEndPose = dataAD.oMf[this->rightArmEndIndex].toHomogeneousMatrix();
 
     Eigen::Matrix<casadi::SX,4,4> leftArmPose = basePose.inverse() * leftArmEndPose;
     Eigen::Matrix<casadi::SX,4,4> rightArmPose = basePose.inverse() * rightArmEndPose;
+
+//    Eigen::Matrix<casadi::SX,4,4> leftArmPose = this->BaseOffsetAD * leftArmEndPose;
+//    Eigen::Matrix<casadi::SX,4,4> rightArmPose = this->BaseOffsetAD * rightArmEndPose;
 
     // translation error
 //    std::cout<<" Translation Error "<<std::endl;
@@ -507,8 +530,11 @@ casadi::SX CrpRobotIKSolver::CostFuncAD(
     Eigen::Matrix<casadi::SX,3,1> targetRightTrans  = targetPose[1].block<3,1>(0,3);
 
     Eigen::Matrix<casadi::SX,6,1> currentTrans, targetTrans;
-    currentTrans << currentLeftTrans, currentRightTrans;
-    targetTrans  << targetLeftTrans, targetRightTrans;
+    currentTrans.block<3,1>(0,0) = currentLeftTrans;
+    currentTrans.block<3,1>(3,0) = currentRightTrans;
+
+    targetTrans.block<3,1>(0,0) = targetLeftTrans;
+    targetTrans.block<3,1>(3,0) = targetRightTrans;
 
     Eigen::Matrix<casadi::SX,6,1> transErrorVec = currentTrans - targetTrans;
     casadi::SX transError = transErrorVec.norm();
@@ -520,9 +546,13 @@ casadi::SX CrpRobotIKSolver::CostFuncAD(
     Eigen::Matrix<casadi::SX,3,3> rightArmError
             = targetPose[1].block<3,3>(0,0) * rightArmPose.block<3,3>(0,0);
 
-    Eigen::Matrix<casadi::SX,6,1> rotaErrorVec(6);
-    rotaErrorVec << pinocchio::log3(leftArmError).cast<casadi::SX>(),
-                    pinocchio::log3(rightArmError).cast<casadi::SX>();
+    Eigen::Matrix<casadi::SX,3,1> leftRotError  = pinocchio::log3(leftArmError).cast<casadi::SX>();
+    Eigen::Matrix<casadi::SX,3,1> rightRotError = pinocchio::log3(rightArmError).cast<casadi::SX>();
+
+    Eigen::Matrix<casadi::SX,6,1> rotaErrorVec;
+    rotaErrorVec.block<3,1>(0,0) = leftRotError;
+    rotaErrorVec.block<3,1>(3,0) = rightRotError;
+
     casadi::SX rotaError = rotaErrorVec.norm();
 
     // smoothing error
@@ -533,8 +563,7 @@ casadi::SX CrpRobotIKSolver::CostFuncAD(
 
     // regularization
 //    std::cout<<" Regularization "<<std::endl;
-    pinocchio::DataTpl<casadi::SX>::ConfigVectorType reguVec;
-    reguVec =
+    pinocchio::DataTpl<casadi::SX>::ConfigVectorType reguVec =
             q - Eigen::VectorXd::Map(this->qNeutral.data(), this->qNeutral.size()).cast<casadi::SX>();
     casadi::SX reguError = reguVec.norm();
 

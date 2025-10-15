@@ -9,12 +9,18 @@ CrpRobotTeleoperate::CrpRobotTeleoperate(const RobotTeleoperate::BasicConfig &co
      dataCollector(VisionProCollector(this->address))
 {
     // IKSolver
+    Eigen::Matrix4d baseOffset;
+    baseOffset << 1, 0, 0, +0.01359,
+                    0, 1, 0, 0,
+                    0, 0, 1, +1.0845,
+                    0, 0 ,0, 1;
     IKSolver::BasicConfig solverConfig = {
         .type = IKSolver::Type::CrpRobot,
         .baseFrameName = {"BASE_S"},
         .targetFrameName = {"L_WRIST_R", "R_WRIST_R"},
+        .baseOffset = {baseOffset},
         .maxIteration = 400,
-        .relativeTol = 1e-3,
+        .relativeTol = 1e-2,        
     };
 
     this->ikSolverPtr = IKSolver::GetPtr(solverConfig);
@@ -33,22 +39,22 @@ CrpRobotTeleoperate::CrpRobotTeleoperate(const RobotTeleoperate::BasicConfig &co
     CoordinateTransform::BasicConfig transformConfig;
     transformConfig.type = CoordinateTransform::Type::VisionPro2CrpRobot;
     transformConfig.T_Head2Waist = Eigen::Matrix4d::Identity();
-    transformConfig.T_XR2Robot <<   0, -1, 0, 0,
-                                    0, 0, 1, 0,
+    transformConfig.T_XR2Robot <<   0, 0, -1, 0,
                                     -1, 0, 0, 0,
+                                    0, 1, 0, 0,
                                     0, 0, 0, 1;
     transformConfig.T_Robot2LeftWrist <<0.0, 1.0, 0.0, 0.0,
                                         -1.0, 0.0,0.0, 0.0,
                                         0.0, 0.0, 1.0, 0.0,
                                         0.0, 0.0, 0.0, 1.0;
-    transformConfig.T_Robot2LeftWrist = Eigen::Matrix4d::Identity();
-    transformConfig.T_Robot2LeftWrist = temp * transformConfig.T_Robot2LeftWrist;
+//    transformConfig.T_Robot2LeftWrist = Eigen::Matrix4d::Identity();
+//    transformConfig.T_Robot2LeftWrist = temp * transformConfig.T_Robot2LeftWrist;
     transformConfig.T_Robot2RightWrist <<   0.0,-1.0, 0.0, 0.0,
                                             1.0, 0.0, 0.0, 0.0,
                                             0.0, 0.0, 1.0, 0.0,
                                             0.0, 0.0, 0.0, 1.0;
-    transformConfig.T_Robot2RightWrist = Eigen::Matrix4d::Identity();
-    transformConfig.offset << 0, 0, 0.2;
+//    transformConfig.T_Robot2RightWrist = Eigen::Matrix4d::Identity();
+    transformConfig.offset << 0, 0, 0;
     this->transformPtr = CoordinateTransform::GetPtr(transformConfig);
 
     // PhysicalRobot
@@ -66,14 +72,16 @@ CrpRobotTeleoperate::~CrpRobotTeleoperate(){
 
 bool CrpRobotTeleoperate::StartTeleoperate(){
 
-    this->start = true;
+    int FPS = 20;
+    this->startFlag = true;
 
-    while(this->start){
-        if(this->stop){
+    while(this->startFlag){
+        if(this->stopFlag){
             std::cout<<"Teleoperation Stop ! "<<std::endl;
             continue;
         }
 
+        auto start = std::chrono::high_resolution_clock::now();
         std::vector<Eigen::Matrix4d> msg = this->dataCollector.GetValue();
 
         if(msg.size()==0 || msg.empty()){
@@ -107,31 +115,52 @@ bool CrpRobotTeleoperate::StartTeleoperate(){
 
         std::cout<<"-------------- Start to solve --------------"<<std::endl;
 
-        boost::optional<Eigen::VectorXd> q = ikSolverPtr->Solve(transformedMsg, qInit, false);
+//        auto solveStart = std::chrono::high_resolution_clock::now();
+        boost::optional<Eigen::VectorXd> q = ikSolverPtr->Solve(transformedMsg, qInit, true);
+//        auto solveEnd = std::chrono::high_resolution_clock::now();
+//        auto solveDuration = std::chrono::duration_cast<std::chrono::milliseconds>(solveEnd - solveStart);
+//        std::cout << " Solve 耗时: " << solveDuration.count() << " ms" << std::endl;
         if(q.has_value()){
             qInit = q.value();
+//            qInit = physicalRobotPtr->GetJointsAngleEigen();
             std::cout << "q:\n" << q << std::endl;
         }else{
+            std::cout<<" Solve failed! "<<std::endl;
             continue;
         }
 
+        // save data to log
+        if(this->saveFlag){
+            this->csvWriter.WriteEigenVector(q.value());
+        }
         std::cout<<"---------------- Solver over ----------------"<<std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << " Main Loop 耗时: " << duration.count() << " ms" << std::endl;
+
+
+        int framePeriod = static_cast<int>(1000.0 / FPS);
+        int sleepTime = framePeriod - duration.count();
+
+        if(sleepTime > 0){
+            std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
+        }
     }
 
     return true;
 }
 
 bool CrpRobotTeleoperate::StopTeleoperate(){
-    this->stop = true;
+    this->stopFlag = true;
     return true;
 }
 
 bool CrpRobotTeleoperate::EndTeleoperate(){
-    if(!this->start){
+    if(!this->startFlag){
         std::cout<<"Teleoperation has ended! "<<std::endl;
     }else{
-        this->start = false;
+        this->startFlag = false;
     }
 
     return true;

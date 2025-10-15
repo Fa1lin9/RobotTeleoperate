@@ -34,6 +34,9 @@ public:
         std::vector<std::string> baseFrameName;
         std::vector<std::string> targetFrameName;
 
+        std::vector<Eigen::Matrix4d> baseOffset;
+        std::vector<Eigen::Matrix4d> targetOffset;
+
         size_t maxIteration;
         double relativeTol;
     };

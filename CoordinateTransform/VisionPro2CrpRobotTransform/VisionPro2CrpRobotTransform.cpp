@@ -30,8 +30,14 @@ std::vector<Eigen::Matrix4d> VisionPro2CrpRobotTransform::Transform(
 
     // 转化到人头坐标系
     Eigen::Matrix4d head2RobotWorldPoseInv = head2RobotWorldPose.inverse();
-    leftWrist2RobotWorldPose = head2RobotWorldPoseInv * leftWrist2RobotWorldPose;
-    rightWrist2RobotWorldPose = head2RobotWorldPoseInv * rightWrist2RobotWorldPose;
+//    leftWrist2RobotWorldPose = head2RobotWorldPoseInv * leftWrist2RobotWorldPose;
+//    rightWrist2RobotWorldPose = head2RobotWorldPoseInv * rightWrist2RobotWorldPose;
+
+    // only for translation
+    leftWrist2RobotWorldPose.block<3,1>(0,3) =
+            leftWrist2RobotWorldPose.block<3,1>(0,3) - head2RobotWorldPose.block<3,1>(0,3);
+    rightWrist2RobotWorldPose.block<3,1>(0,3) =
+            rightWrist2RobotWorldPose.block<3,1>(0,3) - head2RobotWorldPose.block<3,1>(0,3);
 
     // 补偿
     leftWrist2RobotWorldPose.block<3,1>(0,3) += offset;
