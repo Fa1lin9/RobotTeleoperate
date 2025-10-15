@@ -115,10 +115,10 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
     }
 
     // set limitation to joint5
-    this->totalBoundsLower[8] = 0;
-    this->totalBoundsUpper[8] = 0;
-    this->totalBoundsLower[18] = 0;
-    this->totalBoundsUpper[18] = 0;
+//    this->totalBoundsLower[8] = 0;
+//    this->totalBoundsUpper[8] = 0;
+//    this->totalBoundsLower[18] = 0;
+//    this->totalBoundsUpper[18] = 0;
     // set limitation to joint6
     this->totalBoundsLower[9] = 0;
     this->totalBoundsUpper[9] = 0;

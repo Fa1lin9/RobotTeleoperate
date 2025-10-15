@@ -10,9 +10,9 @@ CrpRobotTeleoperate::CrpRobotTeleoperate(const RobotTeleoperate::BasicConfig &co
 {
     // IKSolver
     Eigen::Matrix4d baseOffset;
-    baseOffset << 1, 0, 0, +0.01359,
+    baseOffset << 1, 0, 0, +0.02,
                     0, 1, 0, 0,
-                    0, 0, 1, +1.0845,
+                    0, 0, 1, +1.10,
                     0, 0 ,0, 1;
     IKSolver::BasicConfig solverConfig = {
         .type = IKSolver::Type::CrpRobot,
@@ -20,7 +20,7 @@ CrpRobotTeleoperate::CrpRobotTeleoperate(const RobotTeleoperate::BasicConfig &co
         .targetFrameName = {"L_WRIST_R", "R_WRIST_R"},
         .baseOffset = {baseOffset},
         .maxIteration = 400,
-        .relativeTol = 1e-2,        
+        .relativeTol = 1e-2,
     };
 
     this->ikSolverPtr = IKSolver::GetPtr(solverConfig);
