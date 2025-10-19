@@ -113,9 +113,9 @@ private:
     bool isPoseMatrix(const Eigen::Matrix4d& mat,
                       const double& eps = 1e-2);
 
-    double CostFunc(const IKSolver::CrpRobotConfig& config_);
+    double ObjectiveFunc(const IKSolver::CrpRobotConfig& config_);
 
-    casadi::SX CostFuncAD(const pinocchio::ModelTpl<casadi::SX>::ConfigVectorType& q,
+    casadi::SX ObjectiveFuncAD(const pinocchio::ModelTpl<casadi::SX>::ConfigVectorType& q,
                         const Eigen::Matrix<casadi::SX,Eigen::Dynamic,1>& qInit,
                         const std::vector<Eigen::Matrix<casadi::SX,4,4>>& targetPose
                         );
