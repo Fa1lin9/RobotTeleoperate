@@ -5,12 +5,11 @@ CrpRobotIKSolver::CrpRobotIKSolver(const IKSolver::BasicConfig &config_)
      relativeTol(config_.relativeTol)
 {
     LOG_FUNCTION;
-    // Init Model
     pinocchio::urdf::buildModel(
                 this->modelPath,
                 this->robotModel);
 
-    robotModelAD = robotModel.cast<casadi::SX>();
+    this->robotModelSX = this->robotModel.cast<casadi::SX>();
 
     // As For CrpRobot
     // The size of the baseFrameName should be 1
@@ -35,12 +34,12 @@ CrpRobotIKSolver::CrpRobotIKSolver(const IKSolver::BasicConfig &config_)
         throw std::length_error(error);
     }else{
         this->baseOffset = config_.baseOffset[0];
-        this->baseOffsetAD = this->baseOffset.cast<casadi::SX>();
+        this->baseOffsetSX = this->baseOffset.cast<casadi::SX>();
     }
 
     // Init
     // Initialize qNeutral
-    this->Initialize();
+    this->InitRobot();
 
     std::cout<<" Init Sucessfully! "<<std::endl;
 }
@@ -63,161 +62,62 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
         }
     }
 
-//    this->InitializeAD(targetPose,qInit);
-//    nlopt::opt opt;
+    this->InitAD(targetPose,qInit);
+    nlopt::opt opt;
 
-//    double (*ObjectWrapper)(const std::vector<double>& x,std::vector<double>& grad,void *data);
+    double (*ObjectWrapper)(const std::vector<double>& x,std::vector<double>& grad,void *data);
 
-//    // update casadi variable
-////    this->qInit = qInit.cast<casadi::SX>();
-////    for(size_t i=0;i<this->targetPose.size();i++){
-////        this->targetPose[i] = targetPose[i].cast<casadi::SX>();
-////    }
-
-//    bool useGrad = 1;
-//    if(useGrad){
-//        opt = nlopt::opt(nlopt::GD_STOGO , qInit.size());
-//        ObjectWrapper = [](const std::vector<double>& x,std::vector<double>& grad,void *data)->double{
-//            Eigen::Map<const Eigen::VectorXd> q(x.data(),x.size());
-//            CrpRobotData *robotData = static_cast<CrpRobotData*>(data);
-//            IKSolver::CrpRobotConfig config = {
-//                .q = q,
-//                .qInit= robotData->qInit,
-//                .targetPose = robotData->targetPose,
-//            };
-
-//            casadi::DM qVar = casadi::DM(x);
-//            grad.resize(robotData->solver->dofTotal);
-//            std::vector<casadi::DM> output = robotData->solver->mainFunc({qVar});
-
-//            double costFunc = double(output[0]);
-//            casadi::DM gradFunc = output[1];
-//            std::transform(
-//                        gradFunc->begin(), gradFunc->end(), grad.begin(),
-//                        [](const auto& v){ return double(v); }
-//            );
-
-//            return costFunc;
-//        };
-//    }else{
-//        opt = nlopt::opt(nlopt::GN_DIRECT_L , qInit.size());
-//        ObjectWrapper = [](const std::vector<double>& x,std::vector<double>& grad,void *data)->double{
-//            Eigen::Map<const Eigen::VectorXd> q(x.data(),x.size());
-//            CrpRobotData *robotData = static_cast<CrpRobotData*>(data);
-//            IKSolver::CrpRobotConfig config = {
-//                .q = q,
-//                .qInit= robotData->qInit,
-//                .targetPose = robotData->targetPose,
-//            };
-
-//            return robotData->solver->CostFunc(config);
-//        };
+    // update casadi variable
+//    this->qInit = qInit.cast<casadi::SX>();
+//    for(size_t i=0;i<this->targetPose.size();i++){
+//        this->targetPose[i] = targetPose[i].cast<casadi::SX>();
 //    }
 
-//    // set limitation to joint5
-////    this->totalBoundsLower[8] = 0;
-////    this->totalBoundsUpper[8] = 0;
-////    this->totalBoundsLower[18] = 0;
-////    this->totalBoundsUpper[18] = 0;
-//    // set limitation to joint6
-//    this->totalBoundsLower[9] = 0;
-//    this->totalBoundsUpper[9] = 0;
-//    this->totalBoundsLower[19] = 0;
-//    this->totalBoundsUpper[19] = 0;
-//    // set limitation to joint7
-//    this->totalBoundsLower[10] = 0;
-//    this->totalBoundsUpper[10] = 0;
-//    this->totalBoundsLower[20] = 0;
-//    this->totalBoundsUpper[20] = 0;
+    bool useGrad = 1;
+    if(useGrad){
+        opt = nlopt::opt(nlopt::GD_STOGO , qInit.size());
+        ObjectWrapper = [](const std::vector<double>& x,std::vector<double>& grad,void *data)->double{
+            Eigen::Map<const Eigen::VectorXd> q(x.data(),x.size());
+            CrpRobotData *robotData = static_cast<CrpRobotData*>(data);
+            IKSolver::CrpRobotConfig config = {
+                .q = q,
+                .qInit= robotData->qInit,
+                .targetPose = robotData->targetPose,
+            };
 
-//    // set bounds
-//    opt.set_lower_bounds(this->totalBoundsLower);
-//    opt.set_upper_bounds(this->totalBoundsUpper);
+            casadi::DM qVar = casadi::DM(x);
+            grad.resize(robotData->solver->dofTotal);
+            std::vector<casadi::DM> output = robotData->solver->mainFunc({qVar});
 
-//    opt.set_maxeval(this->maxIteration);
-//    opt.set_xtol_rel(this->relativeTol);
+            double costFunc = double(output[0]);
+            casadi::DM gradFunc = output[1];
+            std::transform(
+                        gradFunc->begin(), gradFunc->end(), grad.begin(),
+                        [](const auto& v){ return double(v); }
+            );
 
-//    CrpRobotData robotData = {
-//        .solver = this,
-//        .qInit = qInit,
-//        .targetPose = targetPose,
-//    };
+            return costFunc;
+        };
+    }else{
+        opt = nlopt::opt(nlopt::GN_DIRECT_L , qInit.size());
+        ObjectWrapper = [](const std::vector<double>& x,std::vector<double>& grad,void *data)->double{
+            Eigen::Map<const Eigen::VectorXd> q(x.data(),x.size());
+            CrpRobotData *robotData = static_cast<CrpRobotData*>(data);
+            IKSolver::CrpRobotConfig config = {
+                .q = q,
+                .qInit= robotData->qInit,
+                .targetPose = robotData->targetPose,
+            };
 
-//    opt.set_min_objective(ObjectWrapper, &robotData);
-
-//    double funcValue;
-
-//    std::vector<double> q(this->dofTotal);
-////    q = this->qNeutral;
-
-//    auto start = std::chrono::high_resolution_clock::now();
-
-//    nlopt::result result = opt.optimize(q, funcValue);
-//    auto end = std::chrono::high_resolution_clock::now();
-//    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-//    std::cout << " optimazation 耗时: " << duration.count() << " ms" << std::endl;
-//    std::cout << " Function Value = " << funcValue << std::endl;
-
-//    if(result<0){
-//        std::string error = " Optimize failed! ";
-//        throw std::logic_error(error);
-
-//    }
-
-//    Eigen::Map<Eigen::VectorXd> qEigen(q.data(),q.size());
-
-//    if(verbose){
-//        // check result
-//        std::cout<<"------------ Solver Result ------------"<<std::endl;
-//        std::cout << " Joint Value =\n" << qEigen << std::endl;
-//        std::cout << " Function Value = " << funcValue << std::endl;
-//        std::cout<<" Left Arm Translation: \n"<<Forward(qEigen)[0].translation()<<std::endl;
-//        std::cout<<" Left Arm Rotation: \n"<<Forward(qEigen)[0].rotation()<<std::endl;
-//        std::cout<<" Right Arm Translation: \n"<<Forward(qEigen)[1].translation()<<std::endl;
-//        std::cout<<" Rigit Arm Rotation: \n"<<Forward(qEigen)[1].rotation()<<std::endl;
-//        std::cout<<"------------ Solver Result ------------"<<std::endl;
-//    }
-
-//    return boost::optional<Eigen::VectorXd>(qEigen);
-
-    casadi::SX qVar = casadi::SX::sym("qVar",this->dofTotal,1);
-
-    pinocchio::DataTpl<casadi::SX>::ConfigVectorType q =
-            pinocchio::DataTpl<casadi::SX>::ConfigVectorType::Zero(this->dofTotal);
-
-    std::vector<Eigen::Matrix<casadi::SX,4,4>> targetPose_(targetPose.size());
-    for(size_t i=0;i<targetPose.size();i++){
-        targetPose_[i] = targetPose[i].cast<casadi::SX>();
+            return robotData->solver->ObjectiveFunc(config);
+        };
     }
 
-    Eigen::Matrix<casadi::SX,Eigen::Dynamic,1> qInit_ = qInit.cast<casadi::SX>();
-
-    for(int i =0;i<q.size();i++){
-        q(i) = qVar(i);
-    }
-
-    casadi::SX costFunc = this->ObjectiveFuncAD(q,qInit_,targetPose_);
-
-    casadi::SXDict nlp = {{"x", qVar}, {"f", costFunc}};
-
-    // 创建求解器
-    casadi::Dict opts;
-    opts["ipopt.tol"] = 1e-6;
-    opts["ipopt.max_iter"] = 50;
-    opts["ipopt.linear_solver"] = "mumps";
-    opts["ipopt.print_level"] = 0;   // <= 设置为0，禁用迭代输出
-    opts["print_time"] = 0;          // <= 禁用求解时间输出
-    opts["calc_lam_p"] = 0;          // 可选，关闭对偶变量计算（减少输出）
-
-    casadi::Function solver = casadi::nlpsol("solver", "ipopt", nlp, opts);
-
-    // 求解器输入
-//    this->totalBoundsLower[9] = 0;
-//    this->totalBoundsUpper[9] = 0;
-    casadi::DMDict arg, res;
-//    arg["x0"] = this->qNeutral;  // 初值
-    arg["x0"] = casadi::DM::zeros(this->dofTotal);
-
+    // set limitation to joint5
+//    this->totalBoundsLower[8] = 0;
+//    this->totalBoundsUpper[8] = 0;
+//    this->totalBoundsLower[18] = 0;
+//    this->totalBoundsUpper[18] = 0;
     // set limitation to joint6
     this->totalBoundsLower[9] = 0;
     this->totalBoundsUpper[9] = 0;
@@ -228,34 +128,48 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
     this->totalBoundsUpper[10] = 0;
     this->totalBoundsLower[20] = 0;
     this->totalBoundsUpper[20] = 0;
-    arg["lbx"] = this->totalBoundsLower;
-    arg["ubx"] = this->totalBoundsUpper;
 
-    // 求解
+    // set bounds
+    opt.set_lower_bounds(this->totalBoundsLower);
+    opt.set_upper_bounds(this->totalBoundsUpper);
+
+    opt.set_maxeval(this->maxIteration);
+    opt.set_xtol_rel(this->relativeTol);
+
+    CrpRobotData robotData = {
+        .solver = this,
+        .qInit = qInit,
+        .targetPose = targetPose,
+    };
+
+    opt.set_min_objective(ObjectWrapper, &robotData);
+
+    double funcValue;
+
+    std::vector<double> q(this->dofTotal);
+//    q = this->qNeutral;
+
     auto start = std::chrono::high_resolution_clock::now();
-    res = solver(arg);
+
+    nlopt::result result = opt.optimize(q, funcValue);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << " optimazation 耗时: " << duration.count() << " ms" << std::endl;
+    std::cout << " Function Value = " << funcValue << std::endl;
 
-    casadi::DM qSolution = res.at("x");
+    if(result<0){
+        std::string error = " Optimize failed! ";
+        throw std::logic_error(error);
 
-    std::vector<double> qVec;
-    qVec.reserve(qSolution.size1()); // 或 q_sol.numel() 都可以
-
-    for (int i = 0; i < qSolution.size1(); ++i) {
-        qVec.push_back(static_cast<double>(qSolution(i)));
     }
 
-    Eigen::Map<Eigen::VectorXd> qEigen(qVec.data(),qVec.size());
+    Eigen::Map<Eigen::VectorXd> qEigen(q.data(),q.size());
 
     if(verbose){
-        std::cout << " Joint Value =\n" << qEigen << std::endl;
-
-        std::cout << " Function Value = " << res.at("f") << std::endl;
-
         // check result
         std::cout<<"------------ Solver Result ------------"<<std::endl;
+        std::cout << " Joint Value =\n" << qEigen << std::endl;
+        std::cout << " Function Value = " << funcValue << std::endl;
         std::cout<<" Left Arm Translation: \n"<<Forward(qEigen)[0].translation()<<std::endl;
         std::cout<<" Left Arm Rotation: \n"<<Forward(qEigen)[0].rotation()<<std::endl;
         std::cout<<" Right Arm Translation: \n"<<Forward(qEigen)[1].translation()<<std::endl;
@@ -264,6 +178,91 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
     }
 
     return boost::optional<Eigen::VectorXd>(qEigen);
+
+//    casadi::SX qVar = casadi::SX::sym("qVar",this->dofTotal,1);
+
+//    pinocchio::DataTpl<casadi::SX>::ConfigVectorType q =
+//            pinocchio::DataTpl<casadi::SX>::ConfigVectorType::Zero(this->dofTotal);
+
+//    std::vector<Eigen::Matrix<casadi::SX,4,4>> targetPose_(targetPose.size());
+//    for(size_t i=0;i<targetPose.size();i++){
+//        targetPose_[i] = targetPose[i].cast<casadi::SX>();
+//    }
+
+//    Eigen::Matrix<casadi::SX,Eigen::Dynamic,1> qInit_ = qInit.cast<casadi::SX>();
+
+//    for(int i =0;i<q.size();i++){
+//        q(i) = qVar(i);
+//    }
+
+//    casadi::SX costFunc = this->ObjectiveFuncSX(q,qInit_,targetPose_);
+
+//    casadi::SXDict nlp = {{"x", qVar}, {"f", costFunc}};
+
+//    // 创建求解器
+//    casadi::Dict opts;
+//    opts["ipopt.tol"] = 1e-6;
+//    opts["ipopt.max_iter"] = 50;
+//    opts["ipopt.linear_solver"] = "mumps";
+//    opts["ipopt.print_level"] = 0;   // <= 设置为0，禁用迭代输出
+//    opts["print_time"] = 0;          // <= 禁用求解时间输出
+//    opts["calc_lam_p"] = 0;          // 可选，关闭对偶变量计算（减少输出）
+
+//    casadi::Function solver = casadi::nlpsol("solver", "ipopt", nlp, opts);
+
+//    // 求解器输入
+////    this->totalBoundsLower[9] = 0;
+////    this->totalBoundsUpper[9] = 0;
+//    casadi::DMDict arg, res;
+////    arg["x0"] = this->qNeutral;  // 初值
+//    arg["x0"] = casadi::DM::zeros(this->dofTotal);
+
+//    // set limitation to joint6
+//    this->totalBoundsLower[9] = 0;
+//    this->totalBoundsUpper[9] = 0;
+//    this->totalBoundsLower[19] = 0;
+//    this->totalBoundsUpper[19] = 0;
+//    // set limitation to joint7
+//    this->totalBoundsLower[10] = 0;
+//    this->totalBoundsUpper[10] = 0;
+//    this->totalBoundsLower[20] = 0;
+//    this->totalBoundsUpper[20] = 0;
+//    arg["lbx"] = this->totalBoundsLower;
+//    arg["ubx"] = this->totalBoundsUpper;
+
+//    // 求解
+//    auto start = std::chrono::high_resolution_clock::now();
+//    res = solver(arg);
+//    auto end = std::chrono::high_resolution_clock::now();
+//    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+//    std::cout << " optimazation 耗时: " << duration.count() << " ms" << std::endl;
+
+//    casadi::DM qSolution = res.at("x");
+
+//    std::vector<double> qVec;
+//    qVec.reserve(qSolution.size1()); // 或 q_sol.numel() 都可以
+
+//    for (int i = 0; i < qSolution.size1(); ++i) {
+//        qVec.push_back(static_cast<double>(qSolution(i)));
+//    }
+
+//    Eigen::Map<Eigen::VectorXd> qEigen(qVec.data(),qVec.size());
+
+//    if(verbose){
+//        std::cout << " Joint Value =\n" << qEigen << std::endl;
+
+//        std::cout << " Function Value = " << res.at("f") << std::endl;
+
+//        // check result
+//        std::cout<<"------------ Solver Result ------------"<<std::endl;
+//        std::cout<<" Left Arm Translation: \n"<<Forward(qEigen)[0].translation()<<std::endl;
+//        std::cout<<" Left Arm Rotation: \n"<<Forward(qEigen)[0].rotation()<<std::endl;
+//        std::cout<<" Right Arm Translation: \n"<<Forward(qEigen)[1].translation()<<std::endl;
+//        std::cout<<" Rigit Arm Rotation: \n"<<Forward(qEigen)[1].rotation()<<std::endl;
+//        std::cout<<"------------ Solver Result ------------"<<std::endl;
+//    }
+
+//    return boost::optional<Eigen::VectorXd>(qEigen);
 }
 
 void CrpRobotIKSolver::Info(){
@@ -462,32 +461,32 @@ double CrpRobotIKSolver::ObjectiveFunc(const IKSolver::CrpRobotConfig& config_){
     return error;
 }
 
-Eigen::VectorXd CrpRobotIKSolver::GetGradient(const IKSolver::CrpRobotConfig& config_){
-    return GradFunc(config_);
-}
+//Eigen::VectorXd CrpRobotIKSolver::GetGradient(const IKSolver::CrpRobotConfig& config_){
+//    return GradFunc(config_);
+//}
 
-Eigen::VectorXd CrpRobotIKSolver::GradFunc(const IKSolver::CrpRobotConfig& config_){
-    double e = 1e-6;
-    Eigen::VectorXd grad(config_.q.size());
-    IKSolver::CrpRobotConfig temp = config_;
+//Eigen::VectorXd CrpRobotIKSolver::GradFunc(const IKSolver::CrpRobotConfig& config_){
+//    double e = 1e-6;
+//    Eigen::VectorXd grad(config_.q.size());
+//    IKSolver::CrpRobotConfig temp = config_;
 
-    for(size_t i = 0;i<config_.q.size();i++){
-        double originalValue = config_.q[i];
-        // plus
-        temp.q[i] = originalValue + e;
-        double fPlus = this->ObjectiveFunc(temp);
+//    for(size_t i = 0;i<config_.q.size();i++){
+//        double originalValue = config_.q[i];
+//        // plus
+//        temp.q[i] = originalValue + e;
+//        double fPlus = this->ObjectiveFunc(temp);
 
-        // minus
-        temp.q[i] = originalValue - e;
-        double fMinus = this->ObjectiveFunc(temp);
+//        // minus
+//        temp.q[i] = originalValue - e;
+//        double fMinus = this->ObjectiveFunc(temp);
 
-        grad[i] = (fPlus - fMinus) / (2*e);
+//        grad[i] = (fPlus - fMinus) / (2*e);
 
-        temp.q[i] = originalValue;
-    }
+//        temp.q[i] = originalValue;
+//    }
 
-    return grad;
-}
+//    return grad;
+//}
 
 void CrpRobotIKSolver::NormalizeAngle(Eigen::VectorXd& angle){
     for(int i=0;i<angle.size();i++){
@@ -499,7 +498,7 @@ void CrpRobotIKSolver::NormalizeAngle(Eigen::VectorXd& angle){
     }
 }
 
-void CrpRobotIKSolver::Initialize(){
+void CrpRobotIKSolver::InitRobot(){
 //    LOG_FUNCTION;
     double min,max;
     for(size_t i = 0;i<this->dofArm;i++){
@@ -553,7 +552,31 @@ void CrpRobotIKSolver::Initialize(){
 
 }
 
-void CrpRobotIKSolver::InitializeAD(const std::vector<Eigen::Matrix4d>& targetPose_,
+void CrpRobotIKSolver::InitCasadi(){
+//    // Init Model
+//    pinocchio::urdf::buildModel(
+//                this->modelPath,
+//                this->robotModel);
+
+//    this->robotModelSX = this->robotModel.cast<casadi::SX>();
+//    pinocchio::DataTpl<casadi::SX> dataSX(this->robotModelSX);
+
+//    // Creating symbolic variables
+//    pinocchio::DataTpl<casadi::SX>::ConfigVectorType q =
+//            pinocchio::DataTpl<casadi::SX>::ConfigVectorType::Zero(this->dofTotal);
+//    casadi::SX targetPoseLeft = casadi::SX::sym("targetPoseLeft",4,4);
+//    casadi::SX targetPoseRight = casadi::SX::sym("targetPoseRight",4,4);
+
+//    pinocchio::forwardKinematics(robotModelSX, dataSX, q);
+//    pinocchio::updateFramePlacements(robotModelSX, dataSX);
+
+//    // Translational Error
+
+
+
+}
+
+void CrpRobotIKSolver::InitAD(const std::vector<Eigen::Matrix4d>& targetPose_,
                                     const Eigen::VectorXd& qInit_){
     // Variable
     casadi::SX qVar = casadi::SX::sym("qVar",this->dofTotal,1);
@@ -572,12 +595,12 @@ void CrpRobotIKSolver::InitializeAD(const std::vector<Eigen::Matrix4d>& targetPo
         q(i) = qVar(i);
     }
 
-    casadi::SX costFunc = this->ObjectiveFuncAD(q,qInit,targetPose);
+    casadi::SX costFunc = this->ObjectiveFuncSX(q,qInit,targetPose);
     casadi::SX gradFunc = gradient(costFunc,qVar);
     this->mainFunc = casadi::Function("mainFunc", {qVar}, {costFunc, gradFunc});
 }
 
-casadi::SX CrpRobotIKSolver::ObjectiveFuncAD(
+casadi::SX CrpRobotIKSolver::ObjectiveFuncSX(
             const pinocchio::ModelTpl<casadi::SX>::ConfigVectorType& q,
             const Eigen::Matrix<casadi::SX,Eigen::Dynamic,1>& qInit,
             const std::vector<Eigen::Matrix<casadi::SX,4,4>>& targetPose){
@@ -591,15 +614,15 @@ casadi::SX CrpRobotIKSolver::ObjectiveFuncAD(
     }
 
     // updata data to better get position
-    pinocchio::DataTpl<casadi::SX> dataAD(robotModelAD);
-    forwardKinematics(robotModelAD, dataAD, q);
-    updateFramePlacements(robotModelAD, dataAD);
+    pinocchio::DataTpl<casadi::SX> dataSX(robotModelSX);
+    forwardKinematics(robotModelSX, dataSX, q);
+    updateFramePlacements(robotModelSX, dataSX);
 
     // extract matrix
     Eigen::Matrix<casadi::SX,4,4> basePose =
-            this->baseOffsetAD * dataAD.oMf[this->baseIndex].toHomogeneousMatrix();
-    Eigen::Matrix<casadi::SX,4,4> leftArmEndPose = dataAD.oMf[this->leftArmEndIndex].toHomogeneousMatrix();
-    Eigen::Matrix<casadi::SX,4,4> rightArmEndPose = dataAD.oMf[this->rightArmEndIndex].toHomogeneousMatrix();
+            this->baseOffsetSX * dataSX.oMf[this->baseIndex].toHomogeneousMatrix();
+    Eigen::Matrix<casadi::SX,4,4> leftArmEndPose = dataSX.oMf[this->leftArmEndIndex].toHomogeneousMatrix();
+    Eigen::Matrix<casadi::SX,4,4> rightArmEndPose = dataSX.oMf[this->rightArmEndIndex].toHomogeneousMatrix();
 
     Eigen::Matrix<casadi::SX,4,4> leftArmPose = basePose.inverse() * leftArmEndPose;
     Eigen::Matrix<casadi::SX,4,4> rightArmPose = basePose.inverse() * rightArmEndPose;
@@ -627,9 +650,9 @@ casadi::SX CrpRobotIKSolver::ObjectiveFuncAD(
     // rotation error
 //    std::cout<<" rotation Error "<<std::endl;
     Eigen::Matrix<casadi::SX,3,3> leftArmError
-            = targetPose[0].block<3,3>(0,0) * leftArmPose.block<3,3>(0,0);
+            = leftArmPose.block<3,3>(0,0) * targetPose[0].block<3,3>(0,0).transpose();
     Eigen::Matrix<casadi::SX,3,3> rightArmError
-            = targetPose[1].block<3,3>(0,0) * rightArmPose.block<3,3>(0,0);
+            = rightArmPose.block<3,3>(0,0) * targetPose[1].block<3,3>(0,0).transpose();
 
     Eigen::Matrix<casadi::SX,3,1> leftRotError  = pinocchio::log3(leftArmError).cast<casadi::SX>();
     Eigen::Matrix<casadi::SX,3,1> rightRotError = pinocchio::log3(rightArmError).cast<casadi::SX>();
@@ -666,4 +689,84 @@ casadi::SX CrpRobotIKSolver::ObjectiveFuncAD(
                         casadi::SX(wRegu)   * reguError;
     return error;
 
+//    if(q.size() != this->robotModel.nq){
+//        std::string error = " The size of the q should be this->robotModel.nq! ";
+//        throw std::length_error(error);
+//    }
+//    if(targetPose.size() != 2){
+//        std::string error = " The size of the targetPose should be 2! ";
+//        throw std::length_error(error);
+//    }
+
+//    // updata data to better get position
+//    pinocchio::DataTpl<casadi::SX> dataSX(robotModelSX);
+//    forwardKinematics(robotModelSX, dataSX, q);
+//    updateFramePlacements(robotModelSX, dataSX);
+
+//    // extract matrix
+//    Eigen::Matrix<casadi::SX,4,4> basePose =
+//            this->baseOffsetSX * dataSX.oMf[this->baseIndex].toHomogeneousMatrix();
+//    Eigen::Matrix<casadi::SX,4,4> leftArmEndPose = dataSX.oMf[this->leftArmEndIndex].toHomogeneousMatrix();
+//    Eigen::Matrix<casadi::SX,4,4> rightArmEndPose = dataSX.oMf[this->rightArmEndIndex].toHomogeneousMatrix();
+
+//    Eigen::Matrix<casadi::SX,4,4> leftArmPose = basePose.inverse() * leftArmEndPose;
+//    Eigen::Matrix<casadi::SX,4,4> rightArmPose = basePose.inverse() * rightArmEndPose;
+
+////    Eigen::Matrix<casadi::SX,4,4> leftArmPose = this->BaseOffsetAD * leftArmEndPose;
+////    Eigen::Matrix<casadi::SX,4,4> rightArmPose = this->BaseOffsetAD * rightArmEndPose;
+
+//    // translation error
+////    std::cout<<" Translation Error "<<std::endl;
+//    Eigen::Matrix<casadi::SX,3,1> currentLeftTrans  = leftArmPose.block<3,1>(0,3);
+//    Eigen::Matrix<casadi::SX,3,1> currentRightTrans = rightArmPose.block<3,1>(0,3);
+//    Eigen::Matrix<casadi::SX,3,1> targetLeftTrans   = targetPose[0].block<3,1>(0,3);
+//    Eigen::Matrix<casadi::SX,3,1> targetRightTrans  = targetPose[1].block<3,1>(0,3);
+
+//    casadi::SX transError =
+//            casadi::SX::sumsqr(casadi::SX::vertcat({
+//               (Eigen2SX(currentLeftTrans) - Eigen2SX(targetLeftTrans)),
+//               (Eigen2SX(currentRightTrans) - Eigen2SX(targetRightTrans)),
+//           }));
+
+//    // rotation error
+////    std::cout<<" rotation Error "<<std::endl;
+//    Eigen::Matrix<casadi::SX,3,3> leftArmError
+//            = leftArmPose.block<3,3>(0,0) * targetPose[0].block<3,3>(0,0).transpose();
+//    Eigen::Matrix<casadi::SX,3,3> rightArmError
+//            = rightArmPose.block<3,3>(0,0) * targetPose[1].block<3,3>(0,0).transpose();
+
+//    Eigen::Matrix<casadi::SX,3,1> leftRotaError  = pinocchio::log3(leftArmError).cast<casadi::SX>();
+//    Eigen::Matrix<casadi::SX,3,1> rightRotaError = pinocchio::log3(rightArmError).cast<casadi::SX>();
+
+//    casadi::SX rotaError =
+//            casadi::SX::sumsqr(casadi::SX::vertcat({
+//                Eigen2SX(leftRotaError),
+//                Eigen2SX(rightRotaError)
+//            }));
+
+//    // smoothing error
+////    std::cout<<" Smoothing Error "<<std::endl;
+//    pinocchio::DataTpl<casadi::SX>::ConfigVectorType smoothErrorVec =
+//            q - qInit.cast<casadi::SX>();
+//    casadi::SX smoothError = smoothErrorVec.norm();
+
+//    // regularization
+////    std::cout<<" Regularization "<<std::endl;
+//    pinocchio::DataTpl<casadi::SX>::ConfigVectorType reguVec =
+//            q - Eigen::VectorXd::Map(this->qNeutral.data(), this->qNeutral.size()).cast<casadi::SX>();
+//    casadi::SX reguError = reguVec.norm();
+
+//    // weight
+//    double wTrans = 50.0;
+//    double wRota = 0.5;
+//    double wSmooth = 0.1;
+//    double wRegu = 0.02;
+////    double wSmooth = 0;
+////    double wRegu = 0;
+
+//    casadi::SX error =  casadi::SX(wTrans)  * transError +
+//                        casadi::SX(wRota)   * rotaError +
+//                        casadi::SX(wSmooth) * smoothError +
+//                        casadi::SX(wRegu)   * reguError;
+//    return error;
 }

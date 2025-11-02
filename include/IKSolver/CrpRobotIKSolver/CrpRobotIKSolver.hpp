@@ -115,7 +115,7 @@ private:
 
     double ObjectiveFunc(const IKSolver::CrpRobotConfig& config_);
 
-    casadi::SX ObjectiveFuncAD(const pinocchio::ModelTpl<casadi::SX>::ConfigVectorType& q,
+    casadi::SX ObjectiveFuncSX(const pinocchio::ModelTpl<casadi::SX>::ConfigVectorType& q,
                         const Eigen::Matrix<casadi::SX,Eigen::Dynamic,1>& qInit,
                         const std::vector<Eigen::Matrix<casadi::SX,4,4>>& targetPose
                         );
@@ -124,10 +124,23 @@ private:
 
     void NormalizeAngle(Eigen::VectorXd& angle);
 
-    void Initialize();
+    void InitRobot();
 
-    void InitializeAD(const std::vector<Eigen::Matrix4d>& targetPose,
+    void InitCasadi();
+
+    void InitAD(const std::vector<Eigen::Matrix4d>& targetPose,
                       const Eigen::VectorXd& qInit);
+
+    template<int Rows, int Cols>
+    casadi::SX Eigen2SX(const Eigen::Matrix<casadi::SX, Rows, Cols>& mat) const {
+        casadi::SX result = casadi::SX::zeros(Rows, Cols);
+        for(int i=0;i<Rows;i++){
+            for(int j=0;j<Cols;j++){
+                result(i,j) = mat(i,j);
+            }
+        }
+        return result;
+    }
 
     // the urdf file path of the CRP's Robot
     const std::string modelPath =
@@ -162,7 +175,7 @@ private:
 
     /* ------------------ Casadi Auto-Diff ------------------ */
 
-    pinocchio::ModelTpl<casadi::SX> robotModelAD;
+    pinocchio::ModelTpl<casadi::SX> robotModelSX;
 
     // Function
     casadi::Function mainFunc;
@@ -170,7 +183,7 @@ private:
     /* ------------------ Casadi Auto-Diff ------------------ */
 
     Eigen::Matrix4d baseOffset;
-    Eigen::Matrix<casadi::SX,4,4> baseOffsetAD;
+    Eigen::Matrix<casadi::SX,4,4> baseOffsetSX;
 
     /* ------------------ NLopt ------------------ */
     double relativeTol = 1e-3;
