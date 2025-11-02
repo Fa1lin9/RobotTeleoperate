@@ -645,7 +645,7 @@ casadi::SX CrpRobotIKSolver::ObjectiveFuncSX(
     targetTrans.block<3,1>(3,0) = targetRightTrans;
 
     Eigen::Matrix<casadi::SX,6,1> transErrorVec = currentTrans - targetTrans;
-    casadi::SX transError = transErrorVec.norm();
+    casadi::SX transError = transErrorVec.squaredNorm();
 
     // rotation error
 //    std::cout<<" rotation Error "<<std::endl;
@@ -661,19 +661,19 @@ casadi::SX CrpRobotIKSolver::ObjectiveFuncSX(
     rotaErrorVec.block<3,1>(0,0) = leftRotError;
     rotaErrorVec.block<3,1>(3,0) = rightRotError;
 
-    casadi::SX rotaError = rotaErrorVec.norm();
+    casadi::SX rotaError = rotaErrorVec.squaredNorm();
 
     // smoothing error
 //    std::cout<<" Smoothing Error "<<std::endl;
     pinocchio::DataTpl<casadi::SX>::ConfigVectorType smoothErrorVec =
             q - qInit.cast<casadi::SX>();
-    casadi::SX smoothError = smoothErrorVec.norm();
+    casadi::SX smoothError = smoothErrorVec.squaredNorm();
 
     // regularization
 //    std::cout<<" Regularization "<<std::endl;
     pinocchio::DataTpl<casadi::SX>::ConfigVectorType reguVec =
             q - Eigen::VectorXd::Map(this->qNeutral.data(), this->qNeutral.size()).cast<casadi::SX>();
-    casadi::SX reguError = reguVec.norm();
+    casadi::SX reguError = reguVec.squaredNorm();
 
     // weight
     double wTrans = 50.0;
