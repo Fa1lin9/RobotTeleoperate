@@ -71,12 +71,12 @@
 
  ------------------ Details of the Joints ------------------ */
 
-class CrpRobotIKSolver
+class Ti5RobotIKSolver
         :public IKSolver
 {
 public:
-    CrpRobotIKSolver(const IKSolver::BasicConfig &config_);
-    ~CrpRobotIKSolver();
+    Ti5RobotIKSolver(const IKSolver::BasicConfig &config_);
+    ~Ti5RobotIKSolver();
 
     boost::optional<Eigen::VectorXd> Solve(
                     const std::vector<Eigen::Matrix4d>& targetPose,
@@ -85,7 +85,7 @@ public:
 
     std::vector<pinocchio::SE3> Forward(const Eigen::VectorXd& q) override;
 
-    Eigen::VectorXd GetGradient(const IKSolver::CrpRobotConfig& config_);
+//    Eigen::VectorXd GetGradient(const IKSolver::CrpRobotConfig& config_);
 
     void Info() override;
 
@@ -101,8 +101,8 @@ public:
     const size_t dofArm = 7;
 
 private:
-    struct CrpRobotData{
-        CrpRobotIKSolver *solver;
+    struct Ti5RobotData{
+        Ti5RobotIKSolver *solver;
         Eigen::VectorXd qInit;
         std::vector<Eigen::Matrix4d> targetPose;
 //        Eigen::Matrix4d leftArmTargetPose;
@@ -113,20 +113,20 @@ private:
     bool isPoseMatrix(const Eigen::Matrix4d& mat,
                       const double& eps = 1e-2);
 
-    double ObjectiveFunc(const IKSolver::CrpRobotConfig& config_);
+    double ObjectiveFunc(const IKSolver::Ti5RobotConfig& config_);
 
     casadi::SX ObjectiveFuncSX(const pinocchio::ModelTpl<casadi::SX>::ConfigVectorType& q,
                         const Eigen::Matrix<casadi::SX,Eigen::Dynamic,1>& qInit,
                         const std::vector<Eigen::Matrix<casadi::SX,4,4>>& targetPose
                         );
 
-    Eigen::VectorXd GradFunc(const IKSolver::CrpRobotConfig& config_);
+    Eigen::VectorXd GradFunc(const IKSolver::Ti5RobotConfig& config_);
 
     void NormalizeAngle(Eigen::VectorXd& angle);
 
     void InitRobot();
 
-    void InitCasadi();
+    void InitOptim();
 
     void InitAD(const std::vector<Eigen::Matrix4d>& targetPose,
                       const Eigen::VectorXd& qInit);
@@ -141,6 +141,17 @@ private:
         }
         return result;
     }
+
+    Eigen::Matrix<casadi::SX, Eigen::Dynamic, Eigen::Dynamic> SX2Eigen(const casadi::SX& mat) const {
+        int rows = mat.size1();
+        int cols = mat.size2();
+        Eigen::Matrix<casadi::SX, Eigen::Dynamic, Eigen::Dynamic> result(rows, cols);
+        for (int i = 0; i < rows; ++i)
+            for (int j = 0; j < cols; ++j)
+                result(i, j) = mat(i,j);
+        return result;
+    }
+
 
     // the urdf file path of the CRP's Robot
     const std::string modelPath =
@@ -171,7 +182,6 @@ private:
     std::vector<double> totalBoundsLower;
     std::vector<double> totalBoundsUpper;
 
-    /* ------------------ Robot Parameter ------------------ */
 
     /* ------------------ Casadi Auto-Diff ------------------ */
 
@@ -180,12 +190,29 @@ private:
     // Function
     casadi::Function mainFunc;
 
-    /* ------------------ Casadi Auto-Diff ------------------ */
-
     Eigen::Matrix4d baseOffset;
     Eigen::Matrix<casadi::SX,4,4> baseOffsetSX;
+
+    // Opti
+    std::shared_ptr<pinocchio::DataTpl<casadi::SX>> dataPtrSX;
+
+    casadi::Opti opti;
+    casadi::MX qVar;
+    casadi::MX qInit;
+    casadi::MX targetPoseLeft;
+    casadi::MX targetPoseRight;
+
+    casadi::Function translationalError;
+    casadi::Function rotationalError;
+
+    casadi::MX translationalCost;
+    casadi::MX rotationalCost;
+    casadi::MX smoothCost;
+    casadi::MX regularizationCost;
+    casadi::MX totalCost;
 
     /* ------------------ NLopt ------------------ */
     double relativeTol = 1e-3;
     size_t maxIteration = 400;
+
 };

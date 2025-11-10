@@ -11,7 +11,7 @@ set( msg_head "[Package Robot CMakeLists.txt] :" )
 set( GROUP_NAME "IKSolver" )
 list( APPEND ${GROUP_NAME}_Components
     IKSolver
-    CrpRobotIKSolver
+    Ti5RobotIKSolver
 )
 
 ##########################################################################

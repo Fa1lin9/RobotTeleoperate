@@ -1,10 +1,10 @@
-#include <CrpRobotTeleoperate/CrpRobotTeleoperate.hpp>
+#include <Ti5RobotTeleoperate/Ti5RobotTeleoperate.hpp>
 
-bool CrpRobotTeleoperate::Init(){
+bool Ti5RobotTeleoperate::Init(){
     return true;
 }
 
-CrpRobotTeleoperate::CrpRobotTeleoperate(const RobotTeleoperate::BasicConfig &config)
+Ti5RobotTeleoperate::Ti5RobotTeleoperate(const RobotTeleoperate::BasicConfig &config)
     :address(config.address),
      dataCollector(VisionProCollector(this->address))
 {
@@ -37,7 +37,7 @@ CrpRobotTeleoperate::CrpRobotTeleoperate(const RobotTeleoperate::BasicConfig &co
          0,0,-1,0,
          0,0,0,1;
     CoordinateTransform::BasicConfig transformConfig;
-    transformConfig.type = CoordinateTransform::Type::VisionPro2CrpRobot;
+    transformConfig.type = CoordinateTransform::Type::VisionPro2Ti5Robot;
     transformConfig.T_Head2Waist = Eigen::Matrix4d::Identity();
     transformConfig.T_XR2Robot <<   0, 0, -1, 0,
                                     -1, 0, 0, 0,
@@ -66,11 +66,11 @@ CrpRobotTeleoperate::CrpRobotTeleoperate(const RobotTeleoperate::BasicConfig &co
             = PhysicalRobot::GetPtr(robotConfig);
 }
 
-CrpRobotTeleoperate::~CrpRobotTeleoperate(){
+Ti5RobotTeleoperate::~Ti5RobotTeleoperate(){
 
 }
 
-bool CrpRobotTeleoperate::StartTeleoperate(){
+bool Ti5RobotTeleoperate::StartTeleoperate(){
 
     int FPS = 20;
     this->startFlag = true;
@@ -151,12 +151,12 @@ bool CrpRobotTeleoperate::StartTeleoperate(){
     return true;
 }
 
-bool CrpRobotTeleoperate::StopTeleoperate(){
+bool Ti5RobotTeleoperate::StopTeleoperate(){
     this->stopFlag = true;
     return true;
 }
 
-bool CrpRobotTeleoperate::EndTeleoperate(){
+bool Ti5RobotTeleoperate::EndTeleoperate(){
     if(!this->startFlag){
         std::cout<<"Teleoperation has ended! "<<std::endl;
     }else{

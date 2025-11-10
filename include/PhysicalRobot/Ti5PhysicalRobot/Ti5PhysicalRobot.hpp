@@ -41,13 +41,13 @@ enum ArmType{
     RightArm,
 };
 
-class CrpPhysicalRobot
+class Ti5PhysicalRobot
         :public PhysicalRobot
 {
 public:
-    CrpPhysicalRobot(const PhysicalRobot::BasicConfig &config_);
+    Ti5PhysicalRobot(const PhysicalRobot::BasicConfig &config_);
 
-    ~CrpPhysicalRobot();
+    ~Ti5PhysicalRobot();
     /* ---------------- Basic Information ---------------- */
 
     // Left(device0): 23, 24, 25, 26, 27, 28, 29
@@ -89,9 +89,9 @@ public:
 
     bool BackToZero() override;
 
-    bool BackToInitPose(const PhysicalRobot::CrpRobotConfig& config_) override;
+    bool BackToInitPose(const PhysicalRobot::Ti5RobotConfig& config_) override;
 
-    bool BackToZero(const PhysicalRobot::CrpRobotConfig& config_) override;
+    bool BackToZero(const PhysicalRobot::Ti5RobotConfig& config_) override;
 
 
     void Info() override;
@@ -106,7 +106,7 @@ public:
 
     bool MoveL() override;
 
-    bool MoveJ(const PhysicalRobot::CrpRobotConfig& config_) override;
+    bool MoveJ(const PhysicalRobot::Ti5RobotConfig& config_) override;
 
     bool Init() override;
 

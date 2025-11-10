@@ -12,7 +12,7 @@ class RobotTeleoperate
 {
 public:
     enum Type{
-        CrpRobot
+        Ti5Robot
     };
 
     struct BasicConfig{

@@ -8,7 +8,7 @@ class CoordinateTransform
 {
 public:
     enum Type{
-        VisionPro2CrpRobot
+        VisionPro2Ti5Robot
     };
 
     struct BasicConfig

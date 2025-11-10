@@ -3,12 +3,12 @@
 
 #include <DataCollector/VisionProCollector.hpp>
 
-class CrpRobotTeleoperate
+class Ti5RobotTeleoperate
         :public RobotTeleoperate
 {
 public:
-    CrpRobotTeleoperate(const RobotTeleoperate::BasicConfig &config);
-    ~CrpRobotTeleoperate();
+    Ti5RobotTeleoperate(const RobotTeleoperate::BasicConfig &config);
+    ~Ti5RobotTeleoperate();
 
     bool Init() override;
     bool StartTeleoperate() override;

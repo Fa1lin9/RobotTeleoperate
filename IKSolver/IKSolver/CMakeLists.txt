@@ -56,7 +56,7 @@ target_link_libraries( ${TARGET_NAME}
         $<BUILD_INTERFACE:casadi::casadi>
         
     PRIVATE
-        $<BUILD_INTERFACE:IKSolver::CrpRobotIKSolver>
+        $<BUILD_INTERFACE:IKSolver::Ti5RobotIKSolver>
 
 )
 

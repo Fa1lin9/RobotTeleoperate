@@ -7,7 +7,7 @@ cmake_minimum_required( VERSION 3.20 )
 #############################################################
 #	Set project name, files, dependancies
 #############################################################
-set( TARGET_NAME "CrpRobotTeleoperate" )
+set( TARGET_NAME "VisionPro2Ti5RobotTransform" )
 message( STATUS "\n-------------  ${GROUP_NAME} - ${TARGET_NAME}  -------------" )
 
 
@@ -27,7 +27,7 @@ file( GLOB INTERFACE_HEADERS
 #	Create target and Set the target prorperties
 #############################################################
 #	Create target
-add_library( ${TARGET_NAME} STATIC ${SOURCES} ${HEADERS} ${INTERFACE_HEADERS} )
+add_library( ${TARGET_NAME} ${SOURCES} ${HEADERS} ${INTERFACE_HEADERS} )
 add_library( ${GROUP_NAME}::${TARGET_NAME} ALIAS ${TARGET_NAME})
 
 #  Set project include directories
@@ -45,17 +45,12 @@ target_include_directories( ${TARGET_NAME}
 
 #   Add dependancies
 target_link_libraries( ${TARGET_NAME}
-    PUBLIC 
-        $<BUILD_INTERFACE:Teleoperate::RobotTeleoperate>
-
+    PUBLIC     
+        $<BUILD_INTERFACE:CoordinateTransform::CoordinateTransform>
     PRIVATE
         
 
 )
-
-if(UNIX)
-  target_link_libraries(${TARGET_NAME} PUBLIC dl)
-endif()
 
 # #   Add Macro compile defination
 # TARGET_COMPILE_DEFINITIONS( ${TARGET_NAME}

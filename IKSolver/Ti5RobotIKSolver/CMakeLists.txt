@@ -7,7 +7,7 @@ cmake_minimum_required( VERSION 3.20 )
 #############################################################
 #	Set project name, files, dependancies
 #############################################################
-set( TARGET_NAME "VisionPro2CrpRobotTransform" )
+set( TARGET_NAME "Ti5RobotIKSolver" )
 message( STATUS "\n-------------  ${GROUP_NAME} - ${TARGET_NAME}  -------------" )
 
 
@@ -46,9 +46,10 @@ target_include_directories( ${TARGET_NAME}
 #   Add dependancies
 target_link_libraries( ${TARGET_NAME}
     PUBLIC     
-        $<BUILD_INTERFACE:CoordinateTransform::CoordinateTransform>
-    PRIVATE
+        $<BUILD_INTERFACE:IKSolver::IKSolver>
         
+    PRIVATE
+
 
 )
 

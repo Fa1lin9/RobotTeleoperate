@@ -7,7 +7,7 @@ cmake_minimum_required( VERSION 3.20 )
 #############################################################
 #	Set project name, files, dependancies
 #############################################################
-set( TARGET_NAME "CrpRobotIKSolver" )
+set( TARGET_NAME "Ti5PhysicalRobot" )
 message( STATUS "\n-------------  ${GROUP_NAME} - ${TARGET_NAME}  -------------" )
 
 
@@ -27,7 +27,7 @@ file( GLOB INTERFACE_HEADERS
 #	Create target and Set the target prorperties
 #############################################################
 #	Create target
-add_library( ${TARGET_NAME} ${SOURCES} ${HEADERS} ${INTERFACE_HEADERS} )
+add_library( ${TARGET_NAME} STATIC ${SOURCES} ${HEADERS} ${INTERFACE_HEADERS} )
 add_library( ${GROUP_NAME}::${TARGET_NAME} ALIAS ${TARGET_NAME})
 
 #  Set project include directories
@@ -35,8 +35,9 @@ target_compile_definitions( ${TARGET_NAME} PUBLIC -DSIM_REMOTEAPICLIENT_OBJECTS 
 target_include_directories( ${TARGET_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${GROUP_NAME}>
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/common>
-    PRIVATE
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/common> 
+        $<BUILD_INTERFACE:${HumaniodRobot_include}>      
+    PRIVATE               
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
@@ -45,13 +46,19 @@ target_include_directories( ${TARGET_NAME}
 
 #   Add dependancies
 target_link_libraries( ${TARGET_NAME}
-    PUBLIC     
-        $<BUILD_INTERFACE:IKSolver::IKSolver>
-        
+    PUBLIC
+        $<BUILD_INTERFACE:Core::CanDriver>
+        $<BUILD_INTERFACE:${HumaniodRobot_LIBS}>
+        $<BUILD_INTERFACE:PhysicalRobot::PhysicalRobot>
     PRIVATE
 
 
+
 )
+
+if(UNIX)
+  target_link_libraries(${TARGET_NAME} PUBLIC dl)
+endif()
 
 # #   Add Macro compile defination
 # TARGET_COMPILE_DEFINITIONS( ${TARGET_NAME}

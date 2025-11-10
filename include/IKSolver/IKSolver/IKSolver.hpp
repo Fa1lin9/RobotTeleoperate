@@ -41,7 +41,7 @@ public:
         double relativeTol;
     };
 
-    struct CrpRobotConfig{
+    struct Ti5RobotConfig{
 
         Eigen::VectorXd q;
         Eigen::VectorXd qInit;

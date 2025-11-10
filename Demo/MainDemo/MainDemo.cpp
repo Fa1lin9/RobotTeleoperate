@@ -27,7 +27,7 @@ int main(){
 //         0,0,-1,0,
 //         0,0,0,1;
 //    CoordinateTransform::BasicConfig basicConfig;
-//    basicConfig.type = CoordinateTransform::Type::VisionPro2CrpRobot;
+//    basicConfig.type = CoordinateTransform::Type::VisionPro2Ti5Robot;
 //    basicConfig.T_Head2Waist = Eigen::Matrix4d::Identity();
 //    basicConfig.T_XR2Robot <<  -1, 0, 0, 0,
 //                                0, 1, 0, 0,
@@ -95,7 +95,7 @@ int main(){
 
 //    return 0;
     RobotTeleoperate::BasicConfig config = {
-        .type = RobotTeleoperate::Type::CrpRobot,
+        .type = RobotTeleoperate::Type::Ti5Robot,
         .address = "tcp://127.0.0.1:5555",
     };
 

@@ -11,7 +11,7 @@ set( msg_head "[Package Teleoperate CMakeLists.txt] :" )
 set( GROUP_NAME "Teleoperate" )
 list( APPEND ${GROUP_NAME}_Components
     RobotTeleoperate
-    CrpRobotTeleoperate
+    Ti5RobotTeleoperate
 )
 
 ##########################################################################
