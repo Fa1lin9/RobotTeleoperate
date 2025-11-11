@@ -54,6 +54,7 @@ target_link_libraries( ${TARGET_NAME}
         $<BUILD_INTERFACE:pinocchio::pinocchio_headers>
         $<BUILD_INTERFACE:NLopt::nlopt>
         $<BUILD_INTERFACE:casadi::casadi>
+#        $<BUILD_INTERFACE:Core::WeightedMovingFilter>
         
     PRIVATE
         $<BUILD_INTERFACE:IKSolver::Ti5RobotIKSolver>

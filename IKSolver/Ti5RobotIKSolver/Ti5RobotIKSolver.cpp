@@ -5,6 +5,13 @@ Ti5RobotIKSolver::Ti5RobotIKSolver(const IKSolver::BasicConfig &config_)
      relativeTol(config_.relativeTol)
 {
     LOG_FUNCTION;
+
+    pinocchio::urdf::buildModel(
+                this->modelPath,
+                this->robotModel);
+
+    this->robotModelSX = this->robotModel.cast<casadi::SX>();
+
     // As For CrpRobot
     // The size of the baseFrameName should be 1
     // The size of the targetFrameName should be 2, and as the order: left arm , right arm
@@ -77,8 +84,8 @@ boost::optional<Eigen::VectorXd> Ti5RobotIKSolver::Solve(
 //        opt = nlopt::opt(nlopt::GD_STOGO , qInit.size());
 //        ObjectWrapper = [](const std::vector<double>& x,std::vector<double>& grad,void *data)->double{
 //            Eigen::Map<const Eigen::VectorXd> q(x.data(),x.size());
-//            CrpRobotData *robotData = static_cast<CrpRobotData*>(data);
-//            IKSolver::CrpRobotConfig config = {
+//            Ti5RobotData *robotData = static_cast<Ti5RobotData*>(data);
+//            IKSolver::Ti5RobotConfig config = {
 //                .q = q,
 //                .qInit= robotData->qInit,
 //                .targetPose = robotData->targetPose,
@@ -101,8 +108,8 @@ boost::optional<Eigen::VectorXd> Ti5RobotIKSolver::Solve(
 //        opt = nlopt::opt(nlopt::GN_DIRECT_L , qInit.size());
 //        ObjectWrapper = [](const std::vector<double>& x,std::vector<double>& grad,void *data)->double{
 //            Eigen::Map<const Eigen::VectorXd> q(x.data(),x.size());
-//            CrpRobotData *robotData = static_cast<CrpRobotData*>(data);
-//            IKSolver::CrpRobotConfig config = {
+//            Ti5RobotData *robotData = static_cast<Ti5RobotData*>(data);
+//            IKSolver::Ti5RobotConfig config = {
 //                .q = q,
 //                .qInit= robotData->qInit,
 //                .targetPose = robotData->targetPose,
@@ -135,7 +142,7 @@ boost::optional<Eigen::VectorXd> Ti5RobotIKSolver::Solve(
 //    opt.set_maxeval(this->maxIteration);
 //    opt.set_xtol_rel(this->relativeTol);
 
-//    CrpRobotData robotData = {
+//    Ti5RobotData robotData = {
 //        .solver = this,
 //        .qInit = qInit,
 //        .targetPose = targetPose,
@@ -206,8 +213,8 @@ boost::optional<Eigen::VectorXd> Ti5RobotIKSolver::Solve(
     this->opti.set_value(this->targetPoseLeft, targetPoseLeftDM);
     this->opti.set_value(this->targetPoseRight, targetPoseRightDM);
 
-//    std::cout<<"targetPose in Eigen:"<<targetPose[0]<<std::endl;
-//    std::cout<<"targetPose in Casadi:"<<targetPoseLeftDM<<std::endl;
+    std::cout<<"targetPose in Eigen:"<<targetPose[0]<<std::endl;
+    std::cout<<"targetPose in Casadi:"<<targetPoseLeftDM<<std::endl;
 
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -231,7 +238,7 @@ boost::optional<Eigen::VectorXd> Ti5RobotIKSolver::Solve(
     if(verbose){
         // check result
         std::cout<<"------------ Solver Result ------------"<<std::endl;
-        std::cout << " Joint Value =\n" << qEigen << std::endl;
+        std::cout << " Joint Value =\n" << std::fixed << std::setprecision(3) << qEigen << std::endl;
 //                std::cout << " Function Value = " << funcValue << std::endl;
         std::cout<<" Left Arm Translation: \n"<<Forward(qEigen)[0].translation()<<std::endl;
         std::cout<<" Left Arm Rotation: \n"<<Forward(qEigen)[0].rotation()<<std::endl;
@@ -367,6 +374,10 @@ std::vector<pinocchio::SE3> Ti5RobotIKSolver::Forward(const Eigen::VectorXd& q){
     return std::vector<pinocchio::SE3>{leftArmPose, rightArmPose};
 }
 
+size_t Ti5RobotIKSolver::GetDofTotal(){
+    return this->dofTotal;
+}
+
 bool Ti5RobotIKSolver::isPoseMatrix(const Eigen::Matrix4d &mat,
                                     const double& eps){
 
@@ -479,6 +490,13 @@ void Ti5RobotIKSolver::NormalizeAngle(Eigen::VectorXd& angle){
 
 void Ti5RobotIKSolver::InitRobot(){
 //    LOG_FUNCTION;
+    // Init Model
+//    pinocchio::urdf::buildModel(
+//                this->modelPath,
+//                this->robotModel);
+
+//    this->robotModelSX = this->robotModel.cast<casadi::SX>();
+
     double min,max;
     for(size_t i = 0;i<this->dofArm;i++){
         // left arm
@@ -532,12 +550,6 @@ void Ti5RobotIKSolver::InitRobot(){
 }
 
 void Ti5RobotIKSolver::InitOptim(){
-    // Init Model
-//    pinocchio::urdf::buildModel(
-//                this->modelPath,
-//                this->robotModel);
-
-//    this->robotModelSX = this->robotModel.cast<casadi::SX>();
 //    pinocchio::DataTpl<casadi::SX> dataSX(this->robotModelSX);
     this->dataPtrSX = std::make_shared<pinocchio::DataTpl<casadi::SX>>(this->robotModelSX);
 
@@ -660,26 +672,26 @@ void Ti5RobotIKSolver::InitOptim(){
 
 void Ti5RobotIKSolver::InitAD(const std::vector<Eigen::Matrix4d>& targetPose_,
                                     const Eigen::VectorXd& qInit_){
-    // Variable
-    casadi::SX qVar = casadi::SX::sym("qVar",this->dofTotal,1);
+//    // Variable
+//    casadi::SX qVar = casadi::SX::sym("qVar",this->dofTotal,1);
 
-    pinocchio::DataTpl<casadi::SX>::ConfigVectorType q =
-            pinocchio::DataTpl<casadi::SX>::ConfigVectorType::Zero(this->dofTotal);
+//    pinocchio::DataTpl<casadi::SX>::ConfigVectorType q =
+//            pinocchio::DataTpl<casadi::SX>::ConfigVectorType::Zero(this->dofTotal);
 
-    std::vector<Eigen::Matrix<casadi::SX,4,4>> targetPose(targetPose_.size());
-    for(size_t i=0;i<targetPose_.size();i++){
-        targetPose[i] = targetPose_[i].cast<casadi::SX>();
-    }
+//    std::vector<Eigen::Matrix<casadi::SX,4,4>> targetPose(targetPose_.size());
+//    for(size_t i=0;i<targetPose_.size();i++){
+//        targetPose[i] = targetPose_[i].cast<casadi::SX>();
+//    }
 
-    Eigen::Matrix<casadi::SX,Eigen::Dynamic,1> qInit = qInit_.cast<casadi::SX>();
+//    Eigen::Matrix<casadi::SX,Eigen::Dynamic,1> qInit = qInit_.cast<casadi::SX>();
 
-    for(int i =0;i<q.size();i++){
-        q(i) = qVar(i);
-    }
+//    for(int i =0;i<q.size();i++){
+//        q(i) = qVar(i);
+//    }
 
-    casadi::SX costFunc = this->ObjectiveFuncSX(q,qInit,targetPose);
-    casadi::SX gradFunc = gradient(costFunc,qVar);
-    this->mainFunc = casadi::Function("mainFunc", {qVar}, {costFunc, gradFunc});
+//    casadi::SX costFunc = this->ObjectiveFuncSX(q,qInit,targetPose);
+//    casadi::SX gradFunc = gradient(costFunc,qVar);
+//    this->mainFunc = casadi::Function("mainFunc", {qVar}, {costFunc, gradFunc});
 }
 
 casadi::SX Ti5RobotIKSolver::ObjectiveFuncSX(

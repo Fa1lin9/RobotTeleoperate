@@ -85,6 +85,8 @@ public:
 
     std::vector<pinocchio::SE3> Forward(const Eigen::VectorXd& q) override;
 
+    size_t GetDofTotal() override;
+
 //    Eigen::VectorXd GetGradient(const IKSolver::CrpRobotConfig& config_);
 
     void Info() override;

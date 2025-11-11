@@ -64,6 +64,7 @@ Ti5RobotTeleoperate::Ti5RobotTeleoperate(const RobotTeleoperate::BasicConfig &co
 
     boost::shared_ptr<PhysicalRobot> physicalRobotPtr
             = PhysicalRobot::GetPtr(robotConfig);
+
 }
 
 Ti5RobotTeleoperate::~Ti5RobotTeleoperate(){
@@ -71,6 +72,8 @@ Ti5RobotTeleoperate::~Ti5RobotTeleoperate(){
 }
 
 bool Ti5RobotTeleoperate::StartTeleoperate(){
+    // Filter
+    WeightedMovingFilter filter(std::vector<double>{0.7, 0.2, 0.1}, this->ikSolverPtr->GetDofTotal());
 
     int FPS = 20;
     this->startFlag = true;
@@ -120,10 +123,19 @@ bool Ti5RobotTeleoperate::StartTeleoperate(){
 //        auto solveEnd = std::chrono::high_resolution_clock::now();
 //        auto solveDuration = std::chrono::duration_cast<std::chrono::milliseconds>(solveEnd - solveStart);
 //        std::cout << " Solve 耗时: " << solveDuration.count() << " ms" << std::endl;
+
+        Eigen::VectorXd qEigen;
+
         if(q.has_value()){
-            qInit = q.value();
+            qEigen = q.value();
+
+            // Filter
+            filter.AddData(qEigen);
+            qEigen = filter.GetFilteredData();
+
+            qInit = qEigen;
 //            qInit = physicalRobotPtr->GetJointsAngleEigen();
-            std::cout << "q:\n" << q << std::endl;
+            std::cout << "q:\n" << std::fixed << std::setprecision(3) << q << std::endl;
         }else{
             std::cout<<" Solve failed! "<<std::endl;
             continue;

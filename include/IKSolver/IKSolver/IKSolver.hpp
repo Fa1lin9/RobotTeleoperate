@@ -18,6 +18,8 @@
 
 #include <nlopt.hpp>
 
+//#include <WeightedMovingFilter/WeightedMovingFilter.hpp>
+
 class IKSolver
 {
 public:
@@ -66,6 +68,8 @@ public:
 
     // Output some information of the current solver
     virtual void Info() = 0;
+
+    virtual size_t GetDofTotal() = 0;
 
     static boost::shared_ptr<IKSolver> GetPtr(const IKSolver::BasicConfig& config_);
 
