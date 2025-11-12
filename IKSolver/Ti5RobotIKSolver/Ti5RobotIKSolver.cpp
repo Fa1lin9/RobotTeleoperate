@@ -5,7 +5,7 @@ Ti5RobotIKSolver::Ti5RobotIKSolver(const IKSolver::BasicConfig &config_)
      relativeTol(config_.relativeTol)
 {
     LOG_FUNCTION;
-
+    // the initialization of the model must be first
     pinocchio::urdf::buildModel(
                 this->modelPath,
                 this->robotModel);
@@ -66,189 +66,194 @@ boost::optional<Eigen::VectorXd> Ti5RobotIKSolver::Solve(
         }
     }
 
-//    // time consumed a lot
-//    this->InitAD(targetPose,qInit);
+    bool useNlopt = false;
+    if(useNlopt){
+        // time consumed a lot
+        this->InitAD(targetPose,qInit);
 
-//    nlopt::opt opt;
+        nlopt::opt opt;
 
-//    double (*ObjectWrapper)(const std::vector<double>& x,std::vector<double>& grad,void *data);
+        double (*ObjectWrapper)(const std::vector<double>& x,std::vector<double>& grad,void *data);
 
-//    // update casadi variable
-////    this->qInit = qInit.cast<casadi::SX>();
-////    for(size_t i=0;i<this->targetPose.size();i++){
-////        this->targetPose[i] = targetPose[i].cast<casadi::SX>();
-////    }
+        // update casadi variable
+    //    this->qInit = qInit.cast<casadi::SX>();
+    //    for(size_t i=0;i<this->targetPose.size();i++){
+    //        this->targetPose[i] = targetPose[i].cast<casadi::SX>();
+    //    }
 
-//    bool useGrad = 1;
-//    if(useGrad){
-//        opt = nlopt::opt(nlopt::GD_STOGO , qInit.size());
-//        ObjectWrapper = [](const std::vector<double>& x,std::vector<double>& grad,void *data)->double{
-//            Eigen::Map<const Eigen::VectorXd> q(x.data(),x.size());
-//            Ti5RobotData *robotData = static_cast<Ti5RobotData*>(data);
-//            IKSolver::Ti5RobotConfig config = {
-//                .q = q,
-//                .qInit= robotData->qInit,
-//                .targetPose = robotData->targetPose,
-//            };
+        bool useGrad = 1;
+        if(useGrad){
+            opt = nlopt::opt(nlopt::GD_STOGO , qInit.size());
+            ObjectWrapper = [](const std::vector<double>& x,std::vector<double>& grad,void *data)->double{
+                Eigen::Map<const Eigen::VectorXd> q(x.data(),x.size());
+                Ti5RobotData *robotData = static_cast<Ti5RobotData*>(data);
+                IKSolver::Ti5RobotConfig config = {
+                    .q = q,
+                    .qInit= robotData->qInit,
+                    .targetPose = robotData->targetPose,
+                };
 
-//            casadi::DM qVar = casadi::DM(x);
-//            grad.resize(robotData->solver->dofTotal);
-//            std::vector<casadi::DM> output = robotData->solver->mainFunc({qVar});
+                casadi::DM qVar = casadi::DM(x);
+                grad.resize(robotData->solver->dofTotal);
+                std::vector<casadi::DM> output = robotData->solver->mainFunc({qVar});
 
-//            double objectiveFunc = double(output[0]);
-//            casadi::DM gradFunc = output[1];
-//            std::transform(
-//                        gradFunc->begin(), gradFunc->end(), grad.begin(),
-//                        [](const auto& v){ return double(v); }
-//            );
+                double objectiveFunc = double(output[0]);
+                casadi::DM gradFunc = output[1];
+                std::transform(
+                            gradFunc->begin(), gradFunc->end(), grad.begin(),
+                            [](const auto& v){ return double(v); }
+                );
 
-//            return objectiveFunc;
-//        };
-//    }else{
-//        opt = nlopt::opt(nlopt::GN_DIRECT_L , qInit.size());
-//        ObjectWrapper = [](const std::vector<double>& x,std::vector<double>& grad,void *data)->double{
-//            Eigen::Map<const Eigen::VectorXd> q(x.data(),x.size());
-//            Ti5RobotData *robotData = static_cast<Ti5RobotData*>(data);
-//            IKSolver::Ti5RobotConfig config = {
-//                .q = q,
-//                .qInit= robotData->qInit,
-//                .targetPose = robotData->targetPose,
-//            };
+                return objectiveFunc;
+            };
+        }else{
+            opt = nlopt::opt(nlopt::GN_DIRECT_L , qInit.size());
+            ObjectWrapper = [](const std::vector<double>& x,std::vector<double>& grad,void *data)->double{
+                Eigen::Map<const Eigen::VectorXd> q(x.data(),x.size());
+                Ti5RobotData *robotData = static_cast<Ti5RobotData*>(data);
+                IKSolver::Ti5RobotConfig config = {
+                    .q = q,
+                    .qInit= robotData->qInit,
+                    .targetPose = robotData->targetPose,
+                };
 
-//            return robotData->solver->ObjectiveFunc(config);
-//        };
-//    }
-
-//    // set limitation to joint5
-////    this->totalBoundsLower[8] = 0;
-////    this->totalBoundsUpper[8] = 0;
-////    this->totalBoundsLower[18] = 0;
-////    this->totalBoundsUpper[18] = 0;
-//    // set limitation to joint6
-//    this->totalBoundsLower[9] = 0;
-//    this->totalBoundsUpper[9] = 0;
-//    this->totalBoundsLower[19] = 0;
-//    this->totalBoundsUpper[19] = 0;
-//    // set limitation to joint7
-//    this->totalBoundsLower[10] = 0;
-//    this->totalBoundsUpper[10] = 0;
-//    this->totalBoundsLower[20] = 0;
-//    this->totalBoundsUpper[20] = 0;
-
-//    // set bounds
-//    opt.set_lower_bounds(this->totalBoundsLower);
-//    opt.set_upper_bounds(this->totalBoundsUpper);
-
-//    opt.set_maxeval(this->maxIteration);
-//    opt.set_xtol_rel(this->relativeTol);
-
-//    Ti5RobotData robotData = {
-//        .solver = this,
-//        .qInit = qInit,
-//        .targetPose = targetPose,
-//    };
-
-//    opt.set_min_objective(ObjectWrapper, &robotData);
-
-//    double funcValue;
-
-//    std::vector<double> q(this->dofTotal);
-////    q = this->qNeutral;
-
-
-//    auto start = std::chrono::high_resolution_clock::now();
-
-//    nlopt::result result = opt.optimize(q, funcValue);
-//    auto end = std::chrono::high_resolution_clock::now();
-//    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-//    std::cout << " optimazation 耗时: " << duration.count() << " ms" << std::endl;
-//    std::cout << " Function Value = " << funcValue << std::endl;
-
-//    if(result<0){
-//        std::string error = " Optimize failed! ";
-//        throw std::logic_error(error);
-
-//    }
-
-//    Eigen::Map<Eigen::VectorXd> qEigen(q.data(),q.size());
-
-//    if(verbose){
-//        // check result
-//        std::cout<<"------------ Solver Result ------------"<<std::endl;
-//        std::cout << " Joint Value =\n" << qEigen << std::endl;
-//        std::cout << " Function Value = " << funcValue << std::endl;
-//        std::cout<<" Left Arm Translation: \n"<<Forward(qEigen)[0].translation()<<std::endl;
-//        std::cout<<" Left Arm Rotation: \n"<<Forward(qEigen)[0].rotation()<<std::endl;
-//        std::cout<<" Right Arm Translation: \n"<<Forward(qEigen)[1].translation()<<std::endl;
-//        std::cout<<" Rigit Arm Rotation: \n"<<Forward(qEigen)[1].rotation()<<std::endl;
-//        std::cout<<"------------ Solver Result ------------"<<std::endl;
-//    }
-
-//    return boost::optional<Eigen::VectorXd>(qEigen);
-
-    // set value
-    // qInit
-    std::vector<double> qInitVec(qInit.data(), qInit.data() + qInit.size());
-    this->opti.set_value(this->qInit, casadi::DM(qInitVec));
-
-
-    // targetPose
-//    std::vector<double> targetPoseLeftVec(targetPose[0].data(), targetPose[0].data() + targetPose[0].size());
-//    casadi::DM targetPoseLeftDM = casadi::DM(targetPoseLeftVec);
-//    targetPoseLeftDM = casadi::DM::reshape(targetPoseLeftDM, targetPose[0].rows(), targetPose[0].cols());
-//    this->opti.set_value(this->targetPoseLeft, targetPoseLeftDM);
-
-//    std::vector<double> targetPoseRightVec(targetPose[1].data(), targetPose[1].data() + targetPose[1].size());
-//    casadi::DM targetPoseRightDM = casadi::DM(targetPoseRightVec);
-//    targetPoseRightDM = casadi::DM::reshape(targetPoseRightDM, targetPose[1].rows(), targetPose[1].cols());
-//    this->opti.set_value(this->targetPoseRight, targetPoseRightDM);
-    casadi::DM targetPoseLeftDM(4,4);
-    casadi::DM targetPoseRightDM(4,4);
-    for(size_t i=0;i<4;i++){
-        for(size_t j=0;j<4;j++){
-            targetPoseLeftDM(i,j) = targetPose[0](i,j);
-            targetPoseRightDM(i,j) = targetPose[1](i,j);
+                return robotData->solver->ObjectiveFunc(config);
+            };
         }
+
+        // set limitation to joint5
+    //    this->totalBoundsLower[8] = 0;
+    //    this->totalBoundsUpper[8] = 0;
+    //    this->totalBoundsLower[18] = 0;
+    //    this->totalBoundsUpper[18] = 0;
+        // set limitation to joint6
+        this->totalBoundsLower[9] = 0;
+        this->totalBoundsUpper[9] = 0;
+        this->totalBoundsLower[19] = 0;
+        this->totalBoundsUpper[19] = 0;
+        // set limitation to joint7
+        this->totalBoundsLower[10] = 0;
+        this->totalBoundsUpper[10] = 0;
+        this->totalBoundsLower[20] = 0;
+        this->totalBoundsUpper[20] = 0;
+
+        // set bounds
+        opt.set_lower_bounds(this->totalBoundsLower);
+        opt.set_upper_bounds(this->totalBoundsUpper);
+
+        opt.set_maxeval(this->maxIteration);
+        opt.set_xtol_rel(this->relativeTol);
+
+        Ti5RobotData robotData = {
+            .solver = this,
+            .qInit = qInit,
+            .targetPose = targetPose,
+        };
+
+        opt.set_min_objective(ObjectWrapper, &robotData);
+
+        double funcValue;
+
+        std::vector<double> q(this->dofTotal);
+    //    q = this->qNeutral;
+
+
+        auto start = std::chrono::high_resolution_clock::now();
+
+        nlopt::result result = opt.optimize(q, funcValue);
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << " optimazation 耗时: " << duration.count() << " ms" << std::endl;
+        std::cout << " Function Value = " << funcValue << std::endl;
+
+        if(result<0){
+            std::string error = " Optimize failed! ";
+            throw std::logic_error(error);
+
+        }
+
+        Eigen::Map<Eigen::VectorXd> qEigen(q.data(),q.size());
+
+        if(verbose){
+            // check result
+            std::cout<<"------------ Solver Result ------------"<<std::endl;
+            std::cout << " Joint Value =\n" << qEigen << std::endl;
+            std::cout << " Function Value = " << funcValue << std::endl;
+            std::cout<<" Left Arm Translation: \n"<<Forward(qEigen)[0].translation()<<std::endl;
+            std::cout<<" Left Arm Rotation: \n"<<Forward(qEigen)[0].rotation()<<std::endl;
+            std::cout<<" Right Arm Translation: \n"<<Forward(qEigen)[1].translation()<<std::endl;
+            std::cout<<" Rigit Arm Rotation: \n"<<Forward(qEigen)[1].rotation()<<std::endl;
+            std::cout<<"------------ Solver Result ------------"<<std::endl;
+        }
+
+        return boost::optional<Eigen::VectorXd>(qEigen);
+
+    }else{
+        // set value
+        // qInit
+        std::vector<double> qInitVec(qInit.data(), qInit.data() + qInit.size());
+        this->opti.set_value(this->qInit, casadi::DM(qInitVec));
+
+
+        // targetPose
+    //    std::vector<double> targetPoseLeftVec(targetPose[0].data(), targetPose[0].data() + targetPose[0].size());
+    //    casadi::DM targetPoseLeftDM = casadi::DM(targetPoseLeftVec);
+    //    targetPoseLeftDM = casadi::DM::reshape(targetPoseLeftDM, targetPose[0].rows(), targetPose[0].cols());
+    //    this->opti.set_value(this->targetPoseLeft, targetPoseLeftDM);
+
+    //    std::vector<double> targetPoseRightVec(targetPose[1].data(), targetPose[1].data() + targetPose[1].size());
+    //    casadi::DM targetPoseRightDM = casadi::DM(targetPoseRightVec);
+    //    targetPoseRightDM = casadi::DM::reshape(targetPoseRightDM, targetPose[1].rows(), targetPose[1].cols());
+    //    this->opti.set_value(this->targetPoseRight, targetPoseRightDM);
+        casadi::DM targetPoseLeftDM(4,4);
+        casadi::DM targetPoseRightDM(4,4);
+        for(size_t i=0;i<4;i++){
+            for(size_t j=0;j<4;j++){
+                targetPoseLeftDM(i,j) = targetPose[0](i,j);
+                targetPoseRightDM(i,j) = targetPose[1](i,j);
+            }
+        }
+
+        this->opti.set_value(this->targetPoseLeft, targetPoseLeftDM);
+        this->opti.set_value(this->targetPoseRight, targetPoseRightDM);
+
+//        std::cout<<"targetPose in Eigen:"<<targetPose[0]<<std::endl;
+//        std::cout<<"targetPose in Casadi:"<<targetPoseLeftDM<<std::endl;
+
+        auto start = std::chrono::high_resolution_clock::now();
+
+        casadi::OptiSol sol = this->opti.solve();
+
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << "Optimization 耗时: " << duration.count() << " ms" << std::endl;
+
+        // -----------------------------
+        // 获取求解结果
+        // -----------------------------
+        casadi::DM qSolution = sol.value(this->qVar);
+
+        // 直接用 Eigen::Map 转为 Eigen::VectorXd
+        Eigen::VectorXd qEigen = Eigen::Map<Eigen::VectorXd>(qSolution.ptr(), qSolution.size1());
+
+        // -----------------------------
+        // 打印调试信息
+        // -----------------------------
+        if(verbose){
+            // check result
+            std::cout<<"------------ Solver Result ------------"<<std::endl;
+            std::cout << " Joint Value =\n" << std::fixed << std::setprecision(3) << qEigen << std::endl;
+    //                std::cout << " Function Value = " << funcValue << std::endl;
+            std::cout<<" Left Arm Translation: \n"<<Forward(qEigen)[0].translation()<<std::endl;
+            std::cout<<" Left Arm Rotation: \n"<<Forward(qEigen)[0].rotation()<<std::endl;
+            std::cout<<" Right Arm Translation: \n"<<Forward(qEigen)[1].translation()<<std::endl;
+            std::cout<<" Rigit Arm Rotation: \n"<<Forward(qEigen)[1].rotation()<<std::endl;
+            std::cout<<"------------ Solver Result ------------"<<std::endl;
+        }
+
+        // 返回 Eigen::VectorXd
+        return boost::optional<Eigen::VectorXd>(qEigen);
     }
-    this->opti.set_value(this->targetPoseLeft, targetPoseLeftDM);
-    this->opti.set_value(this->targetPoseRight, targetPoseRightDM);
-
-    std::cout<<"targetPose in Eigen:"<<targetPose[0]<<std::endl;
-    std::cout<<"targetPose in Casadi:"<<targetPoseLeftDM<<std::endl;
-
-    auto start = std::chrono::high_resolution_clock::now();
-
-    casadi::OptiSol sol = this->opti.solve();
-
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "Optimization 耗时: " << duration.count() << " ms" << std::endl;
-
-    // -----------------------------
-    // 获取求解结果
-    // -----------------------------
-    casadi::DM qSolution = sol.value(this->qVar);
-
-    // 直接用 Eigen::Map 转为 Eigen::VectorXd
-    Eigen::VectorXd qEigen = Eigen::Map<Eigen::VectorXd>(qSolution.ptr(), qSolution.size1());
-
-    // -----------------------------
-    // 打印调试信息
-    // -----------------------------
-    if(verbose){
-        // check result
-        std::cout<<"------------ Solver Result ------------"<<std::endl;
-        std::cout << " Joint Value =\n" << std::fixed << std::setprecision(3) << qEigen << std::endl;
-//                std::cout << " Function Value = " << funcValue << std::endl;
-        std::cout<<" Left Arm Translation: \n"<<Forward(qEigen)[0].translation()<<std::endl;
-        std::cout<<" Left Arm Rotation: \n"<<Forward(qEigen)[0].rotation()<<std::endl;
-        std::cout<<" Right Arm Translation: \n"<<Forward(qEigen)[1].translation()<<std::endl;
-        std::cout<<" Rigit Arm Rotation: \n"<<Forward(qEigen)[1].rotation()<<std::endl;
-        std::cout<<"------------ Solver Result ------------"<<std::endl;
-    }
-
-    // 返回 Eigen::VectorXd
-    return boost::optional<Eigen::VectorXd>(qEigen);
 }
 
 void Ti5RobotIKSolver::Info(){
@@ -672,26 +677,26 @@ void Ti5RobotIKSolver::InitOptim(){
 
 void Ti5RobotIKSolver::InitAD(const std::vector<Eigen::Matrix4d>& targetPose_,
                                     const Eigen::VectorXd& qInit_){
-//    // Variable
-//    casadi::SX qVar = casadi::SX::sym("qVar",this->dofTotal,1);
+    // Variable
+    casadi::SX qVar = casadi::SX::sym("qVar",this->dofTotal,1);
 
-//    pinocchio::DataTpl<casadi::SX>::ConfigVectorType q =
-//            pinocchio::DataTpl<casadi::SX>::ConfigVectorType::Zero(this->dofTotal);
+    pinocchio::DataTpl<casadi::SX>::ConfigVectorType q =
+            pinocchio::DataTpl<casadi::SX>::ConfigVectorType::Zero(this->dofTotal);
 
-//    std::vector<Eigen::Matrix<casadi::SX,4,4>> targetPose(targetPose_.size());
-//    for(size_t i=0;i<targetPose_.size();i++){
-//        targetPose[i] = targetPose_[i].cast<casadi::SX>();
-//    }
+    std::vector<Eigen::Matrix<casadi::SX,4,4>> targetPose(targetPose_.size());
+    for(size_t i=0;i<targetPose_.size();i++){
+        targetPose[i] = targetPose_[i].cast<casadi::SX>();
+    }
 
-//    Eigen::Matrix<casadi::SX,Eigen::Dynamic,1> qInit = qInit_.cast<casadi::SX>();
+    Eigen::Matrix<casadi::SX,Eigen::Dynamic,1> qInit = qInit_.cast<casadi::SX>();
 
-//    for(int i =0;i<q.size();i++){
-//        q(i) = qVar(i);
-//    }
+    for(int i =0;i<q.size();i++){
+        q(i) = qVar(i);
+    }
 
-//    casadi::SX costFunc = this->ObjectiveFuncSX(q,qInit,targetPose);
-//    casadi::SX gradFunc = gradient(costFunc,qVar);
-//    this->mainFunc = casadi::Function("mainFunc", {qVar}, {costFunc, gradFunc});
+    casadi::SX costFunc = this->ObjectiveFuncSX(q,qInit,targetPose);
+    casadi::SX gradFunc = gradient(costFunc,qVar);
+    this->mainFunc = casadi::Function("mainFunc", {qVar}, {costFunc, gradFunc});
 }
 
 casadi::SX Ti5RobotIKSolver::ObjectiveFuncSX(

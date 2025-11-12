@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 6.0.2, 2025-09-23T16:18:40. -->
+<!-- Written by QtCreator 6.0.2, 2025-11-12T16:28:21. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -97,7 +97,7 @@
    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">{bfd70a97-77bc-439b-9178-39b4afb98fb7}</value>
    <value type="int" key="ProjectExplorer.Target.ActiveBuildConfiguration">0</value>
    <value type="int" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
-   <value type="int" key="ProjectExplorer.Target.ActiveRunConfiguration">3</value>
+   <value type="int" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
     <value type="QString" key="CMake.Build.Type">Debug</value>
     <value type="QString" key="CMake.Initial.Parameters">-GUnix Makefiles
@@ -174,7 +174,6 @@
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/ti5robot/workspace_chf/project/build-RobotTeleoperate-Desktop-Debug/Debug/bin</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.1">
     <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
@@ -191,7 +190,6 @@
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/ti5robot/workspace_chf/project/build-RobotTeleoperate-Desktop-Debug/Debug/bin</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.2">
     <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
@@ -208,7 +206,6 @@
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/ti5robot/workspace_chf/project/build-RobotTeleoperate-Desktop-Debug/Debug/bin</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.3">
     <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
@@ -225,7 +222,6 @@
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/ti5robot/workspace_chf/project/build-RobotTeleoperate-Desktop-Debug/Debug/bin</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.4">
     <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
@@ -242,7 +238,6 @@
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/ti5robot/workspace_chf/project/build-RobotTeleoperate-Desktop-Debug/Debug/bin</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.5">
     <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
@@ -259,7 +254,6 @@
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/ti5robot/workspace_chf/project/build-RobotTeleoperate-Desktop-Debug/Debug/bin</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.RunConfiguration.6">
     <value type="bool" key="Analyzer.Perf.Settings.UseGlobalSettings">true</value>
@@ -276,7 +270,6 @@
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/home/ti5robot/workspace_chf/project/build-RobotTeleoperate-Desktop-Debug/Debug/bin</value>
    </valuemap>
    <value type="int" key="ProjectExplorer.Target.RunConfigurationCount">7</value>
   </valuemap>
