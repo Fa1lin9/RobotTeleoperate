@@ -7,7 +7,7 @@ cmake_minimum_required( VERSION 3.20 )
 #############################################################
 #	Set project name, files, dependancies
 #############################################################
-set( TARGET_NAME "FastDDSDemo" )
+set( TARGET_NAME "String_" )
 message( STATUS "\n-------------  ${GROUP_NAME} - ${TARGET_NAME}  -------------" )
 
 
@@ -19,6 +19,7 @@ message( STATUS "\n-------------  ${GROUP_NAME} - ${TARGET_NAME}  -------------"
 file(GLOB SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/*.cxx"
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.ipp"
 )
 
 file( GLOB HEADERS ./*.h  *.hpp )
@@ -32,7 +33,8 @@ file( GLOB INTERFACE_HEADERS
 #	Create target and Set the target prorperties
 #############################################################
 #	Create target
-add_executable( ${TARGET_NAME} ${SOURCES} ${HEADERS} ${INTERFACE_HEADERS} )
+add_library( ${TARGET_NAME} ${SOURCES} ${HEADERS} ${INTERFACE_HEADERS} )
+add_library( ${GROUP_NAME}::${TARGET_NAME} ALIAS ${TARGET_NAME})
 
 #  Set project include directories
 target_compile_definitions( ${TARGET_NAME} PUBLIC -DSIM_REMOTEAPICLIENT_OBJECTS )
@@ -54,7 +56,6 @@ target_link_libraries( ${TARGET_NAME}
     PRIVATE
         $<BUILD_INTERFACE:fastdds>
         $<BUILD_INTERFACE:fastcdr>
-        $<BUILD_INTERFACE:FastDDSInterface::Ros2Bridge>
 )
 
 # find_package( ament_cmake REQUIRED )

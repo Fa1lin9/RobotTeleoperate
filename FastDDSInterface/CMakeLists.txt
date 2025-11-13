@@ -8,13 +8,11 @@ set( msg_head "[Package Core CMakeLists.txt] :" )
 ##########################################################################
 #	MainRoutine group components definition
 ##########################################################################
-set( GROUP_NAME "Core" )
+set( GROUP_NAME "FastDDSInterface" )
 list( APPEND ${GROUP_NAME}_Components
-    DataCollector
-    CanDriver
-    CsvWriter
-    WeightedMovingFilter
-    # FastDDSInterface
+    Ros2Bridge
+    JointState
+    String_
 )
 
 ##########################################################################
