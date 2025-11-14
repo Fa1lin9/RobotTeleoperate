@@ -8,69 +8,74 @@ Ti5RobotTeleoperate::Ti5RobotTeleoperate(const RobotTeleoperate::BasicConfig &co
     :address(config.address),
      dataCollector(VisionProCollector(this->address))
 {
-    // IKSolver
-    Eigen::Matrix4d baseOffset;
-    baseOffset << 1, 0, 0, +0.02,
-                    0, 1, 0, 0,
-                    0, 0, 1, +1.10,
-                    0, 0 ,0, 1;
-    IKSolver::BasicConfig solverConfig = {
-        .type = IKSolver::Type::CrpRobot,
-        .baseFrameName = {"BASE_S"},
-        .targetFrameName = {"L_WRIST_R", "R_WRIST_R"},
-        .baseOffset = {baseOffset},
-        // for nlopt
-//        .maxIteration = 400,
-//        .relativeTol = 1e-2,
-        // for ipopt
-        .maxIteration = 50,
-        .relativeTol = 1e-6,
-        .dofLeftArm = 6,
-        .dofRightArm = 6,
-    };
-
-    this->ikSolverPtr = IKSolver::GetPtr(solverConfig);
-
     // qInit
     this->qInit = Eigen::VectorXd::Zero(21);
     qInit.segment(4,7) << -0.72, -1.0, 0.57, -1.0, 0.83, 0, 0;
     qInit.segment(14,7) << 0.72, 1.0, -0.57, 1.0, -0.83, 0, 0;
 
-    // CoordinateTransform
-    Eigen::Matrix4d temp;
-    temp<<1,0,0,0,
-         0,-1,0,0,
-         0,0,-1,0,
-         0,0,0,1;
-    CoordinateTransform::BasicConfig transformConfig;
-    transformConfig.type = CoordinateTransform::Type::VisionPro2Ti5Robot;
-    transformConfig.T_Head2Waist = Eigen::Matrix4d::Identity();
-    transformConfig.T_XR2Robot <<   0, 0, -1, 0,
-                                    -1, 0, 0, 0,
-                                    0, 1, 0, 0,
-                                    0, 0, 0, 1;
-    transformConfig.T_Robot2LeftWrist <<0.0, 1.0, 0.0, 0.0,
-                                        -1.0, 0.0,0.0, 0.0,
-                                        0.0, 0.0, 1.0, 0.0,
-                                        0.0, 0.0, 0.0, 1.0;
-//    transformConfig.T_Robot2LeftWrist = Eigen::Matrix4d::Identity();
-//    transformConfig.T_Robot2LeftWrist = temp * transformConfig.T_Robot2LeftWrist;
-    transformConfig.T_Robot2RightWrist <<   0.0,-1.0, 0.0, 0.0,
-                                            1.0, 0.0, 0.0, 0.0,
-                                            0.0, 0.0, 1.0, 0.0,
-                                            0.0, 0.0, 0.0, 1.0;
-//    transformConfig.T_Robot2RightWrist = Eigen::Matrix4d::Identity();
-    transformConfig.offset << 0, 0, 0;
-    this->transformPtr = CoordinateTransform::GetPtr(transformConfig);
+    // config inintialzation
+//    // IKSolver
+//    Eigen::Matrix4d baseOffset;
+//    baseOffset << 1, 0, 0, +0.02,
+//                    0, 1, 0, 0,
+//                    0, 0, 1, +1.10,
+//                    0, 0 ,0, 1;
+//    IKSolver::BasicConfig solverConfig = {
+//        .type = IKSolver::Type::CrpRobot,
+//        .baseFrameName = {"BASE_S"},
+//        .targetFrameName = {"L_WRIST_R", "R_WRIST_R"},
+//        .baseOffset = {baseOffset},
+//        // for nlopt
+////        .maxIteration = 400,
+////        .relativeTol = 1e-2,
+//        // for ipopt
+//        .maxIteration = 50,
+//        .relativeTol = 1e-6,
+//        .dofLeftArm = 6,
+//        .dofRightArm = 6,
+//    };
 
-    // PhysicalRobot
-    PhysicalRobot::BasicConfig robotConfig = {
-        .type = PhysicalRobot::Type::CrpRobot,
-    };
+    this->ikSolverPtr = IKSolver::GetPtr(config.solverConfig);
 
-    boost::shared_ptr<PhysicalRobot> physicalRobotPtr
-            = PhysicalRobot::GetPtr(robotConfig);
+//    // CoordinateTransform
+//    Eigen::Matrix4d temp;
+//    temp<<1,0,0,0,
+//         0,-1,0,0,
+//         0,0,-1,0,
+//         0,0,0,1;
+//    CoordinateTransform::BasicConfig transformConfig;
+//    transformConfig.type = CoordinateTransform::Type::VisionPro2Ti5Robot;
+//    transformConfig.T_Head2Waist = Eigen::Matrix4d::Identity();
+//    transformConfig.T_XR2Robot <<   0, 0, -1, 0,
+//                                    -1, 0, 0, 0,
+//                                    0, 1, 0, 0,
+//                                    0, 0, 0, 1;
+//    transformConfig.T_Robot2LeftWrist <<0.0, 1.0, 0.0, 0.0,
+//                                        -1.0, 0.0,0.0, 0.0,
+//                                        0.0, 0.0, 1.0, 0.0,
+//                                        0.0, 0.0, 0.0, 1.0;
+////    transformConfig.T_Robot2LeftWrist = Eigen::Matrix4d::Identity();
+////    transformConfig.T_Robot2LeftWrist = temp * transformConfig.T_Robot2LeftWrist;
+//    transformConfig.T_Robot2RightWrist <<   0.0,-1.0, 0.0, 0.0,
+//                                            1.0, 0.0, 0.0, 0.0,
+//                                            0.0, 0.0, 1.0, 0.0,
+//                                            0.0, 0.0, 0.0, 1.0;
+////    transformConfig.T_Robot2RightWrist = Eigen::Matrix4d::Identity();
+//    transformConfig.offset << 0, 0, 0;
 
+    this->transformPtr = CoordinateTransform::GetPtr(config.transformConfig);
+
+//    // PhysicalRobot
+//    PhysicalRobot::BasicConfig robotConfig = {
+//        .type = PhysicalRobot::Type::CrpRobot,
+//    };
+
+//    boost::shared_ptr<PhysicalRobot> physicalRobotPtr
+//            = PhysicalRobot::GetPtr(robotConfig);
+
+    this->physicalRobotPtr = PhysicalRobot::GetPtr(config.robotConfig);
+
+    this->ros2Bridge.Init(config.bridgeConfig);
 }
 
 Ti5RobotTeleoperate::~Ti5RobotTeleoperate(){
@@ -138,6 +143,12 @@ bool Ti5RobotTeleoperate::StartTeleoperate(){
             // Filter
             filter.AddData(qEigen);
             qEigen = filter.GetFilteredData();
+
+            // send to ros2
+            ti5_interfaces::msg::JointStateWithoutStamp msg;
+            std::vector<double> qVec(qEigen.data(), qEigen.data() + qEigen.size());
+            msg.position() = qVec;
+            this->ros2Bridge.SendMsg(msg);
 
             qInit = qEigen;
 //            qInit = physicalRobotPtr->GetJointsAngleEigen();

@@ -20,6 +20,7 @@ private:
     CsvWriter csvWriter;
 
     VisionProCollector dataCollector;
+    Ros2Bridge ros2Bridge;
 
     Eigen::VectorXd qInit;
 

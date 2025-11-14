@@ -22,7 +22,8 @@
 #ifndef FAST_DDS_GENERATED__MY_MSGS_MSG_DEMOCDRAUX_IPP
 #define FAST_DDS_GENERATED__MY_MSGS_MSG_DEMOCDRAUX_IPP
 
-#include "DemoCdrAux.hpp"
+//#include "DemoCdrAux.hpp"
+#include <Demo/DemoCdrAux.hpp>
 
 #include <fastcdr/Cdr.h>
 #include <fastcdr/CdrSizeCalculator.hpp>

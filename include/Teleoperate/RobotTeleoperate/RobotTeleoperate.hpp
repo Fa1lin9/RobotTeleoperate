@@ -6,6 +6,8 @@
 #include <CsvWriter/CsvWriter.hpp>
 #include <WeightedMovingFilter/WeightedMovingFilter.hpp>
 
+#include <Ros2Bridge/Ros2Bridge.h>
+
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 
@@ -23,6 +25,7 @@ public:
         IKSolver::BasicConfig solverConfig;
         PhysicalRobot::BasicConfig robotConfig;
         CoordinateTransform::BasicConfig transformConfig;
+        Ros2Bridge::BasicConfig bridgeConfig;
     };
 
     RobotTeleoperate();

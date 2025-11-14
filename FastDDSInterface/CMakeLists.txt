@@ -12,7 +12,8 @@ set( GROUP_NAME "FastDDSInterface" )
 list( APPEND ${GROUP_NAME}_Components
     Ros2Bridge
     JointState
-    String_
+    JointStateWithoutStamp
+    Demo
 )
 
 ##########################################################################

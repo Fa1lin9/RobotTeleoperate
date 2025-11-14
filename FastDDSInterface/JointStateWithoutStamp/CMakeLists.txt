@@ -7,14 +7,20 @@ cmake_minimum_required( VERSION 3.20 )
 #############################################################
 #	Set project name, files, dependancies
 #############################################################
-set( TARGET_NAME "Ros2Bridge" )
+set( TARGET_NAME "JointStateWithoutStamp" )
 message( STATUS "\n-------------  ${GROUP_NAME} - ${TARGET_NAME}  -------------" )
 
 
 #############################################################
 #	Add the head and source files to the current project
 #############################################################
-aux_source_directory( ${CMAKE_CURRENT_SOURCE_DIR} SOURCES )
+# aux_source_directory( ${CMAKE_CURRENT_SOURCE_DIR} SOURCES )
+
+file(GLOB SOURCES
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.cxx"
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.ipp"
+)
 
 file( GLOB HEADERS ./*.h  *.hpp )
 file( GLOB INTERFACE_HEADERS 
@@ -37,7 +43,6 @@ target_include_directories( ${TARGET_NAME}
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${GROUP_NAME}>
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/common>
     PRIVATE
-        $<BUILD_INTERFACE:${HumaniodRobot_include}>
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
@@ -46,14 +51,19 @@ target_include_directories( ${TARGET_NAME}
 
 #   Add dependancies
 target_link_libraries( ${TARGET_NAME}
-    PUBLIC     
-        
-    PRIVATE
-    $<BUILD_INTERFACE:FastDDSInterface::JointState>
-    $<BUILD_INTERFACE:FastDDSInterface::Demo>
-    $<BUILD_INTERFACE:FastDDSInterface::JointStateWithoutStamp>
+    PUBLIC 
 
+    PRIVATE
+        $<BUILD_INTERFACE:fastdds>
+        $<BUILD_INTERFACE:fastcdr>
 )
+
+# find_package( ament_cmake REQUIRED )
+# ament_target_dependencies(${TARGET_NAME}
+#     std_msgs
+#     fastdds
+#     fastcdr
+# )
 
 # #   Add Macro compile defination
 # TARGET_COMPILE_DEFINITIONS( ${TARGET_NAME}

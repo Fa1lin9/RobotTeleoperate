@@ -52,6 +52,7 @@ target_link_libraries( ${TARGET_NAME}
         $<BUILD_INTERFACE:Core::WeightedMovingFilter>
         $<BUILD_INTERFACE:IKSolver::IKSolver>
         $<BUILD_INTERFACE:PhysicalRobot::PhysicalRobot>
+        $<BUILD_INTERFACE:FastDDSInterface::Ros2Bridge>
     
     PRIVATE
         $<BUILD_INTERFACE:Teleoperate::Ti5RobotTeleoperate>

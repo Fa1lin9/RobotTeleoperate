@@ -19,9 +19,12 @@ using namespace eprosima::fastdds::dds;
 // JointState
 #include <JointState/JointState.hpp>
 #include <JointState/JointStatePubSubTypes.hpp>
-// String
-#include <String_/String_.hpp>
-#include <String_/String_PubSubTypes.hpp>
+// Demo
+#include <Demo/Demo.hpp>
+#include <Demo/DemoPubSubTypes.hpp>
+// JointStateWithoutStamp
+#include <JointStateWithoutStamp/JointStateWithoutStamp.hpp>
+#include <JointStateWithoutStamp/JointStateWithoutStampPubSubTypes.hpp>
 
 #include <unordered_map>
 
@@ -29,8 +32,9 @@ class Ros2Bridge
 {
 public:
     enum MsgType{
+        JointStateWithoutStamp,
         JointState,
-        String_,
+        Demo,
     };
 
     static std::unordered_map<Ros2Bridge::MsgType, std::function<TypeSupport()>> typeFactory;
@@ -42,9 +46,11 @@ public:
         MsgType msgType;
     };
 
-
+    Ros2Bridge();
     Ros2Bridge(const Ros2Bridge::BasicConfig& config);
     ~Ros2Bridge();
+
+    bool Init(const Ros2Bridge::BasicConfig& config);
 
     template<typename T>
     bool SendMsg(const T& msg);
