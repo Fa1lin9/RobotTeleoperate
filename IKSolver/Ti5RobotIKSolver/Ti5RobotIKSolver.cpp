@@ -40,7 +40,7 @@ Ti5RobotIKSolver::Ti5RobotIKSolver(const IKSolver::BasicConfig &config_)
 
     // Init
     // Initialize some basic parameter,like the bounds
-    this->InitRobot();
+    this->InitRobot(config_);
 
     // Init auto-diff
     this->InitOptim();
@@ -126,16 +126,16 @@ boost::optional<Eigen::VectorXd> Ti5RobotIKSolver::Solve(
     //    this->totalBoundsUpper[8] = 0;
     //    this->totalBoundsLower[18] = 0;
     //    this->totalBoundsUpper[18] = 0;
-        // set limitation to joint6
-        this->totalBoundsLower[9] = 0;
-        this->totalBoundsUpper[9] = 0;
-        this->totalBoundsLower[19] = 0;
-        this->totalBoundsUpper[19] = 0;
-        // set limitation to joint7
-        this->totalBoundsLower[10] = 0;
-        this->totalBoundsUpper[10] = 0;
-        this->totalBoundsLower[20] = 0;
-        this->totalBoundsUpper[20] = 0;
+//        // set limitation to joint6
+//        this->totalBoundsLower[9] = 0;
+//        this->totalBoundsUpper[9] = 0;
+//        this->totalBoundsLower[19] = 0;
+//        this->totalBoundsUpper[19] = 0;
+//        // set limitation to joint7
+//        this->totalBoundsLower[10] = 0;
+//        this->totalBoundsUpper[10] = 0;
+//        this->totalBoundsLower[20] = 0;
+//        this->totalBoundsUpper[20] = 0;
 
         // set bounds
         opt.set_lower_bounds(this->totalBoundsLower);
@@ -242,7 +242,7 @@ boost::optional<Eigen::VectorXd> Ti5RobotIKSolver::Solve(
         if(verbose){
             // check result
             std::cout<<"------------ Solver Result ------------"<<std::endl;
-            std::cout << " Joint Value =\n" << std::fixed << std::setprecision(3) << qEigen << std::endl;
+            std::cout << " Joint Value =\n" << std::fixed << std::setprecision(5) << qEigen << std::endl;
     //                std::cout << " Function Value = " << funcValue << std::endl;
             std::cout<<" Left Arm Translation: \n"<<Forward(qEigen)[0].translation()<<std::endl;
             std::cout<<" Left Arm Rotation: \n"<<Forward(qEigen)[0].rotation()<<std::endl;
@@ -493,7 +493,7 @@ void Ti5RobotIKSolver::NormalizeAngle(Eigen::VectorXd& angle){
     }
 }
 
-void Ti5RobotIKSolver::InitRobot(){
+void Ti5RobotIKSolver::InitRobot(const IKSolver::BasicConfig &config_){
 //    LOG_FUNCTION;
     // Init Model
 //    pinocchio::urdf::buildModel(
@@ -547,6 +547,24 @@ void Ti5RobotIKSolver::InitRobot(){
     qNeutral.insert(qNeutral.end(), qRightArmNeutral.begin(), qRightArmNeutral.end());
     totalBoundsLower.insert(totalBoundsLower.end(), rightArmBoundsLower.begin(), rightArmBoundsLower.end());
     totalBoundsUpper.insert(totalBoundsUpper.end(), rightArmBoundsUpper.begin(), rightArmBoundsUpper.end());
+
+    // according to the config , set limitation to the joint
+    // Left Arm
+    std::cout<<"The current DOF of the left arm is "<<config_.dofLeftArm<<std::endl;
+    for(size_t i=0;i<this->dofArm - config_.dofLeftArm;i++){
+        size_t temp = this->leftArmID.back() - 1 - i;
+        this->totalBoundsLower[temp] = 0;
+        this->totalBoundsUpper[temp] = 0;
+        std::cout<<"Set limitation to left arm joint"<<temp<<std::endl;
+    }
+
+    std::cout<<"The current DOF of the right arm is "<<config_.dofRightArm<<std::endl;
+    for(size_t i=0;i<this->dofArm - config_.dofRightArm;i++){
+        size_t temp = this->rightArmID.back() - 1 - i;
+        this->totalBoundsLower[temp] = 0;
+        this->totalBoundsUpper[temp] = 0;
+        std::cout<<"Set limitation to right arm joint"<<temp<<std::endl;
+    }
 
 //    std::cout<<" The size of the totalBoundsLower is "<<totalBoundsLower.size()<<std::endl;
 //    std::cout<<" The size of the totalBoundsUpper is "<<totalBoundsUpper.size()<<std::endl;
@@ -640,20 +658,21 @@ void Ti5RobotIKSolver::InitOptim(){
 
     this->totalCost =
         50 * translationalCost +
-        0.5 * rotationalCost +
+//        0.5 * rotationalCost +
+        0.4 * rotationalCost +
         0.1 * smoothCost +
         0.02 * regularizationCost;
 
-    // set limitation to joint6
-    this->totalBoundsLower[9] = 0;
-    this->totalBoundsUpper[9] = 0;
-    this->totalBoundsLower[19] = 0;
-    this->totalBoundsUpper[19] = 0;
-    // set limitation to joint7
-    this->totalBoundsLower[10] = 0;
-    this->totalBoundsUpper[10] = 0;
-    this->totalBoundsLower[20] = 0;
-    this->totalBoundsUpper[20] = 0;
+//    // set limitation to joint6
+//    this->totalBoundsLower[9] = 0;
+//    this->totalBoundsUpper[9] = 0;
+//    this->totalBoundsLower[19] = 0;
+//    this->totalBoundsUpper[19] = 0;
+//    // set limitation to joint7
+//    this->totalBoundsLower[10] = 0;
+//    this->totalBoundsUpper[10] = 0;
+//    this->totalBoundsLower[20] = 0;
+//    this->totalBoundsUpper[20] = 0;
 
     this->opti.subject_to(
                 this->opti.bounded(
@@ -665,8 +684,8 @@ void Ti5RobotIKSolver::InitOptim(){
     this->opti.minimize(totalCost);
 
     casadi::Dict opts;
-    opts["ipopt.tol"] = 1e-6;
-    opts["ipopt.max_iter"] = 50;
+    opts["ipopt.tol"] = this->relativeTol;
+    opts["ipopt.max_iter"] = static_cast<int>(this->maxIteration);
 //    opts["ipopt.linear_solver"] = "mumps";
     opts["ipopt.print_level"] = 0;   // <= 设置为0，禁用迭代输出
     opts["print_time"] = 0;          // <= 禁用求解时间输出

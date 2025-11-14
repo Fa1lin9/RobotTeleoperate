@@ -126,7 +126,7 @@ private:
 
     void NormalizeAngle(Eigen::VectorXd& angle);
 
-    void InitRobot();
+    void InitRobot(const IKSolver::BasicConfig &config_);
 
     void InitOptim();
 

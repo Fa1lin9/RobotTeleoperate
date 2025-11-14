@@ -19,8 +19,14 @@ Ti5RobotTeleoperate::Ti5RobotTeleoperate(const RobotTeleoperate::BasicConfig &co
         .baseFrameName = {"BASE_S"},
         .targetFrameName = {"L_WRIST_R", "R_WRIST_R"},
         .baseOffset = {baseOffset},
-        .maxIteration = 400,
-        .relativeTol = 1e-2,
+        // for nlopt
+//        .maxIteration = 400,
+//        .relativeTol = 1e-2,
+        // for ipopt
+        .maxIteration = 50,
+        .relativeTol = 1e-6,
+        .dofLeftArm = 6,
+        .dofRightArm = 6,
     };
 
     this->ikSolverPtr = IKSolver::GetPtr(solverConfig);
@@ -73,7 +79,7 @@ Ti5RobotTeleoperate::~Ti5RobotTeleoperate(){
 
 bool Ti5RobotTeleoperate::StartTeleoperate(){
     // Filter
-    WeightedMovingFilter filter(std::vector<double>{0.7, 0.2, 0.1}, this->ikSolverPtr->GetDofTotal());
+    WeightedMovingFilter filter(std::vector<double>{0.4, 0.3, 0.2, 0.1}, this->ikSolverPtr->GetDofTotal());
 
     int FPS = 20;
     this->startFlag = true;
@@ -135,7 +141,7 @@ bool Ti5RobotTeleoperate::StartTeleoperate(){
 
             qInit = qEigen;
 //            qInit = physicalRobotPtr->GetJointsAngleEigen();
-            std::cout << "q:\n" << std::fixed << std::setprecision(3) << q << std::endl;
+//            std::cout << "q:\n" << std::fixed << std::setprecision(5) << q << std::endl;
         }else{
             std::cout<<" Solve failed! "<<std::endl;
             continue;

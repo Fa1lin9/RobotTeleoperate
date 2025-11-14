@@ -41,6 +41,8 @@ public:
 
         size_t maxIteration;
         double relativeTol;
+        size_t dofLeftArm;
+        size_t dofRightArm;
     };
 
     struct Ti5RobotConfig{
@@ -51,7 +53,6 @@ public:
         std::vector<Eigen::Matrix4d> targetPose;
 //        Eigen::Matrix4d leftArmTargetPose;
 //        Eigen::Matrix4d rightArmTargetPose;
-
     };
 
     IKSolver();
