@@ -87,7 +87,7 @@ bool Ti5RobotTeleoperate::StartTeleoperate(){
     WeightedMovingFilter filter(std::vector<double>{0.4, 0.3, 0.2, 0.1}, this->ikSolverPtr->GetDofTotal());
 
     int FPS = 20;
-//    this->startFlag = true;
+    this->startFlag = true;
     this->saveFlag = false;
 
     while(this->startFlag){
