@@ -87,7 +87,8 @@ bool Ti5RobotTeleoperate::StartTeleoperate(){
     WeightedMovingFilter filter(std::vector<double>{0.4, 0.3, 0.2, 0.1}, this->ikSolverPtr->GetDofTotal());
 
     int FPS = 20;
-    this->startFlag = true;
+//    this->startFlag = true;
+    this->saveFlag = false;
 
     while(this->startFlag){
         if(this->stopFlag){
@@ -147,7 +148,18 @@ bool Ti5RobotTeleoperate::StartTeleoperate(){
             // send to ros2
             ti5_interfaces::msg::JointStateWithoutStamp msg;
             std::vector<double> qVec(qEigen.data(), qEigen.data() + qEigen.size());
-            msg.position() = qVec;
+//            msg.position() = qVec;
+            // Temp send 14 joints value just to apply to GunmpGan's current version
+            std::vector<double> qVecOnlyArm;
+            qVecOnlyArm.reserve(14);
+            qVecOnlyArm.insert(qVecOnlyArm.end(),qVec.begin() + 4, qVec.begin() + 4 + 7);
+            qVecOnlyArm.insert(qVecOnlyArm.end(),qVec.end() - 7, qVec.end());
+            msg.position() = qVecOnlyArm;
+
+//            std::cout<<"The size of the postion of the msg is "<<msg.position().size()<<std::endl;
+//            for(size_t i=0;i<msg.position().size();i++){
+//                std::cout<<"SendMsg: Joint "<<i<<" Value: "<<msg.position()[i]<<std::endl;
+//            }
             this->ros2Bridge.SendMsg(msg);
 
             qInit = qEigen;
