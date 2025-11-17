@@ -86,7 +86,7 @@ bool Ti5RobotTeleoperate::StartTeleoperate(){
     // Filter
     WeightedMovingFilter filter(std::vector<double>{0.4, 0.3, 0.2, 0.1}, this->ikSolverPtr->GetDofTotal());
 
-    int FPS = 20;
+    int FPS = 25;
     this->startFlag = true;
     this->saveFlag = false;
 
@@ -121,7 +121,7 @@ bool Ti5RobotTeleoperate::StartTeleoperate(){
 
         std::vector<Eigen::Matrix4d> transformedMsg = this->transformPtr->Transform(msgConfig);
 
-        if(1){
+        if(0){
             std::cout << "--------------------------" << std::endl;
             std::cout << "Transformed Left Wrist Pose:\n" << transformedMsg[0] << std::endl;
             std::cout << "Transformed Right Wrist Pose:\n" << transformedMsg[1] << std::endl;
@@ -131,7 +131,7 @@ bool Ti5RobotTeleoperate::StartTeleoperate(){
         std::cout<<"-------------- Start to solve --------------"<<std::endl;
 
 //        auto solveStart = std::chrono::high_resolution_clock::now();
-        boost::optional<Eigen::VectorXd> q = ikSolverPtr->Solve(transformedMsg, qInit, true);
+        boost::optional<Eigen::VectorXd> q = ikSolverPtr->Solve(transformedMsg, qInit, false);
 //        auto solveEnd = std::chrono::high_resolution_clock::now();
 //        auto solveDuration = std::chrono::duration_cast<std::chrono::milliseconds>(solveEnd - solveStart);
 //        std::cout << " Solve 耗时: " << solveDuration.count() << " ms" << std::endl;
@@ -164,7 +164,7 @@ bool Ti5RobotTeleoperate::StartTeleoperate(){
 
             qInit = qEigen;
 //            qInit = physicalRobotPtr->GetJointsAngleEigen();
-//            std::cout << "q:\n" << std::fixed << std::setprecision(5) << q << std::endl;
+            std::cout << "q:\n" << std::fixed << std::setprecision(5) << q << std::endl;
         }else{
             std::cout<<" Solve failed! "<<std::endl;
             continue;
