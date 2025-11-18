@@ -12,22 +12,14 @@ set( GROUP_NAME "Demo" )
 list( APPEND ${GROUP_NAME}_Components
     CasadiDemo
     # PybindDemo
-<<<<<<< HEAD
-#    SocketDemo
-=======
     # SocketDemo
->>>>>>> branch_crp
 #    NLoptDemo
     # PinocchioDemo
     CrpRobotDemo
     # CanDriverDemo
     MainDemo
-<<<<<<< HEAD
-    SharedMemoryDemo
-=======
     FastDDSDemo
     JsonDemo
->>>>>>> branch_crp
 )
 
 ##########################################################################

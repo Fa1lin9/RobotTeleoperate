@@ -85,11 +85,8 @@ public:
 
     std::vector<pinocchio::SE3> Forward(const Eigen::VectorXd& q) override;
 
-<<<<<<< HEAD:include/IKSolver/CrpRobotIKSolver/CrpRobotIKSolver.hpp
-=======
     size_t GetDofTotal() override;
 
->>>>>>> branch_crp:include/IKSolver/Ti5RobotIKSolver/Ti5RobotIKSolver.hpp
 //    Eigen::VectorXd GetGradient(const IKSolver::CrpRobotConfig& config_);
 
     void Info() override;
@@ -120,20 +117,12 @@ private:
 
     double ObjectiveFunc(const IKSolver::Ti5RobotConfig& config_);
 
-<<<<<<< HEAD:include/IKSolver/CrpRobotIKSolver/CrpRobotIKSolver.hpp
-    casadi::SX CostFunc(const pinocchio::ModelTpl<casadi::SX>::ConfigVectorType& q,
-=======
     casadi::SX ObjectiveFuncSX(const pinocchio::ModelTpl<casadi::SX>::ConfigVectorType& q,
->>>>>>> branch_crp:include/IKSolver/Ti5RobotIKSolver/Ti5RobotIKSolver.hpp
                         const Eigen::Matrix<casadi::SX,Eigen::Dynamic,1>& qInit,
                         const std::vector<Eigen::Matrix<casadi::SX,4,4>>& targetPose
                         );
 
-<<<<<<< HEAD:include/IKSolver/CrpRobotIKSolver/CrpRobotIKSolver.hpp
-//    Eigen::VectorXd GradFunc(const IKSolver::CrpRobotConfig& config_);
-=======
     Eigen::VectorXd GradFunc(const IKSolver::Ti5RobotConfig& config_);
->>>>>>> branch_crp:include/IKSolver/Ti5RobotIKSolver/Ti5RobotIKSolver.hpp
 
     void NormalizeAngle(Eigen::VectorXd& angle);
 

@@ -3,14 +3,7 @@
 
 #include <DataCollector/VisionProCollector.hpp>
 
-<<<<<<< HEAD:include/Teleoperate/CrpRobotTeleoperate/CrpRobotTeleoperate.hpp
-#include <thread>
-#include <chrono>
-
-class CrpRobotTeleoperate
-=======
 class Ti5RobotTeleoperate
->>>>>>> 28e193747a6947b3cb96080adcbed78b4c72d09e:include/Teleoperate/Ti5RobotTeleoperate/Ti5RobotTeleoperate.hpp
         :public RobotTeleoperate
 {
 public:

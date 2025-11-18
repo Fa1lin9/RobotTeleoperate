@@ -78,7 +78,10 @@ set( CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE )
 
 set(Boost_Components 
     locale date_time filesystem timer regex thread serialization system program_options)
-find_package(Boost REQUIRED COMPONENTS ${Boost_Components} )
+find_package(Boost 1.78 REQUIRED 
+    COMPONENTS ${Boost_Components}
+    PATHS /usr/local/lib/cmake/Boost-1.78.0
+    )
 
 if(Boost_FOUND)
     message( STATUS "Boost is found!")
@@ -120,7 +123,7 @@ endif()
 set( coal_PATH /home/djr/ws_djr/djr_libs/hpp-fcl )
 #    set( EIGENPY_PATH /opt/openrobots/lib/cmake/eigenpy )
 #    set( PINOCCHIO_PATH /opt/openrobots/lib/cmake/pinocchio )
-find_package( eigenpy CONFIG REQUIRED )
+# find_package( eigenpy CONFIG REQUIRED )
 #    find_package( hpp-fcl REQUIRED )
 find_package(pinocchio REQUIRED CONFIG PATHS /usr/local/lib/cmake/pinocchio)
 
@@ -191,6 +194,12 @@ find_package( cppzmq REQUIRED )
 # # #######################################################
 
 find_package( jsoncons REQUIRED )
+
+# # #######################################################
+# # #                     Find fastdds                   #
+# # #######################################################
+
+find_package( fastdds REQUIRED )
 
 # # #######################################################
 # # #                     Find casadi                      #
