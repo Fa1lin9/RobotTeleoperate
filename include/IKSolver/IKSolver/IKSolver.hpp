@@ -19,6 +19,8 @@
 
 #include <nlopt.hpp>
 
+//#include <WeightedMovingFilter/WeightedMovingFilter.hpp>
+
 class IKSolver
 {
 public:
@@ -35,11 +37,16 @@ public:
         std::vector<std::string> baseFrameName;
         std::vector<std::string> targetFrameName;
 
+        std::vector<Eigen::Matrix4d> baseOffset;
+        std::vector<Eigen::Matrix4d> targetOffset;
+
         size_t maxIteration;
         double relativeTol;
+        size_t dofLeftArm;
+        size_t dofRightArm;
     };
 
-    struct CrpRobotConfig{
+    struct Ti5RobotConfig{
 
         Eigen::VectorXd q;
         Eigen::VectorXd qInit;
@@ -47,7 +54,6 @@ public:
         std::vector<Eigen::Matrix4d> targetPose;
 //        Eigen::Matrix4d leftArmTargetPose;
 //        Eigen::Matrix4d rightArmTargetPose;
-
     };
 
     IKSolver();
@@ -64,6 +70,8 @@ public:
 
     // Output some information of the current solver
     virtual void Info() = 0;
+
+    virtual size_t GetDofTotal() = 0;
 
     static boost::shared_ptr<IKSolver> GetPtr(const IKSolver::BasicConfig& config_);
 

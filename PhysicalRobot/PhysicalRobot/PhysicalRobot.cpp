@@ -1,5 +1,5 @@
 #include <PhysicalRobot/PhysicalRobot.hpp>
-#include <CrpPhysicalRobot/CrpPhysicalRobot.hpp>
+#include <Ti5PhysicalRobot/Ti5PhysicalRobot.hpp>
 
 PhysicalRobot::PhysicalRobot(){
 
@@ -9,17 +9,17 @@ PhysicalRobot::~PhysicalRobot(){
 
 }
 
-bool PhysicalRobot::BackToInitPose(const PhysicalRobot::CrpRobotConfig& config_){
+bool PhysicalRobot::BackToInitPose(const PhysicalRobot::Ti5RobotConfig& config_){
     LOG_FUNCTION;
     return true;
 }
 
-bool PhysicalRobot::BackToZero(const PhysicalRobot::CrpRobotConfig& config_){
+bool PhysicalRobot::BackToZero(const PhysicalRobot::Ti5RobotConfig& config_){
     LOG_FUNCTION;
     return true;
 }
 
-bool PhysicalRobot::MoveJ(const PhysicalRobot::CrpRobotConfig& config_){
+bool PhysicalRobot::MoveJ(const PhysicalRobot::Ti5RobotConfig& config_){
     LOG_FUNCTION;
     return true;
 }
@@ -27,7 +27,7 @@ bool PhysicalRobot::MoveJ(const PhysicalRobot::CrpRobotConfig& config_){
 boost::shared_ptr<PhysicalRobot> PhysicalRobot::GetPtr(const PhysicalRobot::BasicConfig &config_){
     switch (config_.type) {
         case PhysicalRobot::Type::CrpRobot :{
-           return boost::make_shared<CrpPhysicalRobot>(config_);
+           return boost::make_shared<Ti5PhysicalRobot>(config_);
         }
         default:{
             return nullptr;

@@ -1,5 +1,5 @@
 #include <RobotTeleoperate/RobotTeleoperate.hpp>
-#include <CrpRobotTeleoperate/CrpRobotTeleoperate.hpp>
+#include <Ti5RobotTeleoperate/Ti5RobotTeleoperate.hpp>
 
 RobotTeleoperate::RobotTeleoperate(){
 
@@ -11,8 +11,8 @@ RobotTeleoperate::~RobotTeleoperate(){
 
 boost::shared_ptr<RobotTeleoperate> RobotTeleoperate::GetPtr(const RobotTeleoperate::BasicConfig &config_){
     switch (config_.type) {
-        case RobotTeleoperate::Type::CrpRobot :{
-           return boost::make_shared<CrpRobotTeleoperate>(config_);
+        case RobotTeleoperate::Type::Ti5Robot :{
+           return boost::make_shared<Ti5RobotTeleoperate>(config_);
         }
         default:{
             return nullptr;

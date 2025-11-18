@@ -12,6 +12,9 @@ set( GROUP_NAME "Core" )
 list( APPEND ${GROUP_NAME}_Components
     DataCollector
     CanDriver
+    CsvWriter
+    WeightedMovingFilter
+    # FastDDSInterface
 )
 
 ##########################################################################

@@ -96,3 +96,8 @@ option( BuildPackages_CoordinateTransform "Whether generate Core package?" ON )
 if( BuildPackages_CoordinateTransform )
     add_subdirectory( CoordinateTransform )
 endif()
+
+option( BuildPackages_FastDDSInterface "Whether generate Core package?" ON )
+if( BuildPackages_FastDDSInterface )
+    add_subdirectory( FastDDSInterface )
+endif()

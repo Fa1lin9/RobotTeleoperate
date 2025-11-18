@@ -54,7 +54,7 @@ target_link_libraries( ${TARGET_NAME}
         $<BUILD_INTERFACE:Boost::program_options>
     
     PRIVATE
-        $<BUILD_INTERFACE:PhysicalRobot::CrpPhysicalRobot>
+        $<BUILD_INTERFACE:PhysicalRobot::Ti5PhysicalRobot>
 
 
 

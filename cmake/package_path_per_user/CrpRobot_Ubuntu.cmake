@@ -45,7 +45,9 @@ endif()
 set( CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE )
 
 set(Boost_Components locale date_time filesystem timer regex thread serialization system program_options)
-find_package(Boost REQUIRED COMPONENTS ${Boost_Components} )
+find_package(Boost 1.78 REQUIRED 
+    COMPONENTS ${Boost_Components} 
+    PATHS /usr/local/lib/cmake/Boost-1.78.0)
 
 if(Boost_FOUND)
     message( STATUS "Boost is found!")
@@ -161,19 +163,36 @@ find_package( ZeroMQ REQUIRED )
 # # #######################################################
 # # #                     Find cppzmq                     #
 # # #######################################################
- find_package( cppzmq REQUIRED )
+find_package( cppzmq REQUIRED )
 
- # # #######################################################
- # # #                     Find nlopt                      #
- # # #######################################################
+# # #######################################################
+# # #                     Find nlopt                      #
+# # #######################################################
 
- find_package( NLopt REQUIRED )
+find_package( NLopt REQUIRED )
 
- # # #######################################################
- # # #                     Find casadi                      #
- # # #######################################################
+# # #######################################################
+# # #                     Find Fastdds                      #
+# # #######################################################
 
- find_package( casadi REQUIRED )
+find_package( fastdds REQUIRED )
+find_package( fastcdr REQUIRED )
+
+# # #######################################################
+# # #                     Find Ros                      #
+# # #######################################################
+
+# set(CMAKE_PREFIX_PATH "/opt/ros/humble" ${CMAKE_PREFIX_PATH})
+
+##find_package(ament_cmake REQUIRED)
+#find_package( rclcpp REQUIRED )
+# find_package( std_msgs REQUIRED )
+
+# # #######################################################
+# # #                     Find casadi                      #
+# # #######################################################
+
+find_package( casadi REQUIRED )
 
  if (Qt5_FOUND)
     message(STATUS "casadi found!")

@@ -52,7 +52,7 @@ target_link_libraries( ${TARGET_NAME}
         $<BUILD_INTERFACE:Boost::program_options>
         
     PRIVATE
-        $<BUILD_INTERFACE:CoordinateTransform::VisionPro2CrpRobotTransform>
+        $<BUILD_INTERFACE:CoordinateTransform::VisionPro2Ti5RobotTransform>
 
 )
 

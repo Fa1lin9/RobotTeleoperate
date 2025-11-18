@@ -19,7 +19,7 @@ public:
         PhysicalRobot::Type type;
     };
 
-    struct CrpRobotConfig
+    struct Ti5RobotConfig
     {
         // some flag
         bool useLeftArm = false;
@@ -70,11 +70,11 @@ public:
 
     /* ---------------- Just for CrpRobot ---------------- */
 
-    virtual bool MoveJ(const PhysicalRobot::CrpRobotConfig& config_);
+    virtual bool MoveJ(const PhysicalRobot::Ti5RobotConfig& config_);
 
-    virtual bool BackToInitPose(const PhysicalRobot::CrpRobotConfig& config_);
+    virtual bool BackToInitPose(const PhysicalRobot::Ti5RobotConfig& config_);
 
-    virtual bool BackToZero(const PhysicalRobot::CrpRobotConfig& config_);
+    virtual bool BackToZero(const PhysicalRobot::Ti5RobotConfig& config_);
 
 
     /* ---------------- Static Method ---------------- */

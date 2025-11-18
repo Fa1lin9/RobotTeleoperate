@@ -48,11 +48,15 @@ target_link_libraries( ${TARGET_NAME}
     PUBLIC 
         $<BUILD_INTERFACE:CoordinateTransform::CoordinateTransform>
         $<BUILD_INTERFACE:Core::DataCollector>
+        $<BUILD_INTERFACE:Core::CsvWriter>
+        $<BUILD_INTERFACE:Core::WeightedMovingFilter>
         $<BUILD_INTERFACE:IKSolver::IKSolver>
         $<BUILD_INTERFACE:PhysicalRobot::PhysicalRobot>
+        $<BUILD_INTERFACE:FastDDSInterface::Ros2Bridge>
+        $<BUILD_INTERFACE:Boost::boost>
     
     PRIVATE
-        $<BUILD_INTERFACE:Teleoperate::CrpRobotTeleoperate>
+        $<BUILD_INTERFACE:Teleoperate::Ti5RobotTeleoperate>
 
 )
 
