@@ -65,7 +65,7 @@ private:
 
     boost::shared_ptr<PhysicalRobot> physicalRobotPtr;
 
-    PhysicalRobot::CrpRobotConfig crpRobotConfig;
+    PhysicalRobot::Ti5RobotConfig crpRobotConfig;
 
     std::vector<double> ConvertDegrees2Radians(const std::vector<double>& degrees);
 

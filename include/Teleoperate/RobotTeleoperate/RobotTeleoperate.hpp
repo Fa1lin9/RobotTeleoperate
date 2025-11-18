@@ -3,24 +3,34 @@
 #include <IKSolver/IKSolver.hpp>
 #include <PhysicalRobot/PhysicalRobot.hpp>
 #include <CoordinateTransform/CoordinateTransform.hpp>
+#include <CsvWriter/CsvWriter.hpp>
+#include <WeightedMovingFilter/WeightedMovingFilter.hpp>
+
+#include <Ros2Bridge/Ros2Bridge.h>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/json.hpp>
 
 class RobotTeleoperate
 {
 public:
     enum Type{
-        CrpRobot
+        Ti5Robot
     };
 
     struct BasicConfig{
         RobotTeleoperate::Type type;
         std::string address;
+        size_t FPS;
 
         IKSolver::BasicConfig solverConfig;
         PhysicalRobot::BasicConfig robotConfig;
         CoordinateTransform::BasicConfig transformConfig;
+        Ros2Bridge::BasicConfig bridgeConfig;
+
+        bool isSim;
+        bool isReal;
     };
 
     RobotTeleoperate();

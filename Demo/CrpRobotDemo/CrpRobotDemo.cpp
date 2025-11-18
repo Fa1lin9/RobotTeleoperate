@@ -19,13 +19,13 @@ int main(){
 //    sleep(1);
     std::cout<<"start to back to zero"<<std::endl;
 
-    physicalRobotPtr->BackToZero();
+//    physicalRobotPtr->BackToZero();
 
 //    physicalRobotPtr->Info();
 
 //    physicalRobotPtr->isConnect();
-    sleep(3);
-    std::cout<<" start to move !!! "<<std::endl;
+//    sleep(3);
+//    std::cout<<" start to move !!! "<<std::endl;
     // closely
     // joint1: 0.03 -- 45
     // joint2: 0.03 -- 45
@@ -38,7 +38,7 @@ int main(){
 //    std::vector<double> jointsAngle_ = { 0.01 , 0.02 , 0.02 , 0.01 , 0 , 0.02, 0.02};
 //    physicalRobotPtr->MoveJ(jointsAngle_);
 
-    PhysicalRobot::CrpRobotConfig crpRobotConfig = {
+    PhysicalRobot::Ti5RobotConfig crpRobotConfig = {
         .useLeftArm = true,
 //        .useRightArm = true,
 //        .leftArmJointsValue = std::vector<double>{ 0 , -0.3 , 0.4 , 0.3 , 0 , 0.3 , 0.4 },
@@ -46,11 +46,11 @@ int main(){
         .rightArmJointsValue = std::vector<double>{ 0 , 0 , 0 , 0 , 0 , 0 , 0 },
     };
 
-    physicalRobotPtr->MoveJ(crpRobotConfig);
+//    physicalRobotPtr->MoveJ(crpRobotConfig);
 
-    sleep(3);
+//    sleep(3);
 
-//    physicalRobotPtr->GetJointsAngle();
+    std::cout<<"q: "<<physicalRobotPtr->GetJointsAngleEigen()<<std::endl;
 
 //    physicalRobotPtr->GetJointsStatus();
 

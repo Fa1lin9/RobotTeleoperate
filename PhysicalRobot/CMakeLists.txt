@@ -11,7 +11,7 @@ set( msg_head "[Package Robot CMakeLists.txt] :" )
 set( GROUP_NAME "PhysicalRobot" )
 list( APPEND ${GROUP_NAME}_Components
     PhysicalRobot
-    CrpPhysicalRobot
+    Ti5PhysicalRobot
 )
 
 ##########################################################################
