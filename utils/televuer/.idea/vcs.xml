@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../avp_teleoperate" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../xr_teleoperate" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../xr_teleoperate/teleop/robot_control/dex-retargeting" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../xr_teleoperate/teleop/televuer" vcs="Git" />
+  </component>
+</project>
