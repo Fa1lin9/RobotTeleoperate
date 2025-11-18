@@ -26,6 +26,9 @@ public:
         PhysicalRobot::BasicConfig robotConfig;
         CoordinateTransform::BasicConfig transformConfig;
         Ros2Bridge::BasicConfig bridgeConfig;
+
+        bool isSim;
+        bool isReal;
     };
 
     RobotTeleoperate();

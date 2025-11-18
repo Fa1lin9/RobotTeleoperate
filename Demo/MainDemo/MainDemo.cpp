@@ -73,6 +73,8 @@ int main(){
         .robotConfig = robotConfig,
         .transformConfig = transformConfig,
         .bridgeConfig = bridgeConfig,
+        .isSim = true,
+        .isReal = false,
     };
 
     auto teleoperatePtr = RobotTeleoperate::GetPtr(config);

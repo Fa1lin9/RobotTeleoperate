@@ -6,72 +6,18 @@ bool Ti5RobotTeleoperate::Init(){
 
 Ti5RobotTeleoperate::Ti5RobotTeleoperate(const RobotTeleoperate::BasicConfig &config)
     :address(config.address),
-     dataCollector(VisionProCollector(this->address))
+     dataCollector(VisionProCollector(this->address)),
+     isSim(config.isSim),
+     isReal(config.isReal)
 {
     // qInit
     this->qInit = Eigen::VectorXd::Zero(21);
     qInit.segment(4,7) << -0.72, -1.0, 0.57, -1.0, 0.83, 0, 0;
     qInit.segment(14,7) << 0.72, 1.0, -0.57, 1.0, -0.83, 0, 0;
 
-    // config inintialzation
-//    // IKSolver
-//    Eigen::Matrix4d baseOffset;
-//    baseOffset << 1, 0, 0, +0.02,
-//                    0, 1, 0, 0,
-//                    0, 0, 1, +1.10,
-//                    0, 0 ,0, 1;
-//    IKSolver::BasicConfig solverConfig = {
-//        .type = IKSolver::Type::CrpRobot,
-//        .baseFrameName = {"BASE_S"},
-//        .targetFrameName = {"L_WRIST_R", "R_WRIST_R"},
-//        .baseOffset = {baseOffset},
-//        // for nlopt
-////        .maxIteration = 400,
-////        .relativeTol = 1e-2,
-//        // for ipopt
-//        .maxIteration = 50,
-//        .relativeTol = 1e-6,
-//        .dofLeftArm = 6,
-//        .dofRightArm = 6,
-//    };
-
     this->ikSolverPtr = IKSolver::GetPtr(config.solverConfig);
 
-//    // CoordinateTransform
-//    Eigen::Matrix4d temp;
-//    temp<<1,0,0,0,
-//         0,-1,0,0,
-//         0,0,-1,0,
-//         0,0,0,1;
-//    CoordinateTransform::BasicConfig transformConfig;
-//    transformConfig.type = CoordinateTransform::Type::VisionPro2Ti5Robot;
-//    transformConfig.T_Head2Waist = Eigen::Matrix4d::Identity();
-//    transformConfig.T_XR2Robot <<   0, 0, -1, 0,
-//                                    -1, 0, 0, 0,
-//                                    0, 1, 0, 0,
-//                                    0, 0, 0, 1;
-//    transformConfig.T_Robot2LeftWrist <<0.0, 1.0, 0.0, 0.0,
-//                                        -1.0, 0.0,0.0, 0.0,
-//                                        0.0, 0.0, 1.0, 0.0,
-//                                        0.0, 0.0, 0.0, 1.0;
-////    transformConfig.T_Robot2LeftWrist = Eigen::Matrix4d::Identity();
-////    transformConfig.T_Robot2LeftWrist = temp * transformConfig.T_Robot2LeftWrist;
-//    transformConfig.T_Robot2RightWrist <<   0.0,-1.0, 0.0, 0.0,
-//                                            1.0, 0.0, 0.0, 0.0,
-//                                            0.0, 0.0, 1.0, 0.0,
-//                                            0.0, 0.0, 0.0, 1.0;
-////    transformConfig.T_Robot2RightWrist = Eigen::Matrix4d::Identity();
-//    transformConfig.offset << 0, 0, 0;
-
     this->transformPtr = CoordinateTransform::GetPtr(config.transformConfig);
-
-//    // PhysicalRobot
-//    PhysicalRobot::BasicConfig robotConfig = {
-//        .type = PhysicalRobot::Type::CrpRobot,
-//    };
-
-//    boost::shared_ptr<PhysicalRobot> physicalRobotPtr
-//            = PhysicalRobot::GetPtr(robotConfig);
 
     this->physicalRobotPtr = PhysicalRobot::GetPtr(config.robotConfig);
 
@@ -145,24 +91,33 @@ bool Ti5RobotTeleoperate::StartTeleoperate(){
             filter.AddData(qEigen);
             qEigen = filter.GetFilteredData();
 
-            // send to ros2
-            ti5_interfaces::msg::JointStateWithoutStamp msg;
-            std::vector<double> qVec(qEigen.data(), qEigen.data() + qEigen.size());
-//            msg.position() = qVec;
-            // Temp send 14 joints value just to apply to GunmpGan's current version
-            std::vector<double> qVecOnlyArm;
-            qVecOnlyArm.reserve(14);
-            qVecOnlyArm.insert(qVecOnlyArm.end(),qVec.begin() + 4, qVec.begin() + 4 + 7);
-            qVecOnlyArm.insert(qVecOnlyArm.end(),qVec.end() - 7, qVec.end());
-            msg.position() = qVecOnlyArm;
+            if(this->isSim){
+                // send to ros2
+                ti5_interfaces::msg::JointStateWithoutStamp msg;
+                std::vector<double> qVec(qEigen.data(), qEigen.data() + qEigen.size());
+    //            msg.position() = qVec;
+                // Temp send 14 joints value just to apply to GunmpGan's current version
+                std::vector<double> qVecOnlyArm;
+                qVecOnlyArm.reserve(14);
+                qVecOnlyArm.insert(qVecOnlyArm.end(),qVec.begin() + 4, qVec.begin() + 4 + 7);
+                qVecOnlyArm.insert(qVecOnlyArm.end(),qVec.end() - 7, qVec.end());
+                msg.position() = qVecOnlyArm;
 
-//            std::cout<<"The size of the postion of the msg is "<<msg.position().size()<<std::endl;
-//            for(size_t i=0;i<msg.position().size();i++){
-//                std::cout<<"SendMsg: Joint "<<i<<" Value: "<<msg.position()[i]<<std::endl;
-//            }
-            this->ros2Bridge.SendMsg(msg);
+    //            std::cout<<"The size of the postion of the msg is "<<msg.position().size()<<std::endl;
+    //            for(size_t i=0;i<msg.position().size();i++){
+    //                std::cout<<"SendMsg: Joint "<<i<<" Value: "<<msg.position()[i]<<std::endl;
+    //            }
+                this->ros2Bridge.SendMsg(msg);
+            }
 
+            if(this->isReal){
+                // TODO
+
+            }
+
+            // set the initial value of the joint
             qInit = qEigen;
+
 //            qInit = physicalRobotPtr->GetJointsAngleEigen();
             std::cout << "q:\n" << std::fixed << std::setprecision(5) << q << std::endl;
         }else{

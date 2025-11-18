@@ -30,4 +30,7 @@ private:
     bool stopFlag = false;
 
     bool saveFlag = true;
+
+    bool isSim;
+    bool isReal;
 };
