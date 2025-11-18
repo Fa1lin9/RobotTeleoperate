@@ -69,6 +69,7 @@ int main(){
         .type = RobotTeleoperate::Type::Ti5Robot,
         .address = "tcp://127.0.0.1:5555",
 //        .address = "ipc:///tmp/teleoperate",
+        .FPS = 25,
         .solverConfig = solverConfig,
         .robotConfig = robotConfig,
         .transformConfig = transformConfig,

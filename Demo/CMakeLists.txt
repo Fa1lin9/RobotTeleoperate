@@ -11,13 +11,14 @@ set( msg_head "[Package Demo CMakeLists.txt] :" )
 set( GROUP_NAME "Demo" )
 list( APPEND ${GROUP_NAME}_Components
     # PybindDemo
-    SocketDemo
+    # SocketDemo
 #    NLoptDemo
-    PinocchioDemo
+    # PinocchioDemo
     CrpRobotDemo
-    CanDriverDemo
+    # CanDriverDemo
     MainDemo
     FastDDSDemo
+    JsonDemo
 )
 
 ##########################################################################

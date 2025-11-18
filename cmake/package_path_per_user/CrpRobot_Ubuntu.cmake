@@ -45,7 +45,9 @@ endif()
 set( CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE )
 
 set(Boost_Components locale date_time filesystem timer regex thread serialization system program_options)
-find_package(Boost REQUIRED COMPONENTS ${Boost_Components} )
+find_package(Boost 1.78 REQUIRED 
+    COMPONENTS ${Boost_Components} 
+    PATHS /usr/local/lib/cmake/Boost-1.78.0)
 
 if(Boost_FOUND)
     message( STATUS "Boost is found!")

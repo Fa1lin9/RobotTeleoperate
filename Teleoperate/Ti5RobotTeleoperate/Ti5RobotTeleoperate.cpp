@@ -8,7 +8,8 @@ Ti5RobotTeleoperate::Ti5RobotTeleoperate(const RobotTeleoperate::BasicConfig &co
     :address(config.address),
      dataCollector(VisionProCollector(this->address)),
      isSim(config.isSim),
-     isReal(config.isReal)
+     isReal(config.isReal),
+     FPS(config.FPS)
 {
     // qInit
     this->qInit = Eigen::VectorXd::Zero(21);
@@ -32,7 +33,7 @@ bool Ti5RobotTeleoperate::StartTeleoperate(){
     // Filter
     WeightedMovingFilter filter(std::vector<double>{0.4, 0.3, 0.2, 0.1}, this->ikSolverPtr->GetDofTotal());
 
-    int FPS = 25;
+//    int FPS = 25;
     this->startFlag = true;
     this->saveFlag = false;
 
@@ -136,7 +137,7 @@ bool Ti5RobotTeleoperate::StartTeleoperate(){
         std::cout << " Main Loop 耗时: " << duration.count() << " ms" << std::endl;
 
 
-        int framePeriod = static_cast<int>(1000.0 / FPS);
+        int framePeriod = static_cast<int>(1000.0 / this->FPS);
         int sleepTime = framePeriod - duration.count();
 
         if(sleepTime > 0){

@@ -8,6 +8,7 @@ class Ti5RobotTeleoperate
 {
 public:
     Ti5RobotTeleoperate(const RobotTeleoperate::BasicConfig &config);
+    Ti5RobotTeleoperate(std::string fileName);
     ~Ti5RobotTeleoperate();
 
     bool Init() override;
@@ -23,6 +24,8 @@ private:
     Ros2Bridge ros2Bridge;
 
     Eigen::VectorXd qInit;
+
+    size_t FPS;
 
     // some flags
     bool startFlag = false;

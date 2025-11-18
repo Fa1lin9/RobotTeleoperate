@@ -10,6 +10,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/json.hpp>
 
 class RobotTeleoperate
 {
@@ -21,6 +22,7 @@ public:
     struct BasicConfig{
         RobotTeleoperate::Type type;
         std::string address;
+        size_t FPS;
 
         IKSolver::BasicConfig solverConfig;
         PhysicalRobot::BasicConfig robotConfig;
