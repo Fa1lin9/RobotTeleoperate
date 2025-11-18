@@ -7,7 +7,7 @@ cmake_minimum_required( VERSION 3.20 )
 #############################################################
 #	Set project name, files, dependancies
 #############################################################
-set( TARGET_NAME "CasadiDemo" )
+set( TARGET_NAME "SharedMemoryDemo" )
 message( STATUS "\n-------------  ${GROUP_NAME} - ${TARGET_NAME}  -------------" )
 
 
@@ -47,8 +47,8 @@ target_link_libraries( ${TARGET_NAME}
     PUBLIC 
         $<BUILD_INTERFACE:Eigen3::Eigen>
     PRIVATE
-        $<BUILD_INTERFACE:casadi::casadi>
-
+        $<BUILD_INTERFACE:Boost::boost>
+        $<BUILD_INTERFACE:rt>
 )
 
 # #   Add Macro compile defination

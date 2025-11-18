@@ -18,6 +18,7 @@ list( APPEND ${GROUP_NAME}_Components
     CrpRobotDemo
     CanDriverDemo
     MainDemo
+    SharedMemoryDemo
 )
 
 ##########################################################################

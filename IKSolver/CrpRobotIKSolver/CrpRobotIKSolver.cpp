@@ -61,6 +61,7 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
         }
     }
 
+
 //    this->InitializeAD(targetPose,qInit);
 //    nlopt::opt opt;
 //    opt = nlopt::opt(nlopt::LD_SLSQP , qInit.size());
@@ -186,8 +187,8 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
 
     // 创建求解器
     casadi::Dict opts;
-    opts["ipopt.tol"] = 1e-4;
-    opts["ipopt.max_iter"] = 400;
+    opts["ipopt.tol"] = 1e-6;
+    opts["ipopt.max_iter"] = 50;
     opts["ipopt.print_level"] = 0;   // <= 设置为0，禁用迭代输出
     opts["print_time"] = 0;          // <= 禁用求解时间输出
     opts["calc_lam_p"] = 0;          // 可选，关闭对偶变量计算（减少输出）
@@ -236,6 +237,7 @@ boost::optional<Eigen::VectorXd> CrpRobotIKSolver::Solve(
     }
 
     return boost::optional<Eigen::VectorXd>(qEigen);
+
 }
 
 void CrpRobotIKSolver::Info(){
@@ -557,6 +559,8 @@ casadi::SX CrpRobotIKSolver::CostFunc(
         std::string error = " The size of the targetPose should be 2! ";
         throw std::length_error(error);
     }
+
+//    casadi::SX tempQ = casadi::SX::sym("q",this->dofTotal,1);
 
     // updata data to better get position
     pinocchio::DataTpl<casadi::SX> dataAD(robotModelSX);

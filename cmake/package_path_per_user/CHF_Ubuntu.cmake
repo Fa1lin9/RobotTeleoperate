@@ -122,7 +122,7 @@ set( coal_PATH /home/djr/ws_djr/djr_libs/hpp-fcl )
 #    set( PINOCCHIO_PATH /opt/openrobots/lib/cmake/pinocchio )
 find_package( eigenpy CONFIG REQUIRED )
 #    find_package( hpp-fcl REQUIRED )
-find_package( pinocchio CONFIG REQUIRED )
+find_package(pinocchio REQUIRED CONFIG PATHS /usr/local/lib/cmake/pinocchio)
 
 if( pinocchio_FOUND )
     message( STATUS "pinocchio is found!")
