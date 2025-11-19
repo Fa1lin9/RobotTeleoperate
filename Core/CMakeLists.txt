@@ -14,7 +14,7 @@ list( APPEND ${GROUP_NAME}_Components
     CanDriver
     CsvWriter
     WeightedMovingFilter
-    # FastDDSInterface
+    JsonParser
 )
 
 ##########################################################################

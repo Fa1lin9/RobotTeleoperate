@@ -1,16 +1,19 @@
 #pragma once
 
+#include <source_path.h>
+
 #include <IKSolver/IKSolver.hpp>
 #include <PhysicalRobot/PhysicalRobot.hpp>
 #include <CoordinateTransform/CoordinateTransform.hpp>
 #include <CsvWriter/CsvWriter.hpp>
 #include <WeightedMovingFilter/WeightedMovingFilter.hpp>
+#include <JsonParser/JsonParser.hpp>
 
 #include <Ros2Bridge/Ros2Bridge.h>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/json.hpp>
+
 
 class RobotTeleoperate
 {

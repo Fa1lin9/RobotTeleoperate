@@ -1,0 +1,49 @@
+{
+    "SolverConfig":{
+        "Type": "CrpRobot",
+        "BaseFrameName": "BASE_S",
+        "TargetFrameName": ["L_WRIST_R", "R_WRIST_R"],
+        "BaseOffset": [
+            [1, 0, 0, 0.02],
+            [0, 1, 0, 0],
+            [0, 0, 1, 1.10],
+            [0, 0 ,0, 1]
+        ],
+        "MaxIteration": 50,
+        "RelativeTol": 1e-6,
+        "DofLeftArm": 6,
+        "DofRightArm": 6        
+    },
+
+    "TransformConfig":{
+        "Type": "VisionPro2Ti5Robot",
+        "T_Head2Waist": [
+            [1, 0, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0 ,0, 1]
+        ],
+        "T_XR2Robot": [
+            [0, 0, -1, 0],
+            [-1, 0, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0 ,0, 1]
+        ],
+        "T_Robot2LeftWrist": [
+            [0,-1, 0, 0],
+            [1, 0, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1]
+        ],
+        "Offset": [0, 0, 0]
+    },
+
+    "PhysicalRobotConfig":{
+        "Type": "CrpRobot"
+    },
+
+    "Ros2BridgeConfig": {
+        "MsgType": "JointStateWithoutStamp",
+        "TopicName": "position_control/joint_state"
+    }
+}

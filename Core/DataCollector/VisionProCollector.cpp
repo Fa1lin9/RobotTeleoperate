@@ -1,10 +1,39 @@
 #include <DataCollector/VisionProCollector.hpp>
 
-VisionProCollector::VisionProCollector(std::string address_)
-     :address(address_),
-      context(1),
-      subscriber(context, zmq::socket_type::sub)
+VisionProCollector::VisionProCollector(){
+
+}
+
+VisionProCollector::VisionProCollector(const std::string &address_)
+//     :address(address_),
+//      context(1),
+//      subscriber(context, zmq::socket_type::sub)
 {
+    this->Init(address_);
+
+////    LOG_FUNCTION;
+//    subscriber.connect(address);
+//    subscriber.set(zmq::sockopt::subscribe, "");  // 订阅所有消息
+
+//    // Mat Init
+//    headPose.setZero();
+//    headPose(3,3) = 1;
+//    leftWristPose.setZero();
+//    leftWristPose(3,3) = 1;
+//    rightWristPose.setZero();
+//    rightWristPose(3,3) = 1;
+
+//    leftHandPosition.setZero();
+//    rightHandPosition.setZero();
+
+//    std::cout << FUNC_SIG <<" initialized, connected to " << address << std::endl;
+}
+
+void VisionProCollector::Init(const std::string &address_){
+    this->address = address_;
+    this->context.set(zmq::ctxopt::io_threads, 1);
+    this->subscriber = zmq::socket_t(this->context, zmq::socket_type::sub);
+
 //    LOG_FUNCTION;
     subscriber.connect(address);
     subscriber.set(zmq::sockopt::subscribe, "");  // 订阅所有消息

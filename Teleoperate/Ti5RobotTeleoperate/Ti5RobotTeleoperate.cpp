@@ -25,6 +25,12 @@ Ti5RobotTeleoperate::Ti5RobotTeleoperate(const RobotTeleoperate::BasicConfig &co
     this->ros2Bridge.Init(config.bridgeConfig);
 }
 
+Ti5RobotTeleoperate::Ti5RobotTeleoperate(const std::string &fileName)
+{
+
+
+}
+
 Ti5RobotTeleoperate::~Ti5RobotTeleoperate(){
 
 }

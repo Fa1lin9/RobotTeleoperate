@@ -12,11 +12,13 @@
 class VisionProCollector
 {
 public:
-
-    VisionProCollector(std::string address_);
+    VisionProCollector();
+    VisionProCollector(const std::string &address_);
     ~VisionProCollector();
     void run();
     std::vector<Eigen::Matrix4d> GetValue();
+
+    void Init(const std::string &address_);
 
 private:
     // some variable for socket

@@ -8,7 +8,7 @@ class Ti5RobotTeleoperate
 {
 public:
     Ti5RobotTeleoperate(const RobotTeleoperate::BasicConfig &config);
-    Ti5RobotTeleoperate(std::string fileName);
+    Ti5RobotTeleoperate(const std::string &fileName);
     ~Ti5RobotTeleoperate();
 
     bool Init() override;
