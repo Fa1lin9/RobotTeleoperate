@@ -37,7 +37,6 @@ target_include_directories( ${TARGET_NAME}
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${GROUP_NAME}>
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/common>
     PRIVATE
-        $<BUILD_INTERFACE:${HumaniodRobot_include}>
         $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
@@ -47,10 +46,12 @@ target_include_directories( ${TARGET_NAME}
 #   Add dependancies
 target_link_libraries( ${TARGET_NAME}
     PUBLIC     
-        
+    $<BUILD_INTERFACE:Eigen3::Eigen>
+            
     PRIVATE
     $<BUILD_INTERFACE:Boost::json>
     $<BUILD_INTERFACE:Boost::boost>
+
 
 
 )

@@ -48,6 +48,7 @@ target_link_libraries( ${TARGET_NAME}
 
     PRIVATE
         $<BUILD_INTERFACE:Boost::boost>
+        $<BUILD_INTERFACE:Core::JsonParser>
 
 )
 

@@ -15,8 +15,12 @@ JsonParser::JsonParser(const std::string &filePath_)
 
         // parse the file
         boost::json::value jsonValue = boost::json::parse(jsonStr);
-        boost::json::object root = jsonValue.as_object();
 
+        if(jsonValue.is_object()){
+           this->rootObject = jsonValue.as_object();
+        }else{
+            std::cerr<<"[JsonParser] The root's type is not a object!"<<std::endl;
+        }
     }  catch (const boost::json::system_error& e) {
         std::cerr<<"Failed to parse the json:"<<e.what()<<std::endl;
     }  catch (const std::exception &e) {
@@ -27,4 +31,61 @@ JsonParser::JsonParser(const std::string &filePath_)
 
 JsonParser::~JsonParser(){
 
+}
+
+static Eigen::MatrixXd JsonArray2EigenMatrixXd(const json::array &array){
+    if(array.empty()){
+        std::cout<<"[JsonParser::JsonArray2EigenMatrixXd] The input array is empty!"<<std::endl;
+        return Eigen::MatrixXd();
+    }
+
+    const size_t rows = static_cast<size_t>(array.size());
+    const size_t cols = static_cast<size_t>(json::value_to<json::array>(array[0]).size());
+
+    for(size_t i=0;i<array.size();i++){
+        const auto& row = json::value_to<json::array>(array[i]);
+        if(row.size() != static_cast<size_t>(cols)){
+            throw std::invalid_argument("[JsonParser::JsonArray2EigenMatrixXd] All rows must be the same");
+        }
+    }
+
+    Eigen::MatrixXd mat(rows,cols);
+    for(size_t i=0;i<rows;i++){
+        const auto& row = json::value_to<json::array>(array[i]);
+        for(size_t j=0;j<cols;j++){
+            mat(i,j) = json::value_to<double>(row[j]);
+        }
+    }
+
+    return mat;
+}
+
+static Eigen::VectorXd JsonArray2EigenVectorXd(const json::array &array){
+    if(array.empty()){
+        std::cout<<"[JsonParser::JsonArray2EigenVectorXd] The input array is empty!"<<std::endl;
+        return Eigen::VectorXd();
+    }
+
+    const size_t size = static_cast<size_t>(array.size());
+
+    Eigen::VectorXd vec(size);
+    for(size_t i=0;i<size;i++){
+        const auto& member = array[i];
+
+        if(!member.is_double() && !member.is_int64() && !member.is_uint64()){
+            throw std::invalid_argument("[JsonParser::JsonArray2EigenVectorXd] Invalid member of this array at"
+                                        + std::to_string(i) + ", expected number! ");
+        }
+
+        try {
+            vec(i) = json::value_to<double>(member);
+        }  catch (const std::exception& e) {
+            throw std::runtime_error("[JsonParser::JsonArray2EigenVectorXd] Failed to convert array["
+                                     + std::to_string(i)
+                                     + "] to double:"
+                                     + e.what());
+        }
+    }
+
+    return vec;
 }

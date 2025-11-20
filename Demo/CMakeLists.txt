@@ -18,7 +18,7 @@ list( APPEND ${GROUP_NAME}_Components
     # CanDriverDemo
     MainDemo
     FastDDSDemo
-#    JsonDemo
+    JsonDemo
 )
 
 ##########################################################################
