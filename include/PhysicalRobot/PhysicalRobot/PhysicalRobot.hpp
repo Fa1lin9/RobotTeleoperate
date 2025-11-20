@@ -6,17 +6,19 @@
 #include <FunctionLogger.hpp>
 #include <iostream>
 
+#include <RobotType.hpp>
+
 class PhysicalRobot
 {
 public:
-    enum Type{
-        Ti5Robot
-    };
+//    enum Type{
+//        Ti5Robot
+//    };
 
     struct BasicConfig
     {
         std::string IP;
-        PhysicalRobot::Type type;
+        RobotType::Type robotType;
     };
 
     struct Ti5RobotConfig
@@ -81,8 +83,6 @@ public:
 
     static boost::shared_ptr<PhysicalRobot> GetPtr(const PhysicalRobot::BasicConfig &config_);
 
-    static PhysicalRobot::Type GetTypeFromStr(const std::string& str);
-
 private:
-    static const std::unordered_map<std::string, PhysicalRobot::Type> typeMap;
+
 };

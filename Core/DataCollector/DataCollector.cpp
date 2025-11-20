@@ -1,10 +1,10 @@
-#include <DataCollector/VisionProCollector.hpp>
+#include <DataCollector/DataCollector.hpp>
 
-VisionProCollector::VisionProCollector(){
+DataCollector::DataCollector(){
 
 }
 
-VisionProCollector::VisionProCollector(const std::string &address_)
+DataCollector::DataCollector(const std::string &address_)
 //     :address(address_),
 //      context(1),
 //      subscriber(context, zmq::socket_type::sub)
@@ -29,7 +29,7 @@ VisionProCollector::VisionProCollector(const std::string &address_)
 //    std::cout << FUNC_SIG <<" initialized, connected to " << address << std::endl;
 }
 
-void VisionProCollector::Init(const std::string &address_){
+void DataCollector::Init(const std::string &address_){
     this->address = address_;
     this->context.set(zmq::ctxopt::io_threads, 1);
     this->subscriber = zmq::socket_t(this->context, zmq::socket_type::sub);
@@ -52,11 +52,11 @@ void VisionProCollector::Init(const std::string &address_){
     std::cout << FUNC_SIG <<" initialized, connected to " << address << std::endl;
 }
 
-VisionProCollector::~VisionProCollector(){
+DataCollector::~DataCollector(){
 
 }
 
-void VisionProCollector::run(){
+void DataCollector::run(){
     LOG_FUNCTION;
 
     while (true) {
@@ -97,7 +97,7 @@ void VisionProCollector::run(){
 
 }
 
-std::vector<Eigen::Matrix4d> VisionProCollector::GetValue(){
+std::vector<Eigen::Matrix4d> DataCollector::GetValue(){
 //    LOG_FUNCTION;
     zmq::message_t msg;
     subscriber.recv(msg, zmq::recv_flags::none);

@@ -9,12 +9,12 @@
 
 // 该类主要是负责接受VisionPro端解析得到的数据
 // 通信方式主要是通过Socket解析python脚本发送过来的数据
-class VisionProCollector
+class DataCollector
 {
 public:
-    VisionProCollector();
-    VisionProCollector(const std::string &address_);
-    ~VisionProCollector();
+    DataCollector();
+    DataCollector(const std::string &address_);
+    ~DataCollector();
     void run();
     std::vector<Eigen::Matrix4d> GetValue();
 

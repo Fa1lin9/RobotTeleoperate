@@ -10,8 +10,8 @@ IKSolver::~IKSolver(){
 }
 
 boost::shared_ptr<IKSolver> IKSolver::GetPtr(const IKSolver::BasicConfig &config_){
-    switch (config_.type) {
-        case IKSolver::Type::Ti5Robot :{
+    switch (config_.robotType) {
+        case RobotType::Ti5Robot :{
            return boost::make_shared<Ti5RobotIKSolver>(config_);
         }
         default:{
@@ -20,15 +20,5 @@ boost::shared_ptr<IKSolver> IKSolver::GetPtr(const IKSolver::BasicConfig &config
     }
 }
 
-const std::unordered_map<std::string, IKSolver::Type> IKSolver::typeMap = {
-    {"Ti5Robot", IKSolver::Type::Ti5Robot}
-};
 
-IKSolver::Type IKSolver::GetTypeFromStr(const std::string& str){
-    auto temp = IKSolver::typeMap.find(str);
-    if(temp != IKSolver::typeMap.end()){
-        return temp->second;
-    }
 
-    throw std::invalid_argument("[IKSolver::GetTypeFromStr] Invalid string");
-}

@@ -5,7 +5,7 @@ using namespace eprosima::fastdds::dds;
 int main()
 {
     Ros2Bridge::BasicConfig config;
-    config.type = Ros2Bridge::Type::Demo;
+    config.msgType = Ros2Bridge::MsgType::Demo;
     config.topicName = "StringTopic";
     Ros2Bridge ros2Bridge(config);
 

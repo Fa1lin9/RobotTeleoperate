@@ -18,20 +18,22 @@
 
 #include <nlopt.hpp>
 
+#include <RobotType.hpp>
+
 //#include <WeightedMovingFilter/WeightedMovingFilter.hpp>
 
 class IKSolver
 {
 public:
-    enum Type{
-        Ti5Robot
-    };
+//    enum Type{
+//        Ti5Robot
+//    };
 
     struct BasicConfig
     {
         std::string modelPath;
 
-        IKSolver::Type type;
+        RobotType::Type robotType;
 
         std::vector<std::string> baseFrameName;
         std::vector<std::string> targetFrameName;
@@ -74,9 +76,6 @@ public:
 
     static boost::shared_ptr<IKSolver> GetPtr(const IKSolver::BasicConfig& config_);
 
-    static IKSolver::Type GetTypeFromStr(const std::string& str);
-
-
 private:
-    static const std::unordered_map<std::string, IKSolver::Type> typeMap;
+
 };

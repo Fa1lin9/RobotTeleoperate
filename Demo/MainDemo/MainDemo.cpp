@@ -11,7 +11,7 @@ int main(){
                     0, 0, 1, +1.10,
                     0, 0 ,0, 1;
     IKSolver::BasicConfig solverConfig = {
-        .type = IKSolver::Type::Ti5Robot,
+        .robotType = RobotType::Type::Ti5Robot,
         .baseFrameName = {"BASE_S"},
         .targetFrameName = {"L_WRIST_R", "R_WRIST_R"},
         .baseOffset = {baseOffset},
@@ -53,18 +53,18 @@ int main(){
 
     // PhysicalRobot
     PhysicalRobot::BasicConfig robotConfig = {
-        .type = PhysicalRobot::Type::Ti5Robot,
+        .robotType = RobotType::Type::Ti5Robot,
     };
 
     // Ros2Bridge
     Ros2Bridge::BasicConfig bridgeConfig;
-    bridgeConfig.type = Ros2Bridge::Type::JointStateWithoutStamp;
+    bridgeConfig.msgType = Ros2Bridge::MsgType::JointStateWithoutStamp;
     bridgeConfig.topicName = "position_control/joint_state";
 
     /*************************************************************/
 
     RobotTeleoperate::BasicConfig config = {
-        .type = RobotTeleoperate::Type::Ti5Robot,
+        .robotType = RobotType::Type::Ti5Robot,
         .address = "tcp://127.0.0.1:5555",
 //        .address = "ipc:///tmp/teleoperate",
         .FPS = 25,
@@ -78,10 +78,8 @@ int main(){
 
     std::string configPath = static_cast<std::string>(SOURCE_FILE_PATH) + "/config/Teleoperate/Ti5Robot.json";
 
-    auto teleoperatePtr = RobotTeleoperate::GetPtr(config);
+//    auto teleoperatePtr = RobotTeleoperate::GetPtr(config);
+    auto teleoperatePtr = RobotTeleoperate::GetPtr(configPath);
 
-    auto teleoperate = Ti5RobotTeleoperate(configPath);
-
-    teleoperate.StartTeleoperate();
-//    teleoperatePtr->StartTeleoperate();
+    teleoperatePtr->StartTeleoperate();
 }

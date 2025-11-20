@@ -7,7 +7,6 @@
     "IsReal": false,
 
     "SolverConfig":{
-        "Type": "Ti5Robot",
         "BaseFrameName": ["BASE_S"],
         "TargetFrameName": ["L_WRIST_R", "R_WRIST_R"],
         "BaseOffset": [
@@ -54,11 +53,11 @@
     },
 
     "PhysicalRobotConfig":{
-        "Type": "Ti5Robot"
+        
     },
 
     "Ros2BridgeConfig": {
-        "Type": "JointStateWithoutStamp",
+        "MsgType": "JointStateWithoutStamp",
         "TopicName": "position_control/joint_state"
     }
 }

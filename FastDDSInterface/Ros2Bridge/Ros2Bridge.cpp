@@ -2,19 +2,19 @@
 
 using namespace eprosima::fastdds::dds;
 
-static std::unordered_map<Ros2Bridge::Type, std::function<TypeSupport()>> typeFactory = {
-       { Ros2Bridge::Type::JointState, []() {
+static std::unordered_map<Ros2Bridge::MsgType, std::function<TypeSupport()>> typeFactory = {
+       { Ros2Bridge::MsgType::JointState, []() {
             return TypeSupport(new sensor_msgs::msg::JointStatePubSubType());
        }},
-       { Ros2Bridge::Type::Demo, []() {
+       { Ros2Bridge::MsgType::Demo, []() {
             return TypeSupport(new my_msgs::msg::DemoPubSubType());
        }},
-       { Ros2Bridge::Type::JointStateWithoutStamp, []() {
+       { Ros2Bridge::MsgType::JointStateWithoutStamp, []() {
             return TypeSupport(new ti5_interfaces::msg::JointStateWithoutStampPubSubType());
        }},
    };
 
-static TypeSupport CreateType(const Ros2Bridge::Type& type){
+static TypeSupport CreateType(const Ros2Bridge::MsgType& type){
     auto it = typeFactory.find(type);
     if(it != typeFactory.end() ){
         return it->second();
@@ -94,7 +94,7 @@ Ros2Bridge::Ros2Bridge(const Ros2Bridge::BasicConfig& config)
 bool Ros2Bridge::Init(const Ros2Bridge::BasicConfig &config){
     LOG_FUNCTION;
     topicName = config.topicName;
-    msgType = config.type;
+    msgType = config.msgType;
 
     // Initialize the basic parameter
     if(topicName.empty()){
@@ -116,7 +116,7 @@ bool Ros2Bridge::Init(const Ros2Bridge::BasicConfig &config){
     }
 
     // Step 2 注册类型
-    type = CreateType(config.type);
+    type = CreateType(config.msgType);
     if (type.register_type(participant) != RETCODE_OK)
     {
         throw(std::logic_error("[Ros2Bridge] Failed to register type!"));
@@ -162,13 +162,13 @@ Ros2Bridge::~Ros2Bridge(){
     }
 }
 
-const std::unordered_map<std::string, Ros2Bridge::Type> Ros2Bridge::typeMap = {
-    {"JointStateWithoutStamp", Ros2Bridge::Type::JointStateWithoutStamp},
-    {"JointState", Ros2Bridge::Type::JointState},
-    {"Demo", Ros2Bridge::Type::Demo},
+const std::unordered_map<std::string, Ros2Bridge::MsgType> Ros2Bridge::typeMap = {
+    {"JointStateWithoutStamp", Ros2Bridge::MsgType::JointStateWithoutStamp},
+    {"JointState", Ros2Bridge::MsgType::JointState},
+    {"Demo", Ros2Bridge::MsgType::Demo},
 };
 
-Ros2Bridge::Type Ros2Bridge::GetTypeFromStr(const std::string& str){
+Ros2Bridge::MsgType Ros2Bridge::GetMsgTypeFromStr(const std::string& str){
     auto temp = Ros2Bridge::typeMap.find(str);
     if(temp != Ros2Bridge::typeMap.end()){
         return temp->second;

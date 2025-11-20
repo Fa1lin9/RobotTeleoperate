@@ -14,18 +14,20 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 
+#include <RobotType.hpp>
+
 
 class RobotTeleoperate
 {
 public:
-    enum Type{
-        Ti5Robot
-    };
+//    enum Type{
+//        Ti5Robot
+//    };
 
     struct BasicConfig{
-        RobotTeleoperate::Type type;
+        RobotType::Type robotType;
         std::string address;
-        size_t FPS;
+        int FPS;
 
         IKSolver::BasicConfig solverConfig;
         PhysicalRobot::BasicConfig robotConfig;
@@ -41,6 +43,8 @@ public:
 
     static boost::shared_ptr<RobotTeleoperate> GetPtr(const RobotTeleoperate::BasicConfig& config_);
 
+    static boost::shared_ptr<RobotTeleoperate> GetPtr(const std::string& filePath);
+
     virtual bool Init() = 0;
     virtual bool StartTeleoperate() = 0;
     virtual bool StopTeleoperate() = 0;
@@ -52,5 +56,10 @@ protected:
     boost::shared_ptr<PhysicalRobot> physicalRobotPtr;
 
     boost::shared_ptr<CoordinateTransform> transformPtr;
+
+    int FPS;
+
+    bool isSim;
+    bool isReal;
 
 };

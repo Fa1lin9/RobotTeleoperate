@@ -31,19 +31,19 @@ using namespace eprosima::fastdds::dds;
 class Ros2Bridge
 {
 public:
-    enum Type{
+    enum MsgType{
         JointStateWithoutStamp,
         JointState,
         Demo,
     };
 
-    static std::unordered_map<Ros2Bridge::Type, std::function<TypeSupport()>> typeFactory;
+    static std::unordered_map<Ros2Bridge::MsgType, std::function<TypeSupport()>> typeFactory;
 
 
     struct BasicConfig
     {
         std::string topicName;
-        Ros2Bridge::Type type;
+        Ros2Bridge::MsgType msgType;
     };
 
     Ros2Bridge();
@@ -55,13 +55,13 @@ public:
     template<typename T>
     bool SendMsg(const T& msg);
 
-    static Ros2Bridge::Type GetTypeFromStr(const std::string& str);
+    static Ros2Bridge::MsgType GetMsgTypeFromStr(const std::string& str);
 
 private:
-    static const std::unordered_map<std::string, Ros2Bridge::Type> typeMap;
+    static const std::unordered_map<std::string, Ros2Bridge::MsgType> typeMap;
 
     std::string topicName;
-    Type msgType;
+    MsgType msgType;
 
     DomainParticipant* participant;
     Publisher* publisher;
@@ -72,7 +72,7 @@ private:
 
 };
 
-static TypeSupport CreateType(const Ros2Bridge::Type& type);
+static TypeSupport CreateType(const Ros2Bridge::MsgType& type);
 
 template <typename T>
 bool Ros2Bridge::SendMsg(const T& msg){
