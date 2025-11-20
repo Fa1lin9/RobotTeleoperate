@@ -7,7 +7,7 @@ cmake_minimum_required( VERSION 3.20 )
 #############################################################
 #	Set project name, files, dependancies
 #############################################################
-set( TARGET_NAME "CrpRobotBasicControlGUI" )
+set( TARGET_NAME "Ti5RobotBasicControlGUI" )
 message( STATUS "\n-------------  ${GROUP_NAME} - ${TARGET_NAME}  -------------" )
 
 #############################################################
@@ -93,7 +93,7 @@ else()
             $<BUILD_INTERFACE:Boost::filesystem>
             $<BUILD_INTERFACE:Boost::thread>
             
-            $<BUILD_INTERFACE:CRPRobotMainGUI::BasicControlWidget>
+            $<BUILD_INTERFACE:Ti5RobotMainGUI::BasicControlWidget>
     )
 endif()
 

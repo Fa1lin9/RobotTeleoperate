@@ -1,21 +1,22 @@
-#ifndef CRPROBOTBASICCONTROLGUI_H
-#define CRPROBOTBASICCONTROLGUI_H
+#ifndef TI5ROBOTBASICCONTROLGUI_H
+#pragma once
+#define TI5ROBOTBASICCONTROLGUI_H
 
 #include <QMainWindow>
 #include <PhysicalRobot/PhysicalRobot.hpp>
 #include <math.h>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class CrpRobotBasicControlGUI; }
+namespace Ui { class Ti5RobotBasicControlGUI; }
 QT_END_NAMESPACE
 
-class CrpRobotBasicControlGUI : public QMainWindow
+class Ti5RobotBasicControlGUI : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    CrpRobotBasicControlGUI(QWidget *parent = nullptr);
-    ~CrpRobotBasicControlGUI();
+    Ti5RobotBasicControlGUI(QWidget *parent = nullptr);
+    ~Ti5RobotBasicControlGUI();
 
 private:
     void printMessage(const std::string& message);
@@ -61,11 +62,11 @@ private slots:
     void on_backToInitPosePushButton_clicked();
 
 private:
-    Ui::CrpRobotBasicControlGUI *ui;
+    Ui::Ti5RobotBasicControlGUI *ui;
 
     boost::shared_ptr<PhysicalRobot> physicalRobotPtr;
 
-    PhysicalRobot::Ti5RobotConfig crpRobotConfig;
+    PhysicalRobot::Ti5RobotConfig ti5RobotConfig;
 
     std::vector<double> ConvertDegrees2Radians(const std::vector<double>& degrees);
 
@@ -77,4 +78,4 @@ private:
 
 
 };
-#endif // CRPROBOTBASICCONTROLGUI_H
+#endif // TI5ROBOTBASICCONTROLGUI_H

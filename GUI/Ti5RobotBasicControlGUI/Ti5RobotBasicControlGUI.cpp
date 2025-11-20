@@ -1,9 +1,9 @@
-#include "CrpRobotBasicControlGUI.h"
-#include "./ui_CrpRobotBasicControlGUI.h"
+#include "Ti5RobotBasicControlGUI.h"
+#include "./ui_Ti5RobotBasicControlGUI.h"
 
-CrpRobotBasicControlGUI::CrpRobotBasicControlGUI(QWidget *parent)
+Ti5RobotBasicControlGUI::Ti5RobotBasicControlGUI(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::CrpRobotBasicControlGUI)
+    , ui(new Ui::Ti5RobotBasicControlGUI)
 {
     ui->setupUi(this);
     // Initialize the robot
@@ -13,41 +13,41 @@ CrpRobotBasicControlGUI::CrpRobotBasicControlGUI(QWidget *parent)
     this->physicalRobotPtr = PhysicalRobot::GetPtr(config);
 }
 
-CrpRobotBasicControlGUI::~CrpRobotBasicControlGUI()
+Ti5RobotBasicControlGUI::~Ti5RobotBasicControlGUI()
 {
     delete ui;
 }
 
-void CrpRobotBasicControlGUI::printMessage(const std::string &message){
+void Ti5RobotBasicControlGUI::printMessage(const std::string &message){
     ui->messageTextEdit->append(QString::fromStdString(message));
     std::cout<<message<<std::endl;
 }
 
-void CrpRobotBasicControlGUI::CheckConnection(){
+void Ti5RobotBasicControlGUI::CheckConnection(){
     if(!this->physicalRobotPtr->isConnect()){
         printMessage(" [Connect] Please connect to the robot first ! ");
         return;
     }
 }
 
-void CrpRobotBasicControlGUI::UpdateConfig(){
-    this->crpRobotConfig.useLeftArm = ui->leftArmCheckBox->isChecked();
-    this->crpRobotConfig.useRightArm = ui->rightArmCheckBox->isChecked();
-    this->crpRobotConfig.useHead = ui->headCheckBox->isChecked();
-    this->crpRobotConfig.useWaist = ui->waistCheckBox->isChecked();
+void Ti5RobotBasicControlGUI::UpdateConfig(){
+    this->ti5RobotConfig.useLeftArm = ui->leftArmCheckBox->isChecked();
+    this->ti5RobotConfig.useRightArm = ui->rightArmCheckBox->isChecked();
+    this->ti5RobotConfig.useHead = ui->headCheckBox->isChecked();
+    this->ti5RobotConfig.useWaist = ui->waistCheckBox->isChecked();
 
     std::vector<std::string> enabledParts;
 
-    if(this->crpRobotConfig.useLeftArm){
+    if(this->ti5RobotConfig.useLeftArm){
         enabledParts.push_back("Left Arm");
     }
-    if(this->crpRobotConfig.useRightArm){
+    if(this->ti5RobotConfig.useRightArm){
         enabledParts.push_back("Right Arm");
     }
-    if(this->crpRobotConfig.useHead){
+    if(this->ti5RobotConfig.useHead){
         enabledParts.push_back("Head");
     }
-    if(this->crpRobotConfig.useWaist){
+    if(this->ti5RobotConfig.useWaist){
         enabledParts.push_back("Waist");
     }
 
@@ -64,7 +64,7 @@ void CrpRobotBasicControlGUI::UpdateConfig(){
 
 }
 
-void CrpRobotBasicControlGUI::on_socketConnectPushButton_clicked()
+void Ti5RobotBasicControlGUI::on_socketConnectPushButton_clicked()
 {
     //TODO
     printMessage(" [TODO]Socket Connect ");
@@ -72,7 +72,7 @@ void CrpRobotBasicControlGUI::on_socketConnectPushButton_clicked()
 }
 
 
-void CrpRobotBasicControlGUI::on_directConnectPushButton_clicked()
+void Ti5RobotBasicControlGUI::on_directConnectPushButton_clicked()
 {
     // check connection
     if(this->physicalRobotPtr->isConnect()){
@@ -90,7 +90,7 @@ void CrpRobotBasicControlGUI::on_directConnectPushButton_clicked()
 }
 
 
-void CrpRobotBasicControlGUI::on_disconnectPushButton_clicked()
+void Ti5RobotBasicControlGUI::on_disconnectPushButton_clicked()
 {
     // check connection
     if(!this->physicalRobotPtr->isConnect()){
@@ -109,7 +109,7 @@ void CrpRobotBasicControlGUI::on_disconnectPushButton_clicked()
 
 
 
-void CrpRobotBasicControlGUI::on_emergencyStopPushButton_clicked()
+void Ti5RobotBasicControlGUI::on_emergencyStopPushButton_clicked()
 {
     CheckConnection();
 
@@ -118,7 +118,7 @@ void CrpRobotBasicControlGUI::on_emergencyStopPushButton_clicked()
 }
 
 
-void CrpRobotBasicControlGUI::on_getJointsValuePushButton_clicked()
+void Ti5RobotBasicControlGUI::on_getJointsValuePushButton_clicked()
 {
     CheckConnection();
 
@@ -126,7 +126,7 @@ void CrpRobotBasicControlGUI::on_getJointsValuePushButton_clicked()
 }
 
 
-void CrpRobotBasicControlGUI::on_getJointsPosePushButton_clicked()
+void Ti5RobotBasicControlGUI::on_getJointsPosePushButton_clicked()
 {
     CheckConnection();
 
@@ -134,31 +134,31 @@ void CrpRobotBasicControlGUI::on_getJointsPosePushButton_clicked()
 }
 
 
-void CrpRobotBasicControlGUI::on_leftArmCheckBox_stateChanged(int arg1)
+void Ti5RobotBasicControlGUI::on_leftArmCheckBox_stateChanged(int arg1)
 {
     this->UpdateConfig();
 }
 
 
-void CrpRobotBasicControlGUI::on_rightArmCheckBox_stateChanged(int arg1)
+void Ti5RobotBasicControlGUI::on_rightArmCheckBox_stateChanged(int arg1)
 {
     this->UpdateConfig();
 }
 
 
-void CrpRobotBasicControlGUI::on_headCheckBox_stateChanged(int arg1)
+void Ti5RobotBasicControlGUI::on_headCheckBox_stateChanged(int arg1)
 {
     this->UpdateConfig();
 }
 
 
-void CrpRobotBasicControlGUI::on_waistCheckBox_stateChanged(int arg1)
+void Ti5RobotBasicControlGUI::on_waistCheckBox_stateChanged(int arg1)
 {
     this->UpdateConfig();
 }
 
 
-void CrpRobotBasicControlGUI::on_moveJPushButton_clicked()
+void Ti5RobotBasicControlGUI::on_moveJPushButton_clicked()
 {
     CheckConnection();
 
@@ -210,15 +210,15 @@ void CrpRobotBasicControlGUI::on_moveJPushButton_clicked()
 
     }
 
-    this->crpRobotConfig.leftArmJointsValue = leftArmTarget;
-    this->crpRobotConfig.rightArmJointsValue = rightArmTarget;
+    this->ti5RobotConfig.leftArmJointsValue = leftArmTarget;
+    this->ti5RobotConfig.rightArmJointsValue = rightArmTarget;
     this->NormalizeAngle();
-    this->physicalRobotPtr->MoveJ(this->crpRobotConfig);
+    this->physicalRobotPtr->MoveJ(this->ti5RobotConfig);
 
 }
 
 
-void CrpRobotBasicControlGUI::on_moveLPushButton_clicked()
+void Ti5RobotBasicControlGUI::on_moveLPushButton_clicked()
 {
     CheckConnection();
 
@@ -226,28 +226,28 @@ void CrpRobotBasicControlGUI::on_moveLPushButton_clicked()
 }
 
 
-void CrpRobotBasicControlGUI::on_clearMessagePushButton_clicked()
+void Ti5RobotBasicControlGUI::on_clearMessagePushButton_clicked()
 {
     ui->messageTextEdit->setText("");
 }
 
 
-void CrpRobotBasicControlGUI::on_backToZeroPushButton_clicked()
+void Ti5RobotBasicControlGUI::on_backToZeroPushButton_clicked()
 {
     CheckConnection();
 
 //    std::vector<double> zeroVec = {0 , 0 , 0 , 0 , 0 , 0 , 0};
 
-//    if(this->crpRobotConfig.useLeftArm){
-//        this->crpRobotConfig.leftArmJointsValue=zeroVec;
-//    }else if(this->crpRobotConfig.useRightArm){
-//        this->crpRobotConfig.rightArmJointsValue=zeroVec;
+//    if(this->ti5RobotConfig.useLeftArm){
+//        this->ti5RobotConfig.leftArmJointsValue=zeroVec;
+//    }else if(this->ti5RobotConfig.useRightArm){
+//        this->ti5RobotConfig.rightArmJointsValue=zeroVec;
 //    }
 
-    this->physicalRobotPtr->BackToZero(this->crpRobotConfig);
+    this->physicalRobotPtr->BackToZero(this->ti5RobotConfig);
 }
 
-std::vector<double> CrpRobotBasicControlGUI::ConvertDegrees2Radians(const std::vector<double>& degrees){
+std::vector<double> Ti5RobotBasicControlGUI::ConvertDegrees2Radians(const std::vector<double>& degrees){
     std::vector<double> radians;
 
     for(const auto& degree:degrees){
@@ -257,7 +257,7 @@ std::vector<double> CrpRobotBasicControlGUI::ConvertDegrees2Radians(const std::v
     return radians;
 }
 
-std::vector<double> CrpRobotBasicControlGUI::ConvertRadians2Degrees(const std::vector<double>& radians){
+std::vector<double> Ti5RobotBasicControlGUI::ConvertRadians2Degrees(const std::vector<double>& radians){
     std::vector<double> degrees;
 
     for(const auto& radian:radians){
@@ -267,25 +267,25 @@ std::vector<double> CrpRobotBasicControlGUI::ConvertRadians2Degrees(const std::v
     return degrees;
 }
 
-void CrpRobotBasicControlGUI::NormalizeAngle(){
+void Ti5RobotBasicControlGUI::NormalizeAngle(){
     // turn to degree
     if(ui->radianRadioButton->isChecked()){
-//        this->crpRobotConfig.leftArmJointsValue
-//                = ConvertRadians2Degrees(this->crpRobotConfig.leftArmJointsValue);
-//        this->crpRobotConfig.rightArmJointsValue
-//                = ConvertRadians2Degrees(this->crpRobotConfig.rightArmJointsValue);
+//        this->ti5RobotConfig.leftArmJointsValue
+//                = ConvertRadians2Degrees(this->ti5RobotConfig.leftArmJointsValue);
+//        this->ti5RobotConfig.rightArmJointsValue
+//                = ConvertRadians2Degrees(this->ti5RobotConfig.rightArmJointsValue);
     // turn to radian
     }else{
-        this->crpRobotConfig.leftArmJointsValue
-                = ConvertDegrees2Radians(this->crpRobotConfig.leftArmJointsValue);
-        this->crpRobotConfig.rightArmJointsValue
-                = ConvertDegrees2Radians(this->crpRobotConfig.rightArmJointsValue);
+        this->ti5RobotConfig.leftArmJointsValue
+                = ConvertDegrees2Radians(this->ti5RobotConfig.leftArmJointsValue);
+        this->ti5RobotConfig.rightArmJointsValue
+                = ConvertDegrees2Radians(this->ti5RobotConfig.rightArmJointsValue);
     }
 }
 
 
 
-void CrpRobotBasicControlGUI::on_resetLeftArmPushButton_clicked()
+void Ti5RobotBasicControlGUI::on_resetLeftArmPushButton_clicked()
 {
     std::array<QLineEdit*, 7> leftArmLineEdits = {
         ui->leftArmJ1LineEdit,
@@ -305,7 +305,7 @@ void CrpRobotBasicControlGUI::on_resetLeftArmPushButton_clicked()
 }
 
 
-void CrpRobotBasicControlGUI::on_resetRightArmPushButton_clicked()
+void Ti5RobotBasicControlGUI::on_resetRightArmPushButton_clicked()
 {
     std::array<QLineEdit*, 7> rightArmLineEdits = {
         ui->rightArmJ1LineEdit,
@@ -325,11 +325,11 @@ void CrpRobotBasicControlGUI::on_resetRightArmPushButton_clicked()
 }
 
 
-void CrpRobotBasicControlGUI::on_backToInitPosePushButton_clicked()
+void Ti5RobotBasicControlGUI::on_backToInitPosePushButton_clicked()
 {
     CheckConnection();
 
-    this->physicalRobotPtr->BackToInitPose(this->crpRobotConfig);
+    this->physicalRobotPtr->BackToInitPose(this->ti5RobotConfig);
 
 }
 
