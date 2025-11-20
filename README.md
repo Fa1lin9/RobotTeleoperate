@@ -1,1 +1,1 @@
-Aim for the teleoperation of the robots.
+Aiming for the teleoperation of the robots.
