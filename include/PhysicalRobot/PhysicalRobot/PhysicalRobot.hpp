@@ -10,7 +10,7 @@ class PhysicalRobot
 {
 public:
     enum Type{
-        CrpRobot
+        Ti5Robot
     };
 
     struct BasicConfig
@@ -81,6 +81,8 @@ public:
 
     static boost::shared_ptr<PhysicalRobot> GetPtr(const PhysicalRobot::BasicConfig &config_);
 
-private:
+    static PhysicalRobot::Type GetTypeFromStr(const std::string& str);
 
+private:
+    static const std::unordered_map<std::string, PhysicalRobot::Type> typeMap;
 };

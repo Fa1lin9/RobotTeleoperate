@@ -18,6 +18,8 @@ public:
 
     static Eigen::VectorXd JsonArray2EigenVectorXd(const json::array &array);
 
+    static std::vector<std::string> JsonArray2StdVecStr(const json::array &array);
+
     inline json::value GetJsonValue(){
         return this->rootValue;};
 

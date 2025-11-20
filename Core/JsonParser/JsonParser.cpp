@@ -33,7 +33,7 @@ JsonParser::~JsonParser(){
 
 }
 
-static Eigen::MatrixXd JsonArray2EigenMatrixXd(const json::array &array){
+Eigen::MatrixXd JsonParser::JsonArray2EigenMatrixXd(const json::array &array){
     if(array.empty()){
         std::cout<<"[JsonParser::JsonArray2EigenMatrixXd] The input array is empty!"<<std::endl;
         return Eigen::MatrixXd();
@@ -60,7 +60,7 @@ static Eigen::MatrixXd JsonArray2EigenMatrixXd(const json::array &array){
     return mat;
 }
 
-static Eigen::VectorXd JsonArray2EigenVectorXd(const json::array &array){
+Eigen::VectorXd JsonParser::JsonArray2EigenVectorXd(const json::array &array){
     if(array.empty()){
         std::cout<<"[JsonParser::JsonArray2EigenVectorXd] The input array is empty!"<<std::endl;
         return Eigen::VectorXd();
@@ -85,6 +85,25 @@ static Eigen::VectorXd JsonArray2EigenVectorXd(const json::array &array){
                                      + "] to double:"
                                      + e.what());
         }
+    }
+
+    return vec;
+}
+
+std::vector<std::string> JsonParser::JsonArray2StdVecStr(const json::array &array){
+    if(array.empty()){
+        std::cout<<"[JsonParser::JsonArray2StdVecStr] The input array is empty!"<<std::endl;
+        return std::vector<std::string>();
+    }
+
+    std::vector<std::string> vec;
+    vec.reserve(array.size());
+
+    for(const auto& temp : array){
+        if(!temp.is_string()){
+            throw std::invalid_argument("[JsonParser::JsonArray2StdVecStr] The input array contains non-string element ");
+        }
+        vec.push_back(temp.as_string().c_str());
     }
 
     return vec;

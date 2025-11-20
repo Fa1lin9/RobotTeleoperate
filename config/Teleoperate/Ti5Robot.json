@@ -1,13 +1,22 @@
 {
+    "RobotType": "Ti5Robot",
+    "Address": "tcp://127.0.0.1:5555",
+    "FPS": 25,
+
+    "IsSimulation": true,
+    "IsReal": false,
+
     "SolverConfig":{
-        "Type": "CrpRobot",
-        "BaseFrameName": "BASE_S",
+        "Type": "Ti5Robot",
+        "BaseFrameName": ["BASE_S"],
         "TargetFrameName": ["L_WRIST_R", "R_WRIST_R"],
         "BaseOffset": [
+            [
             [1, 0, 0, 0.02],
             [0, 1, 0, 0],
             [0, 0, 1, 1.10],
             [0, 0 ,0, 1]
+            ]
         ],
         "MaxIteration": 50,
         "RelativeTol": 1e-6,
@@ -30,6 +39,12 @@
             [0, 0 ,0, 1]
         ],
         "T_Robot2LeftWrist": [
+            [0,1, 0, 0],
+            [-1, 0, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1]
+        ],
+        "T_Robot2RightWrist": [
             [0,-1, 0, 0],
             [1, 0, 0, 0],
             [0, 0, 1, 0],
@@ -39,11 +54,11 @@
     },
 
     "PhysicalRobotConfig":{
-        "Type": "CrpRobot"
+        "Type": "Ti5Robot"
     },
 
     "Ros2BridgeConfig": {
-        "MsgType": "JointStateWithoutStamp",
+        "Type": "JointStateWithoutStamp",
         "TopicName": "position_control/joint_state"
     }
 }

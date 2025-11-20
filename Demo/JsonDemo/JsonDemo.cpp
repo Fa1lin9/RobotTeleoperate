@@ -11,7 +11,11 @@ int main(int argc, char const *argv[])
 
     json::object temp = jsonParser.GetJsonObject();
 
-//    std::cout<<temp[""]<<std::endl;
+    json::array baseOffset = temp["SolverConfig"].as_object()["BaseOffset"].as_array()[0].as_array();
+//    std::cout<<baseOffset<<std::endl;
+    std::cout<<
+                JsonParser::JsonArray2EigenMatrixXd(baseOffset)
+            <<std::endl;
 
     return 0;
 }

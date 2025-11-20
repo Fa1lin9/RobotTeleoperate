@@ -19,3 +19,4 @@ boost::shared_ptr<RobotTeleoperate> RobotTeleoperate::GetPtr(const RobotTeleoper
         }
     }
 }
+

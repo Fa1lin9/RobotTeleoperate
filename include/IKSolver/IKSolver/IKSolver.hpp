@@ -24,7 +24,7 @@ class IKSolver
 {
 public:
     enum Type{
-        CrpRobot
+        Ti5Robot
     };
 
     struct BasicConfig
@@ -39,10 +39,10 @@ public:
         std::vector<Eigen::Matrix4d> baseOffset;
         std::vector<Eigen::Matrix4d> targetOffset;
 
-        size_t maxIteration;
+        int maxIteration;
         double relativeTol;
-        size_t dofLeftArm;
-        size_t dofRightArm;
+        int dofLeftArm;
+        int dofRightArm;
     };
 
     struct Ti5RobotConfig{
@@ -74,7 +74,9 @@ public:
 
     static boost::shared_ptr<IKSolver> GetPtr(const IKSolver::BasicConfig& config_);
 
+    static IKSolver::Type GetTypeFromStr(const std::string& str);
+
 
 private:
-
+    static const std::unordered_map<std::string, IKSolver::Type> typeMap;
 };

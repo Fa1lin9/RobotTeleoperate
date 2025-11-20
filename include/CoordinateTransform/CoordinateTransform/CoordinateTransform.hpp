@@ -43,6 +43,9 @@ public:
 
     static boost::shared_ptr<CoordinateTransform> GetPtr(const CoordinateTransform::BasicConfig &config_);
 
+    static CoordinateTransform::Type GetTypeFromStr(const std::string& str);
+
 private:
+    static const std::unordered_map<std::string, CoordinateTransform::Type> typeMap;
 
 };

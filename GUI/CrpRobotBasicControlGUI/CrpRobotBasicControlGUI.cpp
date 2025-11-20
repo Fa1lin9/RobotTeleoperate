@@ -8,7 +8,7 @@ CrpRobotBasicControlGUI::CrpRobotBasicControlGUI(QWidget *parent)
     ui->setupUi(this);
     // Initialize the robot
     PhysicalRobot::BasicConfig config = {
-        .type = PhysicalRobot::Type::CrpRobot,
+        .type = PhysicalRobot::Type::Ti5Robot,
     };
     this->physicalRobotPtr = PhysicalRobot::GetPtr(config);
 }

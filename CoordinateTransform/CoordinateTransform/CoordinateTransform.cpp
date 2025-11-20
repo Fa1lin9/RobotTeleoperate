@@ -19,3 +19,16 @@ boost::shared_ptr<CoordinateTransform> CoordinateTransform::GetPtr(const Coordin
         }
     }
 }
+
+const std::unordered_map<std::string, CoordinateTransform::Type> CoordinateTransform::typeMap = {
+    {"VisionPro2Ti5Robot", CoordinateTransform::Type::VisionPro2Ti5Robot}
+};
+
+CoordinateTransform::Type CoordinateTransform::GetTypeFromStr(const std::string& str){
+    auto temp = CoordinateTransform::typeMap.find(str);
+    if(temp != CoordinateTransform::typeMap.end()){
+        return temp->second;
+    }
+
+    throw std::invalid_argument("[CoordinateTransform::GetTypeFromStr] Invalid string");
+}
